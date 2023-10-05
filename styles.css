@@ -1,0 +1,39 @@
+/* set display:block for workspace tab container */
+.workspace-split.mod-vertical.mod-root .workspace-tab-container {
+	display:block !important;
+	overflow:scroll !important;
+}
+/* set display:contents for key elements */
+.workspace-split.mod-vertical.mod-root .workspace-tab-container .workspace-leaf,
+.workspace-split.mod-vertical.mod-root .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]),
+.workspace-split.mod-vertical.mod-root .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]) .view-content,
+.workspace-split.mod-vertical.mod-root .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]):not([data-type="image"]) .view-content > div:not([style*="display"]),
+.workspace-split.mod-vertical.mod-root .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]) .view-content .markdown-preview-view { 
+	display:contents !important;
+}
+/* padding bottom */
+.workspace-split.mod-vertical.mod-root .workspace-tab-container, 
+.workspace-split.mod-vertical.mod-root .workspace-tab-container .workspace-leaf .cm-editor .cm-content {
+	padding-bottom:0 !important;
+}
+/* markdown preview sizer margin */
+.markdown-preview-sizer {
+	margin:var(--file-margins); padding:0;
+}
+/* hide default header borders */
+.cm-editor.cm-focused::before, .workspace-leaf.mod-active:before {
+	display:none !important;
+}
+/* header borders */
+.workspace-leaf .view-header { 
+	border-top:2px solid var(--charcoal-grey);
+}
+/* header borders */
+.workspace-leaf.mod-active .view-header { 
+	border-top:2px solid var(--text-faint);
+	border-bottom:1px solid var(--charcoal-grey);
+}
+/* image leaf styles */
+.workspace-split.mod-vertical.mod-root .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-type="image"] div.image-container {
+	padding:var(--file-margins);
+}
