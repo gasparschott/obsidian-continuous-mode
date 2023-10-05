@@ -14,7 +14,7 @@ AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
 INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
+PERFORMANCE OF THIS SOFTWARE. 
 ***************************************************************************** */
 /* global Reflect, Promise */
 
@@ -31,18 +31,16 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-var CVPlugin = /** @class */ (function (_super) {
-    __extends(CVPlugin, _super);
-    function CVPlugin() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CVPlugin.prototype.onload = function () {
+var ContViewPlugin = /** @class */ (function (_super) {
+    __extends(ContViewPlugin, _super);
+    function ContViewPlugin() { return _super !== null && _super.apply(this, arguments) || this; }
+    ContViewPlugin.prototype.onload = function () {
         var _this = this;
-        
         
         console.log('Loading the macOS Keyboard Navigation plugin.');
         this.registerDomEvent(document, 'keydown', function (keyboardPressEvent) {
-            if (keyboardPressEvent.getModifierState("Alt") && !((keyboardPressEvent.getModifierState("Control") || (keyboardPressEvent.getModifierState("Meta"))))) {
+            
+            if ( !keyboardPressEvent.altKey && !keyboardPressEvent.ctrlKey && !keyboardPressEvent.metaKey && !keyboardPressEvent.shiftKey ) {
                 if (keyboardPressEvent.key == "ArrowUp") {
                     var editor = _this.app.workspace.activeLeaf.view.sourceMode.cmEditor;
                     var cursorHead = editor.getCursor("head");
@@ -82,8 +80,8 @@ var CVPlugin = /** @class */ (function (_super) {
             }
         });
     };
-    CVPlugin.prototype.onunload = function () { console.log('Unloading the macOS Keyboard Navigation plugin.'); };
-    return CVPlugin;
+    ContViewPlugin.prototype.onunload = function () { console.log('Unloading the macOS Keyboard Navigation plugin.'); };
+    return ContViewPlugin;
 }(obsidian.Plugin));
 
-module.exports = CVPlugin;
+module.exports = ContViewPlugin;
