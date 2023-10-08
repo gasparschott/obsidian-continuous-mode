@@ -36,66 +36,49 @@ let ContViewPlugin = /** @class */ (function (_super) {
     function ContViewPlugin() { return _super !== null && _super.apply(this, arguments) || this; }
     
     ContViewPlugin.prototype.onload = function () {
-        let _this = this;
-		let this_workspace = _this.app.workspace;
+		let this_workspace = 				this.app.workspace;
 		function getTabGroups()				{ return Array.from(this_workspace.querySelectorAll('.workspace-tabs')); }		// 
 		function getActiveTabGroup()		{ return this_workspace.activeTabGroup; }
 		function getTabGroupHeaders(group)	{ return this_workspace.activeTabGroup.tabHeaderEls; }
 		function getTabHeaderIndex(e)		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
+		function this_activeleaf() 			{ return this_workspace.activeLeaf; }
+		function this_editor()				{ return this_activeleaf().view.sourceMode.cmEditor; }
 		/*-----------------------------------------------*/
 		// DRAG TAB HEADERS TO REARRANGE LEAVES
-		function tabDragEnd(e,initialTabHeaderIndex) {
+		function onTabHeaderDragEnd(e,initialTabHeaderIndex) {
 			e.target.ondragend = function(f) { 
-				if ( getTabHeaderIndex(f) !== initialTabHeaderIndex ) {
-					
-					tabDrag(f,initialTabHeaderIndex);
-				} 
+				if ( getTabHeaderIndex(f) !== initialTabHeaderIndex ) { rearrangeLeaves(f,initialTabHeaderIndex); }		// only rearrange leaves if tab header is actually moved to a new position
 			}
 		}
-		this.registerDomEvent(document,"dragstart",function(e) { 
-			if ( e.target.classList.contains('workspace-tab-header') ) { tabDragEnd(e,getTabHeaderIndex(e)); }		// start tab header drag: get initial tab header index for tabDragEnd()
-		});
-		this.registerDomEvent(document,"dragend",function(e) { /*tabDragEnd(tab,initialTabHeaderIndex);*/ });
-
-		// Rearrange elements in array
-		function moveInArray(arr,from,to) { let item = arr.splice(from, 1);	arr.splice(to, 0, item[0]); }			// Delete the item from its current position, and move it to new position
-		// Rearrange tabs on dragend
-		function tabDrag(e,initialTabHeaderIndex) {
-			let tab_headers = Array.from(e.target.closest('.workspace-tab-header-container-inner').querySelectorAll('.workspace-tab-header'));
-			let droppedTabIndex = getTabHeaderIndex(e);
-			let leaves = Array.from(e.target.closest('.workspace-tabs').querySelectorAll('.workspace-tab-container .workspace-leaf'));
-			moveInArray(leaves, initialTabHeaderIndex, droppedTabIndex);											// rearrange the leaves
-			e.target.closest('.workspace-tabs').querySelector('.workspace-tab-container').innerHTML = '';	
-			//tab.closest('.workspace-tabs').querySelector('.workspace-tab-container').insertAdjacentHTML('beforeend',leaf.outerHTML);															// empty the leaves container
-//			leaves.forEach( leaf => e.target.closest('.workspace-tabs').querySelector('.workspace-tab-container').insertAdjacentHTML('beforeend',leaf.outerHTML) );	// restore the rearranged leaves
-//			this_workspace.setActiveLeaf()
-//			tab_headers[droppedTabIndex].click();																	// select the dropped leaf by clicking tab
+		// let moveInArray = function(arr,from,to) { let item = arr.splice(from,1); arr.splice(to,0,item[0]); }			// Delete the item from its current position, and move it to new position
+		// Rearrange leaves on dragend
+		function rearrangeLeaves(e,initialTabHeaderIndex) {
+			let this_tab_container = e.target.closest('.workspace-tabs').querySelector('.workspace-tab-container');		// get current tab container
+			let leaves = Array.from(this_tab_container.querySelectorAll('.workspace-leaf'));							// get current tab container leaves
+			let finalTabHeaderIndex = getTabHeaderIndex(e);																// get final dropped tab header index
+			let rearranged = '';																						// define rearranged leaves variable
+			let moved = leaves.splice(initialTabHeaderIndex,1);															// get the moved leave
+			leaves.toSpliced(finalTabHeaderIndex,0,moved[0]);															// move the moved leaf into position
+			leaves.forEach( leaf => rearranged += leaf.outerHTML );														// compose rearranged HTML
+			this_tab_container.innerHTML = rearranged;																	// replace tab container content with rearranged leaves
+			getTabGroupHeaders()[finalTabHeaderIndex].click();															// confirm drag and focus leaf by clicking tab
 		}
         /* ----------------------- */
         // Mouse events
-        this.registerDomEvent(document, "mousedown", function(e) { let target = e.target;
-			if ( /workspace-tab-header/.test(target.className) ) { 
-				let tab_header = target.closest('.workspace-tab-header');
-				let tab_headers = Array.from(target.closest('.workspace-tab-header-container-inner').querySelectorAll('.workspace-tab-header'));
-				let initialTabHeaderIndex = tab_headers.indexOf(tab_header);		// get index of the clicked tab...
-				//tab_header.ondragstart = function() { tabDragEnd(tab_header,initialTabHeaderIndex) };									// on dragstart...call tabdragend with index of dragged tab
-			}
-        });
-        this.registerDomEvent(document, "click", function(e) {
-        	console.log("CLICK"); // console.log(e.target);
-        });
+		this.registerDomEvent(document,"dragstart",function(e) { 
+			if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }	// get initial tab header index for onTabHeaderDragEnd()
+		});
+		// this.registerDomEvent(document,"dragend", function(e) { return; });
+        // this.registerDomEvent(document, "mousedown", function(e) { return; });
+        // this.registerDomEvent(document, "click", function(e) { return });
         /* ----------------------- */
         // Keydown events
         this.registerDomEvent(document, "keydown", function (e) {
 			let key = e.key;
-			let this_activeleaf = function() { return this_workspace.activeLeaf; }
-			let this_editor = function() { return this_activeleaf().view.sourceMode.cmEditor; }
 			let cursorHead = this_editor().getCursor("head");
 			let cursorAnchor = this_editor().getCursor("anchor");
 			let activeTabGroupChildren = this_activeleaf().workspace.activeTabGroup.children;
 			let doc = this_editor().getDoc();
-//console.log(this_editor.getLine(this_editor.lastLine()));
-console.log(activeTabGroupChildren);
         	switch(true) {
 	        	// Arrow navigation between leaves
 				case ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):
@@ -122,19 +105,6 @@ console.log(activeTabGroupChildren);
 				break;
 				// Start another keydown case here
             }
-	// 				if ( this_editor.getSelection() ) { this_editor.scrollIntoView({range:this_editor.getSelection().start,this_editor.getSelection().end},behaviour:"smooth"); }
-	// 					from:{line:,ch:},
-	// 					to:{line:,ch:}
-	// 				});
-	//                     if (e.getModifierState("Shift")) { // select up
-	//                         if (cursorHead.ch != 0) {
-	//                             doc.setSelection({ line: cursorAnchor.line, ch: cursorAnchor.ch }, { line: cursorHead.line, ch: 0 }, { scroll: true });
-	//                         } else {
-	//                             doc.setSelection({ line: cursorAnchor.line, ch: cursorAnchor.ch }, { line: cursorHead.line - 1, ch: 0 }, { scroll: true });
-	//                         }
-	//                     } else { // move up
-	//                         if (cursorHead.ch != 0) { editor.setCursor(cursorHead.line, 0); } else { editor.setCursor((cursorHead.line - 1), 0); }
-	//                     }
         });
     };
     ContViewPlugin.prototype.onunload = function () { console.log('Unloading the macOS Keyboard Navigation plugin.'); };
