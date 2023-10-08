@@ -50,7 +50,6 @@ let ContViewPlugin = /** @class */ (function (_super) {
 				if ( getTabHeaderIndex(f) !== initialTabHeaderIndex ) { rearrangeLeaves(f,initialTabHeaderIndex); }		// only rearrange leaves if tab header is actually moved to a new position
 			}
 		}
-		// let moveInArray = function(arr,from,to) { let item = arr.splice(from,1); arr.splice(to,0,item[0]); }			// Delete the item from its current position, and move it to new position
 		// Rearrange leaves on dragend
 		function rearrangeLeaves(e,initialTabHeaderIndex) {
 			let this_tab_container = e.target.closest('.workspace-tabs').querySelector('.workspace-tab-container');		// get current tab container
@@ -68,9 +67,6 @@ let ContViewPlugin = /** @class */ (function (_super) {
 		this.registerDomEvent(document,"dragstart",function(e) { 
 			if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }	// get initial tab header index for onTabHeaderDragEnd()
 		});
-		// this.registerDomEvent(document,"dragend", function(e) { return; });
-        // this.registerDomEvent(document, "mousedown", function(e) { return; });
-        // this.registerDomEvent(document, "click", function(e) { return });
         /* ----------------------- */
         // Keydown events
         this.registerDomEvent(document, "keydown", function (e) {
@@ -80,8 +76,7 @@ let ContViewPlugin = /** @class */ (function (_super) {
 			let activeTabGroupChildren = this_activeleaf().workspace.activeTabGroup.children;
 			let doc = this_editor().getDoc();
         	switch(true) {
-	        	// Arrow navigation between leaves
-				case ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):
+				case ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):		        	// Arrow navigation between leaves
 					switch(true) {
 						case key === "ArrowUp": case key === "ArrowLeft":
 							switch(true) {
