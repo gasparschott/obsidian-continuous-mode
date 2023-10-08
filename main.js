@@ -69,16 +69,22 @@ let ContViewPlugin = /** @class */ (function (_super) {
 		});
         /* ----------------------- */
         // Keydown events
-        this.registerDomEvent(document, "keydown", function (e) {
+        this.registerDomEvent(document, "click", function (e) {
+            if ( e.target.classList.contains('workspace-tab-container') ) { e.target.closest('.workspace-tabs').querySelector('.workspace-tab-header.is-active')?.click(); }
+        });
+        this.registerDomEvent(document, "keydown", function (e) { leafArrowNavigation(e); });
+
+        function leafArrowNavigation(e) {
+        	if ( e.target.closest('.workspace-split.mod-root') === null ) { return; } 									// return if not in leaf editor
 			let key = e.key;
 			let cursorHead = this_editor().getCursor("head");
 			let cursorAnchor = this_editor().getCursor("anchor");
 			let activeTabGroupChildren = this_activeleaf().workspace.activeTabGroup.children;
 			let doc = this_editor().getDoc();
         	switch(true) {
-				case ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):		        	// Arrow navigation between leaves
-					switch(true) {
-						case key === "ArrowUp": case key === "ArrowLeft":
+				case ( /Arrow/.test(key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):		        		// Arrow navigation between leaves
+					switch(key) {
+						case 'ArrowUp': case 'ArrowLeft':
 							switch(true) {
 								case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:										// cursor in inline-title
 								case cursorAnchor.line === 0 && cursorAnchor.ch === 0:																				// cursor at first line, first char
@@ -89,10 +95,10 @@ let ContViewPlugin = /** @class */ (function (_super) {
 									break;
 							}
 							break;
-						case key === "ArrowDown":	case key === "ArrowRight": 
+						case 'ArrowDown':	case 'ArrowRight': 
 							switch(true) {
 								case ( cursorAnchor.ch === this_editor().getLine(this_editor().lastLine()).length && cursorAnchor.line === this_editor().lineCount() - 1 ):
-									this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) + 1],{focus:true}); // make next leaf active 
+									this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) + 1],{focus:true}); 		// make next leaf active 
 									break;
 							}
 							break;
@@ -100,7 +106,7 @@ let ContViewPlugin = /** @class */ (function (_super) {
 				break;
 				// Start another keydown case here
             }
-        });
+        }
     };
     ContViewPlugin.prototype.onunload = function () { console.log('Unloading the macOS Keyboard Navigation plugin.'); };
     return ContViewPlugin;
