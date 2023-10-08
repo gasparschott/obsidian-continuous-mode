@@ -3,7 +3,7 @@
 	"name": "Continuous View",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "An Obsidian plugin that shows all open leaves in a tab group as a continuous \"page\" (sometimes called \"Scrivenings mode\"). Features arrow navigation between leaves, reorder leaves with drag-and-drop of tab headers.",
+	"description": "Show all open leaves in a tab group as a continuous “page” (sometimes called “Scrivenings mode”). Features include arrow navigation between leaves and the ability to reorder leaves via tab header drag-and-drop.",
 	"author": "gaspar_schott",
 	"fundingUrl": "https://www.buymeacoffee.com/fiLtliTFxQ",
 	"isDesktopOnly": false
