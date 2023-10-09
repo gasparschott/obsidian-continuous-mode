@@ -43,8 +43,19 @@ let ContViewPlugin = /** @class */ (function (_super) {
 		function getTabHeaderIndex(e)		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
 		function this_activeleaf() 			{ return this_workspace.activeLeaf; }
 		function this_editor()				{ return this_activeleaf().view.sourceMode.cmEditor; }
+        /* ----------------------- */
+        // Register events
+		this.registerDomEvent(document,"dragstart",function(e) { 
+			if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }	// get initial tab header index for onTabHeaderDragEnd()
+		});
+        this.registerDomEvent(document, "click", function (e) {
+            if ( e.target.classList.contains('workspace-tab-container') ) { e.target.closest('.workspace-tabs').querySelector('.workspace-tab-header.is-active')?.click(); }
+        });
+        this.registerDomEvent(document, "keydown", function (e) {
+        	leafArrowNavigation(e); 
+        });
 		/*-----------------------------------------------*/
-		// DRAG TAB HEADERS TO REARRANGE LEAVES
+		// Drag Tab Headers to Rearrange Leaves on dragstart
 		function onTabHeaderDragEnd(e,initialTabHeaderIndex) {
 			e.target.ondragend = function(f) { 
 				if ( getTabHeaderIndex(f) !== initialTabHeaderIndex ) { rearrangeLeaves(f,initialTabHeaderIndex); }		// only rearrange leaves if tab header is actually moved to a new position
@@ -62,18 +73,7 @@ let ContViewPlugin = /** @class */ (function (_super) {
 			this_tab_container.innerHTML = rearranged;																	// replace tab container content with rearranged leaves
 			getTabGroupHeaders()[finalTabHeaderIndex].click();															// confirm drag and focus leaf by clicking tab
 		}
-        /* ----------------------- */
-        // Mouse events
-		this.registerDomEvent(document,"dragstart",function(e) { 
-			if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }	// get initial tab header index for onTabHeaderDragEnd()
-		});
-        /* ----------------------- */
-        // Keydown events
-        this.registerDomEvent(document, "click", function (e) {
-            if ( e.target.classList.contains('workspace-tab-container') ) { e.target.closest('.workspace-tabs').querySelector('.workspace-tab-header.is-active')?.click(); }
-        });
-        this.registerDomEvent(document, "keydown", function (e) { leafArrowNavigation(e); });
-
+		// Allow arrow navigation between open leaves
         function leafArrowNavigation(e) {
         	if ( e.target.closest('.workspace-split.mod-root') === null ) { return; } 									// return if not in leaf editor
 			let key = e.key;
@@ -107,6 +107,20 @@ let ContViewPlugin = /** @class */ (function (_super) {
 				// Start another keydown case here
             }
         }
+        function toggleContinuousMode() {
+        	return;
+        }
+		this.addCommand({
+			id: "toggle-continuous-mode",
+			name: "Toggle continuous mode in active tab group",
+			callback: () => {
+				this.toggleContinuousMode();
+			},
+			//hotkeys: [{ modifiers: ["Alt", "Mod"], key: "Z" }],
+        });
+
+        
+        
     };
     ContViewPlugin.prototype.onunload = function () { console.log('Unloading the macOS Keyboard Navigation plugin.'); };
     return ContViewPlugin;
