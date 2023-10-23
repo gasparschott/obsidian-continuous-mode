@@ -1,6 +1,3 @@
-// add menu items?
-// settings: save tab groups by id instead of index
-
 'use strict';
 
 let obsidian = require('obsidian');
