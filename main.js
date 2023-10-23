@@ -1,3 +1,6 @@
+// add menu items?
+// settings: save tab groups by id instead of index
+
 'use strict';
 
 let obsidian = require('obsidian');
@@ -16,114 +19,237 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE. 
 ***************************************************************************** */
-/* global Reflect, Promise */
 
-let extendStatics = function(d, b) {
-    extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-    return extendStatics(d, b);
+var __async = (__this, __arguments, generator) => {
+	return new Promise((resolve, reject) => {
+		var fulfilled = (value) => {
+			try {
+		        step(generator.next(value));
+			} catch (e) {
+				reject(e);
+			}
+		};
+		var rejected = (value) => {
+			try {
+				step(generator.throw(value));
+			} catch (e) {
+				reject(e);
+			}
+		};
+		var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+		step((generator = generator.apply(__this, __arguments)).next());
+	});
 };
 
-function __extends(d, b) {
-    extendStatics(d, b);
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+const DEFAULT_SETTINGS = {
+	startOnLaunch: true,
+	useInAllTabGroups: false,
+	tabGroups:[]
+};
+
+class ContinuousModePlugin extends obsidian.Plugin {
+    constructor(app, pluginManifest) { super(app, pluginManifest); }
+    onload() {
+   		return __async(this, null, function* () {
+			yield this.loadSettings();
+			// helpers
+			const this_workspace = 					this.app.workspace;
+			const getAllTabGroups = () =>			{ let groups = []; 
+				this_workspace.rootSplit.children.forEach(child => { 
+		    		if ( !child.allowSingleChild ) { groups.push(...child.children) } else { groups.push(child) }    		// get all tab groups in all root splits
+		    	}); 
+		    	return groups;
+			}
+			const getActiveTabGroup = () =>			{ return this_workspace.activeTabGroup; }
+			const getTabGroupHeaders = (group) =>	{ return this_workspace.activeTabGroup.tabHeaderEls; }
+			const getTabHeaderIndex = (e) =>		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
+			const this_activeleaf = () =>			{ return this_workspace.activeLeaf; }
+			const this_editor = () =>				{ return this_workspace.activeEditor.editor; }		
+			/* ----------------------- */
+			// Register events
+			this.registerDomEvent(document,"dragstart",function(e)	{ if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
+				if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }	// get initial tab header index for onTabHeaderDragEnd()
+			});
+			this.registerDomEvent(document, "click", function (e)	{ if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
+				if ( e.target.classList.contains('workspace-tab-container') ) { e.target.closest('.workspace-tabs').querySelector('.workspace-tab-header.is-active')?.click(); }
+			});
+			this.registerDomEvent(document, "keydown", function (e)	{ if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
+				leafArrowNavigation(e); 
+			});		
+			this.registerEvent(
+				this.app.workspace.on("file-menu", (menu, file) => {
+					menu.addItem((item) => {
+						item
+							.setTitle("Toggle continuous mode")
+							.setIcon("book-down")
+							.onClick(async () => {
+								toggleContinuousMode()
+						});
+					});
+				})
+			);
+			this.registerEvent(
+				this.app.workspace.on("editor-menu", (menu, editor, view) => {
+					menu.addItem((item) => {
+						item
+							.setTitle("Toggle continuous mode")
+							.setIcon("book-down")
+							.onClick(async () => {
+								toggleContinuousMode()
+						});
+					});
+				})
+			);
+			/*-----------------------------------------------*/
+			// Drag Tab Headers to Rearrange Leaves on dragstart
+			const onTabHeaderDragEnd = (e,initialTabHeaderIndex) => {
+				e.target.ondragend = function(f) { 
+					if ( getTabHeaderIndex(f) !== initialTabHeaderIndex ) { rearrangeLeaves(f,initialTabHeaderIndex); }		// only rearrange leaves if tab header is actually moved to a new position
+				}
+			}
+			// Rearrange leaves on dragend
+			const rearrangeLeaves = (e,initialTabHeaderIndex) => {
+				let this_tab_container = e.target.closest('.workspace-tabs').querySelector('.workspace-tab-container');		// get current tab container
+				let leaves = Array.from(this_tab_container.querySelectorAll('.workspace-leaf'));							// get current tab container leaves
+				let finalTabHeaderIndex = getTabHeaderIndex(e);																// get final dropped tab header index
+				let rearranged = '';																						// define rearranged leaves variable
+				let moved = leaves.splice(initialTabHeaderIndex,1);															// get the moved leave
+				leaves.toSpliced(finalTabHeaderIndex,0,moved[0]);															// move the moved leaf into position
+				leaves.forEach( leaf => rearranged += leaf.outerHTML );														// compose rearranged HTML
+				this_tab_container.innerHTML = rearranged;																	// replace tab container content with rearranged leaves
+				getTabGroupHeaders()[finalTabHeaderIndex].click();															// confirm drag and focus leaf by clicking tab
+			}
+			// Allow arrow navigation between open leaves
+			const leafArrowNavigation = (e) => {
+				if ( e.target.closest('.workspace-split.mod-root') === null ) { return; } 		// return if not in leaf editor
+				let key = e.key;
+				let cursorHead = this_editor().getCursor("head");
+				let cursorAnchor = this_editor().getCursor("anchor");
+				let activeTabGroupChildren = this_activeleaf().workspace.activeTabGroup.children;
+				let thisContentDOM = this_editor().cm.contentDOM;
+				switch(true) {
+					case ( /Arrow/.test(key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):		        		// Arrow navigation between leaves
+						switch(key) {
+							case 'ArrowUp': case 'ArrowLeft':
+								switch(true) {
+									case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:										// cursor in inline-title
+									case cursorAnchor.line === 0 && cursorAnchor.ch === 0:																				// cursor at first line, first char
+										if ( this_activeleaf().containerEl.previousSibling !== null ) {																	// ignore if first leaf
+											this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) - 1],{focus:true});	// make previous leaf active 
+											this_editor().setCursor({line:this_editor().lastLine(),ch:this_editor().lastLine().length - 1});							// select last char
+										}
+										break;
+								}
+								break;
+							case 'ArrowDown':	case 'ArrowRight': 
+								switch(true) {
+									case ( cursorAnchor.ch === this_editor().getLine(this_editor().lastLine()).length && cursorAnchor.line === this_editor().lineCount() - 1 ):
+										this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) + 1],{focus:true}); 		// make next leaf active 
+										break;
+								}
+								break;
+						}
+						break;
+					// Start another keydown case here
+				}
+			}
+
+		    // initialize continuous mode = add class to workspace tab groups from plugin settings
+			const initContinuousMode = () => {
+		    	let groups = getAllTabGroups();
+ 				this.settings.tabGroups.forEach(tabGroup => {
+					groups[tabGroup]?.containerEl.classList.add('is_continuous_mode')
+				});
+			}
+			// onlayoutReady
+		    this.app.workspace.onLayoutReady(initContinuousMode);
+		    
+			// toggle continuous mode
+			const toggleContinuousMode = (tabGroupIndex) => {
+		    	let groups = getAllTabGroups();
+				tabGroupIndex = tabGroupIndex || groups.indexOf(getActiveTabGroup());					// use the provided tabGroupIndex argument or get the active group index
+				let tabGroup = groups[tabGroupIndex].containerEl;										// get the tab group
+				tabGroup?.classList.toggle('is_continuous_mode');										// toggle the continuous mode style
+				if ( this.settings.tabGroups.includes(tabGroupIndex) ) {
+					this.settings.tabGroups.splice(this.settings.tabGroups.indexOf(tabGroupIndex),1)	// remove the index from settings
+				} else { 
+					this.settings.tabGroups.push(Number(tabGroupIndex)); 								// add the index to settings
+				}
+				this.settings.tabGroups.sort();															// sort the tabGroups setting
+				this.saveSettings();																	// save the settings
+			}
+			// ADD COMMANDS
+			this.addCommand({																			// add command: toggle continuous mode in active tab group
+				id: "toggle-continuous-mode-active",
+				name: "Toggle continuous mode in active tab group",
+				callback: () => { toggleContinuousMode(); },
+			});
+			// add command palette items for 10 tab groups
+			// better to add only those needed for the currently open tab groups; need to update when tab group is closed or new group is opened
+			const addCommands = () => {
+				for ( let count = 0; count < 10; count++ ) { 
+					this.addCommand({
+						id: "toggle-continuous-mode-"+ (Number(count) + 1),
+						name: "Toggle continuous mode in tab group "+ (Number(count) + 1),
+						callback: () => { toggleContinuousMode(count); },
+					});
+				}
+			}    
+			addCommands();																				// call addCommands	
+
+			// add settings to settings tab
+			this.addSettingTab(new SettingsTab(this.app, this));										
+    	});
+    } // end onload
+    
+	// load settings
+    loadSettings() {
+	    return __async(this, null, function* () {
+            this.settings = Object.assign({}, DEFAULT_SETTINGS, yield this.loadData());
+        });
+    }
+    // save settings
+    saveSettings() {
+	    return __async(this, null, function* () {
+            yield this.saveData(this.settings);
+        });
+    }
+    // on plugin unload
+	onunload() { 
+    	console.log('Unloading the Continuous Mode plugin.');
+    	Array.from(this.app.workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs.is_continuous_mode')).forEach(group => group.classList.remove('is_continuous_mode'));
+    };
+}
+// SETTINGS TAB
+class SettingsTab extends obsidian.PluginSettingTab {
+	constructor(app, plugin) {
+		super(app, plugin);
+		this.app = app;
+		this.plugin = plugin;
+	}
+	display() {
+		const { containerEl } = this;
+		containerEl.empty();
+		containerEl.createEl('h2', { text: 'Settings' });
+		new obsidian.Setting(containerEl)
+			.setName('Start on app launch')
+			//.setDesc('Lorem ipsum.')
+			.addToggle((toggle) => toggle
+			.setValue(this.plugin.settings.startOnLaunch)
+			.onChange((value) => __awaiter(this, void 0, void 0, function* () {
+			this.plugin.settings.startOnLaunch = value;
+			yield this.plugin.saveSettings();
+		})));
+		new obsidian.Setting(containerEl)
+			.setName('Use continuous mode in all tab groups')
+			.setDesc('Always load leaves in tab groups in continuous mode')
+			.addToggle((toggle) => toggle
+			.setValue(this.plugin.settings.useInAllTabGroups)
+			.onChange((value) => __awaiter(this, void 0, void 0, function* () {
+			this.plugin.settings.useInAllTabGroups = value;
+			yield this.plugin.saveSettings();
+		})));
+	}
 }
 
-let ContViewPlugin = /** @class */ (function (_super) {
-    __extends(ContViewPlugin, _super);
-    function ContViewPlugin() { return _super !== null && _super.apply(this, arguments) || this; }
-    
-    ContViewPlugin.prototype.onload = function () {
-		let this_workspace = 				this.app.workspace;
-		function getTabGroups()				{ return Array.from(this_workspace.querySelectorAll('.workspace-tabs')); }		// 
-		function getActiveTabGroup()		{ return this_workspace.activeTabGroup; }
-		function getTabGroupHeaders(group)	{ return this_workspace.activeTabGroup.tabHeaderEls; }
-		function getTabHeaderIndex(e)		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
-		function this_activeleaf() 			{ return this_workspace.activeLeaf; }
-		function this_editor()				{ return this_activeleaf().view.sourceMode.cmEditor; }
-        /* ----------------------- */
-        // Register events
-		this.registerDomEvent(document,"dragstart",function(e) { 
-			if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }	// get initial tab header index for onTabHeaderDragEnd()
-		});
-        this.registerDomEvent(document, "click", function (e) {
-            if ( e.target.classList.contains('workspace-tab-container') ) { e.target.closest('.workspace-tabs').querySelector('.workspace-tab-header.is-active')?.click(); }
-        });
-        this.registerDomEvent(document, "keydown", function (e) {
-        	leafArrowNavigation(e); 
-        });
-		/*-----------------------------------------------*/
-		// Drag Tab Headers to Rearrange Leaves on dragstart
-		function onTabHeaderDragEnd(e,initialTabHeaderIndex) {
-			e.target.ondragend = function(f) { 
-				if ( getTabHeaderIndex(f) !== initialTabHeaderIndex ) { rearrangeLeaves(f,initialTabHeaderIndex); }		// only rearrange leaves if tab header is actually moved to a new position
-			}
-		}
-		// Rearrange leaves on dragend
-		function rearrangeLeaves(e,initialTabHeaderIndex) {
-			let this_tab_container = e.target.closest('.workspace-tabs').querySelector('.workspace-tab-container');		// get current tab container
-			let leaves = Array.from(this_tab_container.querySelectorAll('.workspace-leaf'));							// get current tab container leaves
-			let finalTabHeaderIndex = getTabHeaderIndex(e);																// get final dropped tab header index
-			let rearranged = '';																						// define rearranged leaves variable
-			let moved = leaves.splice(initialTabHeaderIndex,1);															// get the moved leave
-			leaves.toSpliced(finalTabHeaderIndex,0,moved[0]);															// move the moved leaf into position
-			leaves.forEach( leaf => rearranged += leaf.outerHTML );														// compose rearranged HTML
-			this_tab_container.innerHTML = rearranged;																	// replace tab container content with rearranged leaves
-			getTabGroupHeaders()[finalTabHeaderIndex].click();															// confirm drag and focus leaf by clicking tab
-		}
-		// Allow arrow navigation between open leaves
-        function leafArrowNavigation(e) {
-        	if ( e.target.closest('.workspace-split.mod-root') === null ) { return; } 									// return if not in leaf editor
-			let key = e.key;
-			let cursorHead = this_editor().getCursor("head");
-			let cursorAnchor = this_editor().getCursor("anchor");
-			let activeTabGroupChildren = this_activeleaf().workspace.activeTabGroup.children;
-			let doc = this_editor().getDoc();
-        	switch(true) {
-				case ( /Arrow/.test(key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):		        		// Arrow navigation between leaves
-					switch(key) {
-						case 'ArrowUp': case 'ArrowLeft':
-							switch(true) {
-								case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:										// cursor in inline-title
-								case cursorAnchor.line === 0 && cursorAnchor.ch === 0:																				// cursor at first line, first char
-									if ( this_activeleaf().containerEl.previousSibling !== null ) {																	// ignore if first leaf
-										this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) - 1],{focus:true});	// make previous leaf active 
-										this_editor().setCursor({line:this_editor().lastLine(),ch:this_editor().lastLine().length - 1});							// select last char
-									}
-									break;
-							}
-							break;
-						case 'ArrowDown':	case 'ArrowRight': 
-							switch(true) {
-								case ( cursorAnchor.ch === this_editor().getLine(this_editor().lastLine()).length && cursorAnchor.line === this_editor().lineCount() - 1 ):
-									this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) + 1],{focus:true}); 		// make next leaf active 
-									break;
-							}
-							break;
-					}
-				break;
-				// Start another keydown case here
-            }
-        }
-        function toggleContinuousMode() {
-        	return;
-        }
-		this.addCommand({
-			id: "toggle-continuous-mode",
-			name: "Toggle continuous mode in active tab group",
-			callback: () => {
-				this.toggleContinuousMode();
-			},
-			//hotkeys: [{ modifiers: ["Alt", "Mod"], key: "Z" }],
-        });
-
-        
-        
-    };
-    ContViewPlugin.prototype.onunload = function () { console.log('Unloading the macOS Keyboard Navigation plugin.'); };
-    return ContViewPlugin;
-}(obsidian.Plugin));
-
-module.exports = ContViewPlugin;
+module.exports = ContinuousModePlugin;

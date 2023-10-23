@@ -1,48 +1,48 @@
 /* set display:block for workspace tab container */
-.workspace-split.mod-vertical.mod-root .workspace-tabs:not(.mod-stacked) .workspace-tab-container {
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container {
 	display:block !important;
 	overflow:scroll !important;
 }
 /* set display:contents for key elements */
-.workspace-split.mod-vertical.mod-root .workspace-tabs:not(.mod-stacked) .workspace-tab-container .workspace-leaf,
-.workspace-split.mod-vertical.mod-root .workspace-tabs:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]),
-.workspace-split.mod-vertical.mod-root .workspace-tabs:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]) .view-content,
-.workspace-split.mod-vertical.mod-root .workspace-tabs:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]):not([data-type="image"]) .view-content > div:not([style*="display"]),
-.workspace-split.mod-vertical.mod-root .workspace-tabs:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]) .view-content .markdown-preview-view {
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf,
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]),
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]) .view-content,
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]):not([data-type="image"]) .view-content > div:not([style*="display"]),
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]) .view-content .markdown-preview-view {
 	display:contents !important;
 }
 /* padding bottom */
-.workspace-split.mod-vertical.mod-root .workspace-tabs:not(.mod-stacked) .workspace-tab-container, 
-.workspace-split.mod-vertical.mod-root .workspace-tabs:not(.mod-stacked) .workspace-tab-container .workspace-leaf .cm-editor .cm-content {
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container, 
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .cm-editor .cm-content {
 	padding-bottom:0 !important;
 }
 /* markdown preview sizer margin */
-.workspace-tabs:not(.mod-stacked) .markdown-preview-sizer {
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-sizer {
 	margin:var(--file-margins); padding:0;
 }
 /* hide default header borders */
-.workspace-tabs:not(.mod-stacked) .cm-editor.cm-focused::before, .workspace-leaf.mod-active:before {
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .cm-editor.cm-focused::before, .workspace-leaf.mod-active:before {
 	display:none !important;
 }
 /* header borders */
-.workspace-tabs:not(.mod-stacked) .workspace-leaf .view-header { 
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-header { 
 	border-top:2px solid var(--charcoal-grey);
 }
 /* header borders */
-.workspace-tabs:not(.mod-stacked) .workspace-leaf.mod-active .view-header { 
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .view-header { 
 	border-top:2px solid var(--text-faint);
 	border-bottom:1px solid var(--charcoal-grey);
 }
 /* image leaf styles */
-.workspace-split.mod-vertical.mod-root .workspace-tabs:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-type="image"] div.image-container {
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-type="image"] div.image-container {
 	padding:var(--file-margins);
 }
 /* Set Margins for rendered markdown preview */
-.workspace-tabs:not(.mod-stacked) .markdown-preview-view.markdown-rendered > * {
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-view.markdown-rendered > * {
 	margin-left:var(--file-margins);
 	margin-right:var(--file-margins);
 }
 /* image size */
-.workspace-tabs:not(.mod-stacked) .markdown-preview-view img:not([width]), .markdown-rendered img:not([width]) {
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-view img:not([width]), .markdown-rendered img:not([width]) {
 	max-width:calc(100% - 2*var(--file-margins));
 }
