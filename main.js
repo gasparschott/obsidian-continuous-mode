@@ -97,6 +97,16 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					});
 				})
 			);
+			// Open new splits in continuous mode
+			this.registerEvent(
+				this.app.workspace.on("layout-change", () => {
+					if ( this.settings.useInAllTabGroups === true ) { let groups = getAllTabGroups(); 
+						for (let i = 0; i < groups.length; i++) { toggleContinuousMode(i,true); } 
+					}
+				})
+			);
+			
+
 			/*-----------------------------------------------*/
 			// Drag Tab Headers to Rearrange Leaves on dragstart
 			const onTabHeaderDragEnd = (e,initialTabHeaderIndex) => {
@@ -162,11 +172,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		    this.app.workspace.onLayoutReady(initContinuousMode);
 		    
 			// toggle continuous mode
-			const toggleContinuousMode = (tabGroupIndex) => {
+			const toggleContinuousMode = (tabGroupIndex,bool) => {
 		    	let groups = getAllTabGroups();
 				tabGroupIndex = tabGroupIndex || groups.indexOf(getActiveTabGroup());					// use the provided tabGroupIndex argument or get the active group index
 				let tabGroup = groups[tabGroupIndex].containerEl;										// get the tab group
-				tabGroup?.classList.toggle('is_continuous_mode');										// toggle the continuous mode style
+				if ( bool === true ) { tabGroup?.classList.add('is_continuous_mode'); } else { tabGroup?.classList.toggle('is_continuous_mode');	}	// toggle the continuous mode style
 				if ( this.settings.tabGroups.includes(tabGroupIndex) ) {
 					this.settings.tabGroups.splice(this.settings.tabGroups.indexOf(tabGroupIndex),1)	// remove the index from settings
 				} else { 
@@ -193,7 +203,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				}
 			}    
 			addCommands();																				// call addCommands	
-
+			
 			// add settings to settings tab
 			this.addSettingTab(new SettingsTab(this.app, this));										
     	});
@@ -216,6 +226,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
     	console.log('Unloading the Continuous Mode plugin.');
     	Array.from(this.app.workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs.is_continuous_mode')).forEach(group => group.classList.remove('is_continuous_mode'));
     };
+
 }
 // SETTINGS TAB
 class SettingsTab extends obsidian.PluginSettingTab {
@@ -229,20 +240,11 @@ class SettingsTab extends obsidian.PluginSettingTab {
 		containerEl.empty();
 		containerEl.createEl('h2', { text: 'Settings' });
 		new obsidian.Setting(containerEl)
-			.setName('Start on app launch')
-			//.setDesc('Lorem ipsum.')
-			.addToggle((toggle) => toggle
-			.setValue(this.plugin.settings.startOnLaunch)
-			.onChange((value) => __awaiter(this, void 0, void 0, function* () {
-			this.plugin.settings.startOnLaunch = value;
-			yield this.plugin.saveSettings();
-		})));
-		new obsidian.Setting(containerEl)
-			.setName('Use continuous mode in all tab groups')
-			.setDesc('Always load leaves in tab groups in continuous mode')
+			.setName('Open all new splits in continuous mode')
+			//.setDesc('Always load leaves in tab groups in continuous mode')
 			.addToggle((toggle) => toggle
 			.setValue(this.plugin.settings.useInAllTabGroups)
-			.onChange((value) => __awaiter(this, void 0, void 0, function* () {
+			.onChange((value) => __async(this, null, function* () {
 			this.plugin.settings.useInAllTabGroups = value;
 			yield this.plugin.saveSettings();
 		})));

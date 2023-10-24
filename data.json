@@ -1,7 +1,10 @@
 {
-  "startOnLaunch": true,
-  "useInAllTabGroups": false,
+  "startOnLaunch": false,
+  "useInAllTabGroups": true,
   "tabGroups": [
-    0
+    0,
+    1,
+    3,
+    4
   ]
 }
