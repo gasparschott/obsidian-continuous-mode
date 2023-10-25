@@ -39,9 +39,8 @@ var __async = (__this, __arguments, generator) => {
 };
 
 const DEFAULT_SETTINGS = {
-	startOnLaunch: true,
 	useInAllTabGroups: false,
-	tabGroups:[]
+	tabGroupIDs: []
 };
 
 class ContinuousModePlugin extends obsidian.Plugin {
@@ -58,6 +57,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		    	return groups;
 			}
 			const getActiveTabGroup = () =>			{ return this_workspace.activeTabGroup; }
+			const getTabGroupByID = (id) =>			{ return getAllTabGroups().find( group => group.id === id )}
 			const getTabGroupHeaders = (group) =>	{ return this_workspace.activeTabGroup.tabHeaderEls; }
 			const getTabHeaderIndex = (e) =>		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
 			const this_activeleaf = () =>			{ return this_workspace.activeLeaf; }
@@ -101,12 +101,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			this.registerEvent(
 				this.app.workspace.on("layout-change", () => {
 					if ( this.settings.useInAllTabGroups === true ) { let groups = getAllTabGroups(); 
-						for (let i = 0; i < groups.length; i++) { toggleContinuousMode(i,true); } 
+						for (let i = 0; i < groups.length; i++) { toggleContinuousMode(groups[i].id,true); }		// bool === true => add continuous mode to all tab groups
 					}
 				})
 			);
 			
-
 			/*-----------------------------------------------*/
 			// Drag Tab Headers to Rearrange Leaves on dragstart
 			const onTabHeaderDragEnd = (e,initialTabHeaderIndex) => {
@@ -128,7 +127,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 			// Allow arrow navigation between open leaves
 			const leafArrowNavigation = (e) => {
-				if ( e.target.closest('.workspace-split.mod-root') === null ) { return; } 		// return if not in leaf editor
+				if ( e.target.closest('.workspace-split.mod-root') === null ) { return; } 									// return if not in leaf editor
 				let key = e.key;
 				let cursorHead = this_editor().getCursor("head");
 				let cursorAnchor = this_editor().getCursor("anchor");
@@ -139,9 +138,9 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						switch(key) {
 							case 'ArrowUp': case 'ArrowLeft':
 								switch(true) {
-									case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:										// cursor in inline-title
-									case cursorAnchor.line === 0 && cursorAnchor.ch === 0:																				// cursor at first line, first char
-										if ( this_activeleaf().containerEl.previousSibling !== null ) {																	// ignore if first leaf
+									case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:									// cursor in inline-title
+									case cursorAnchor.line === 0 && cursorAnchor.ch === 0:																			// cursor at first line, first char
+										if ( this_activeleaf().containerEl.previousSibling !== null ) {																// ignore if first leaf
 											this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) - 1],{focus:true});	// make previous leaf active 
 											this_editor().setCursor({line:this_editor().lastLine(),ch:this_editor().lastLine().length - 1});							// select last char
 										}
@@ -164,26 +163,30 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		    // initialize continuous mode = add class to workspace tab groups from plugin settings
 			const initContinuousMode = () => {
 		    	let groups = getAllTabGroups();
- 				this.settings.tabGroups.forEach(tabGroup => {
-					groups[tabGroup]?.containerEl.classList.add('is_continuous_mode')
-				});
+		    	if ( this.settings.tabGroupIDs ) {
+					this.settings.tabGroupIDs.forEach(tabGroupID => {
+						getTabGroupByID(tabGroupID)?.containerEl.classList.add('is_continuous_mode')
+					});
+				}
 			}
 			// onlayoutReady
 		    this.app.workspace.onLayoutReady(initContinuousMode);
 		    
 			// toggle continuous mode
-			const toggleContinuousMode = (tabGroupIndex,bool) => {
+			const toggleContinuousMode = (tabGroupID,bool) => {										// bool === true => add continuous mode to all tab groups
 		    	let groups = getAllTabGroups();
-				tabGroupIndex = tabGroupIndex || groups.indexOf(getActiveTabGroup());					// use the provided tabGroupIndex argument or get the active group index
-				let tabGroup = groups[tabGroupIndex].containerEl;										// get the tab group
-				if ( bool === true ) { tabGroup?.classList.add('is_continuous_mode'); } else { tabGroup?.classList.toggle('is_continuous_mode');	}	// toggle the continuous mode style
-				if ( this.settings.tabGroups.includes(tabGroupIndex) ) {
-					this.settings.tabGroups.splice(this.settings.tabGroups.indexOf(tabGroupIndex),1)	// remove the index from settings
-				} else { 
-					this.settings.tabGroups.push(Number(tabGroupIndex)); 								// add the index to settings
+				tabGroupID = tabGroupID || getActiveTabGroup().id;									// use the provided tabGroupID argument or get the active group ID
+				if ( tabGroupID ) {
+					let tabGroupContainer = getTabGroupByID(tabGroupID)?.containerEl;										// get the tab group ID
+					if ( bool === true ) { tabGroupContainer?.classList.add('is_continuous_mode'); } else { tabGroupContainer?.classList.toggle('is_continuous_mode');	}	// toggle style
+					if ( this.settings.tabGroupIDs && this.settings.tabGroupIDs.includes(tabGroupID) ) {
+						this.settings.tabGroupIDs.splice(this.settings.tabGroupIDs.indexOf(tabGroupID),1)	// remove the index from settings
+					} else { 
+						this.settings.tabGroupIDs.push(tabGroupID); 								// add the index to settings
+					}
+					this.settings.tabGroupIDs.sort();															// sort the tabGroups setting
+					this.saveSettings();																	// save the settings
 				}
-				this.settings.tabGroups.sort();															// sort the tabGroups setting
-				this.saveSettings();																	// save the settings
 			}
 			// ADD COMMANDS
 			this.addCommand({																			// add command: toggle continuous mode in active tab group
@@ -198,7 +201,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					this.addCommand({
 						id: "toggle-continuous-mode-"+ (Number(count) + 1),
 						name: "Toggle continuous mode in tab group "+ (Number(count) + 1),
-						callback: () => { toggleContinuousMode(count); },
+						callback: () => { toggleContinuousMode(getAllTabGroups()[count].id); },
 					});
 				}
 			}    
