@@ -7,8 +7,11 @@
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf,
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]),
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]) .view-content,
-.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]):not([data-type="image"]) .view-content > div:not([style*="display"]),
-.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]) .view-content .markdown-preview-view {
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-mode="source"]:not([data-type="pdf"]):not([data-type="image"]) .view-content > div:not([style*="display"]),
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-mode="source"]:not([data-type="pdf"]) .view-content .markdown-preview-view,
+.workspace-leaf-content[data-type="empty"] .view-content .empty-state,
+.workspace-leaf-content[data-type="empty"] .view-content .empty-state-container
+{
 	display:contents !important;
 }
 /* padding bottom */
@@ -16,9 +19,13 @@
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .cm-editor .cm-content {
 	padding-bottom:0 !important;
 }
+.workspace-leaf-content[data-mode="preview"] .view-content .markdown-reading-view, 
+.workspace-leaf-content[data-mode="preview"] .view-content .markdown-reading-view .markdown-preview-view {
+	display:block !important; height:auto !important;
+}
 /* markdown preview sizer margin */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-sizer {
-	margin:var(--file-margins); padding:0;
+	min-height:0 !important; margin:var(--file-margins); padding:0 !important;
 }
 /* hide default header borders */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .cm-editor.cm-focused::before, .workspace-leaf.mod-active:before {
@@ -45,4 +52,8 @@
 /* image size */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-view img:not([width]), .markdown-rendered img:not([width]) {
 	max-width:calc(100% - 2*var(--file-margins));
+}
+/* empty-state */
+.workspace-leaf-content[data-type="empty"] .view-content .empty-state-container .empty-state-action-list {
+	margin-bottom:20px;
 }

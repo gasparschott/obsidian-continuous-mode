@@ -76,24 +76,20 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			this.registerEvent(
 				this.app.workspace.on("file-menu", (menu, file) => {
 					menu.addItem((item) => {
-						item
-							.setTitle("Toggle continuous mode")
+						item.setTitle("Toggle continuous mode")
 							.setIcon("book-down")
-							.onClick(async () => {
-								toggleContinuousMode()
-						});
+							.onClick(async () => { toggleContinuousMode() }
+						);
 					});
 				})
 			);
 			this.registerEvent(
 				this.app.workspace.on("editor-menu", (menu, editor, view) => {
 					menu.addItem((item) => {
-						item
-							.setTitle("Toggle continuous mode")
+						item.setTitle("Toggle continuous mode")
 							.setIcon("book-down")
-							.onClick(async () => {
-								toggleContinuousMode()
-						});
+							.onClick(async () => { toggleContinuousMode() }
+						);
 					});
 				})
 			);
@@ -162,34 +158,34 @@ class ContinuousModePlugin extends obsidian.Plugin {
 
 		    // initialize continuous mode = add class to workspace tab groups from plugin settings
 			const initContinuousMode = () => {
-		    	let groups = getAllTabGroups();
 		    	if ( this.settings.tabGroupIDs ) {
 					this.settings.tabGroupIDs.forEach(tabGroupID => {
-						getTabGroupByID(tabGroupID)?.containerEl.classList.add('is_continuous_mode')
+						getTabGroupByID(tabGroupID)?.containerEl.classList.add('is_continuous_mode');		// don't use toggleContinuousMode here; we don't want to update the tabGroupIDs setting
 					});
 				}
 			}
 			// onlayoutReady
-		    this.app.workspace.onLayoutReady(initContinuousMode);
+		    this.app.workspace.onLayoutReady(initContinuousMode);											// restore continuous mode in tab groups on app load and layout ready
 		    
 			// toggle continuous mode
-			const toggleContinuousMode = (tabGroupID,bool) => {										// bool === true => add continuous mode to all tab groups
+			const toggleContinuousMode = (tabGroupID,bool) => {												// bool === true => add continuous mode to all tab groups
 		    	let groups = getAllTabGroups();
-				tabGroupID = tabGroupID || getActiveTabGroup().id;									// use the provided tabGroupID argument or get the active group ID
+				tabGroupID = tabGroupID || getActiveTabGroup().id;											// use the provided tabGroupID argument or get the active group ID
 				if ( tabGroupID ) {
-					let tabGroupContainer = getTabGroupByID(tabGroupID)?.containerEl;										// get the tab group ID
+					let tabGroupContainer = getTabGroupByID(tabGroupID)?.containerEl;						// get the tab group ID
 					if ( bool === true ) { tabGroupContainer?.classList.add('is_continuous_mode'); } else { tabGroupContainer?.classList.toggle('is_continuous_mode');	}	// toggle style
-					if ( this.settings.tabGroupIDs && this.settings.tabGroupIDs.includes(tabGroupID) ) {
+					if ( this.settings.tabGroupIDs && this.settings.tabGroupIDs.includes(tabGroupID) && bool !== true ) {
 						this.settings.tabGroupIDs.splice(this.settings.tabGroupIDs.indexOf(tabGroupID),1)	// remove the index from settings
 					} else { 
-						this.settings.tabGroupIDs.push(tabGroupID); 								// add the index to settings
+						this.settings.tabGroupIDs.push(tabGroupID);											// add the index to settings
 					}
-					this.settings.tabGroupIDs.sort();															// sort the tabGroups setting
+					this.settings.tabGroupIDs = [...new Set(this.settings.tabGroupIDs)];					// remove dupe IDs
+					this.settings.tabGroupIDs.sort();														// sort the tabGroups setting
 					this.saveSettings();																	// save the settings
 				}
 			}
 			// ADD COMMANDS
-			this.addCommand({																			// add command: toggle continuous mode in active tab group
+			this.addCommand({																				// add command: toggle continuous mode in active tab group
 				id: "toggle-continuous-mode-active",
 				name: "Toggle continuous mode in active tab group",
 				callback: () => { toggleContinuousMode(); },
