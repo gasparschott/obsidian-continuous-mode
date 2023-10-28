@@ -129,28 +129,30 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				let cursorAnchor = this_editor().getCursor("anchor");
 				let activeTabGroupChildren = this_activeleaf().workspace.activeTabGroup.children;
 				let thisContentDOM = this_editor().cm.contentDOM;
-//console.log(this_workspace.activeLeaf.getViewState());
-// 				if ( this_workspace.activeLeaf.getViewState().state.mode === 'preview' ) {
+console.log(this_workspace.activeLeaf.getViewState());
+ 				if ( this_workspace.activeLeaf.getViewState().state.mode === 'preview' ) {
 // 					this_workspace.activeLeaf.setViewState({}).state.mode = 'source';
-// 				}
+ 				}
 				switch(true) {
 					case ( /Arrow/.test(key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):		        		// Arrow navigation between leaves
 						switch(key) {
 							case 'ArrowUp': case 'ArrowLeft':
 								switch(true) {
 									case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:									// cursor in inline-title
+									case this_workspace.activeLeaf.getViewState().state.mode === 'preview':															// leaf is in preview mode
 									case cursorAnchor.line === 0 && cursorAnchor.ch === 0:																			// cursor at first line, first char
 										if ( this_activeleaf().containerEl.previousSibling !== null ) {																// ignore if first leaf
 											this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) - 1],{focus:true});	// make previous leaf active 
-											this_editor().setCursor({line:this_editor().lastLine(),ch:this_editor().lastLine().length - 1});							// select last char
+											this_editor().setCursor({line:this_editor().lastLine(),ch:this_editor().lastLine().length - 1});						// select last char
 										}
 										break;
 								}
 								break;
 							case 'ArrowDown':	case 'ArrowRight': 
 								switch(true) {
+									case this_workspace.activeLeaf.getViewState().state.mode === 'preview':															// leaf is in preview mode
 									case ( cursorAnchor.ch === this_editor().getLine(this_editor().lastLine()).length && cursorAnchor.line === this_editor().lineCount() - 1 ):
-										this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) + 1],{focus:true}); 		// make next leaf active 
+										this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) + 1],{focus:true}); 	// make next leaf active 
 										break;
 								}
 								break;
@@ -188,28 +190,29 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				}
 			}
 			// ADD COMMAND PALETTE ITEMS
-			this.addCommand({																				// add command: toggle continuous mode in active tab group
+			// add command: toggle continuous mode in active tab group
+			this.addCommand({																				
 				id: "toggle-continuous-mode-active",
 				name: "Toggle continuous mode in active tab group",
 				callback: () => { toggleContinuousMode(); },
 			});
-			this.addCommand({																				// add command: toggle continuous mode in active tab group
+			// add command: toggle display of leaf headers
+			this.addCommand({																				
 				id: "toggle-continuous-mode-view-headers",
 				name: "Toggle visibility of leaf headers",
 				callback: () => { getActiveTabGroup().containerEl.classList.toggle('hide_view_headers'); },
 			});
-			// add command palette items for 10 tab groups
-			// better to add only those needed for the currently open tab groups; need to update when tab group is closed or new group is opened
-			const addCommands = () => {
-				for ( let count = 0; count < 10; count++ ) { 
-					this.addCommand({
-						id: "toggle-continuous-mode-"+ (Number(count) + 1),
-						name: "Toggle continuous mode in tab group "+ (Number(count) + 1),
-						callback: () => { toggleContinuousMode(getAllTabGroups()[count].id); },
-					});
-				}
-			}    
-			addCommands();																				// call addCommands	
+			// add command palette items for 10 tab groups ==> is this really needed?
+			// const addToggleCommands = () => {
+				// for ( let count = 0; count < 10; count++ ) { 
+					// this.addCommand({
+						// id: "toggle-continuous-mode-"+ (Number(count) + 1),
+						// name: "Toggle continuous mode in tab group "+ (Number(count) + 1),
+						// callback: () => { toggleContinuousMode(getAllTabGroups()[count].id); },
+					// });
+				// }
+			// }    
+			// addToggleCommands();																				// call addCommands	
 			
 			// add settings to settings tab
 			this.addSettingTab(new SettingsTab(this.app, this));										
