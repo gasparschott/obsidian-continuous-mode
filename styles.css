@@ -19,6 +19,7 @@
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .cm-editor .cm-content {
 	padding-bottom:0 !important;
 }
+/* markdown preview*/
 .workspace-leaf-content[data-mode="preview"] .view-content .markdown-reading-view, 
 .workspace-leaf-content[data-mode="preview"] .view-content .markdown-reading-view .markdown-preview-view {
 	display:block !important; height:auto !important;
@@ -27,18 +28,22 @@
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-sizer {
 	min-height:0 !important; margin:var(--file-margins); padding:0 !important;
 }
-/* hide default header borders */
+/* hide default active leaf header border */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .cm-editor.cm-focused::before, .workspace-leaf.mod-active:before {
 	display:none !important;
 }
-/* header borders */
+/* active leaf borders */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-header { 
 	border-top:2px solid var(--charcoal-grey);
 }
-/* header borders */
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .view-header { 
+/* active leaf borders */
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .view-header, 
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .cm-editor,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .markdown-reading-view,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .release-notes-view .cm-scroller
+{ 
 	border-top:2px solid var(--text-faint);
-	border-bottom:1px solid var(--charcoal-grey);
+	border-bottom:1px solid var(--text-faint);
 }
 /* image leaf styles */
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-type="image"] div.image-container {
@@ -53,7 +58,9 @@
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-view img:not([width]), .markdown-rendered img:not([width]) {
 	max-width:calc(100% - 2*var(--file-margins));
 }
-/* empty-state */
+/* empty-state tabs (new tab) */
 .workspace-leaf-content[data-type="empty"] .view-content .empty-state-container .empty-state-action-list {
 	margin-bottom:20px;
 }
+/* hide leaf headers */
+.is_continuous_mode.hide_view_headers .view-header { display:none; }

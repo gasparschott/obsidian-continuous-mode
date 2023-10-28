@@ -61,7 +61,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			const getTabGroupHeaders = (group) =>	{ return this_workspace.activeTabGroup.tabHeaderEls; }
 			const getTabHeaderIndex = (e) =>		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
 			const this_activeleaf = () =>			{ return this_workspace.activeLeaf; }
-			const this_editor = () =>				{ return this_workspace.activeEditor.editor; }		
+			const this_editor = () =>				{ return this_workspace.activeEditor?.editor; }
 			/* ----------------------- */
 			// Register events
 			this.registerDomEvent(document,"dragstart",function(e)	{ if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
@@ -72,7 +72,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			});
 			this.registerDomEvent(document, "keydown", function (e)	{ if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
 				leafArrowNavigation(e); 
-			});		
+			});	
+			// add context menu items	
 			this.registerEvent(
 				this.app.workspace.on("file-menu", (menu, file) => {
 					menu.addItem((item) => {
@@ -101,7 +102,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					}
 				})
 			);
-			
 			/*-----------------------------------------------*/
 			// Drag Tab Headers to Rearrange Leaves on dragstart
 			const onTabHeaderDragEnd = (e,initialTabHeaderIndex) => {
@@ -129,6 +129,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				let cursorAnchor = this_editor().getCursor("anchor");
 				let activeTabGroupChildren = this_activeleaf().workspace.activeTabGroup.children;
 				let thisContentDOM = this_editor().cm.contentDOM;
+//console.log(this_workspace.activeLeaf.getViewState());
+// 				if ( this_workspace.activeLeaf.getViewState().state.mode === 'preview' ) {
+// 					this_workspace.activeLeaf.setViewState({}).state.mode = 'source';
+// 				}
 				switch(true) {
 					case ( /Arrow/.test(key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):		        		// Arrow navigation between leaves
 						switch(key) {
@@ -155,7 +159,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					// Start another keydown case here
 				}
 			}
-
 		    // initialize continuous mode = add class to workspace tab groups from plugin settings
 			const initContinuousMode = () => {
 		    	if ( this.settings.tabGroupIDs ) {
@@ -184,11 +187,16 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					this.saveSettings();																	// save the settings
 				}
 			}
-			// ADD COMMANDS
+			// ADD COMMAND PALETTE ITEMS
 			this.addCommand({																				// add command: toggle continuous mode in active tab group
 				id: "toggle-continuous-mode-active",
 				name: "Toggle continuous mode in active tab group",
 				callback: () => { toggleContinuousMode(); },
+			});
+			this.addCommand({																				// add command: toggle continuous mode in active tab group
+				id: "toggle-continuous-mode-view-headers",
+				name: "Toggle visibility of leaf headers",
+				callback: () => { getActiveTabGroup().containerEl.classList.toggle('hide_view_headers'); },
 			});
 			// add command palette items for 10 tab groups
 			// better to add only those needed for the currently open tab groups; need to update when tab group is closed or new group is opened
