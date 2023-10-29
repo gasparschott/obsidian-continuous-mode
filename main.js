@@ -124,7 +124,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 			// Allow arrow navigation between open leaves
 			const leafArrowNavigation = (e) => {
-//console.log(this_activeleaf());
 				if ( this_activeleaf().containerEl.closest('.workspace-split.mod-root') === null ) { return; } 									// return if not in leaf editor
 				let cursorHead = this_editor()?.getCursor("head");
 				let cursorAnchor = this_editor()?.getCursor("anchor");
@@ -136,6 +135,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 							case 'ArrowUp': case 'ArrowLeft':
 								switch(true) {
 									case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:									// cursor in inline-title
+									case e.target.classList.contains('metadata-properties-heading'):																// cursor in properties header
 									case cursorAnchor?.line === 0 && cursorAnchor?.ch === 0:																		// cursor at first line, first char
 									case this_activeleaf().getViewState().state.mode === 'preview':																	// leaf is in preview mode
 									case (!/markdown/.test(this_activeleaf().getViewState().type)):													// leaf is empty (new tab)
@@ -150,8 +150,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 								switch(true) {
 									case ( cursorAnchor?.ch === this_editor()?.getLine(this_editor().lastLine()).length && cursorAnchor?.line === this_editor()?.lineCount() - 1 ):
 									case this_activeleaf().getViewState().state.mode === 'preview':															// leaf is in preview mode
-									case (!/markdown/.test(this_activeleaf().getViewState().type)):													// leaf is empty (new tab)
-										this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) + 1],{focus:true}); 	// make next leaf active 
+									case (!/markdown/.test(this_activeleaf().getViewState().type)):															// make next leaf active 
+										this_workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) + 1] || this_activeleaf()),{focus:true}); 
 										break;
 								}
 								break;

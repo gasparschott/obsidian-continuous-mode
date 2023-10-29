@@ -50,23 +50,30 @@
 }
 /* active leaf borders */
 .workspace-tabs.is_continuous_mode .workspace-leaf.mod-active::before,
-.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active + .workspace-leaf::before 
-{
-	content:'';
-	width:100%;
-	border-top:2px solid var(--text-faint);
-	display:block !important;
-}
+.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active + .workspace-leaf::before,
 .workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active)::before
 {
 	content:'';
 	width:100%;
+	display:block !important;
+	position:relative;
+}
+.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active::before
+{
+	border-top:2px solid var(--text-faint);
+}
+.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active + .workspace-leaf::before 
+{
+	border-top:1px solid var(--text-faint) !important;
+}
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active)::before
+{
 	border-top:2px dotted var(--text-faint);
-	display:block;
 }
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .view-header
 { 
 	border-bottom:1px solid var(--text-faint);
+	position:relative;
 }
 /* image leaf styles */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-type="image"] div.image-container
