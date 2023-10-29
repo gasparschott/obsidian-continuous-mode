@@ -124,6 +124,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 			// Allow arrow navigation between open leaves
 			const leafArrowNavigation = (e) => {
+//console.log(this_activeleaf());
 				if ( this_activeleaf().containerEl.closest('.workspace-split.mod-root') === null ) { return; } 									// return if not in leaf editor
 				let cursorHead = this_editor()?.getCursor("head");
 				let cursorAnchor = this_editor()?.getCursor("anchor");
@@ -137,11 +138,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
 									case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:									// cursor in inline-title
 									case cursorAnchor?.line === 0 && cursorAnchor?.ch === 0:																		// cursor at first line, first char
 									case this_activeleaf().getViewState().state.mode === 'preview':																	// leaf is in preview mode
-									case this_activeleaf().getViewState().type === 'empty':																			// leaf is empty (new tab)
-									case this_activeleaf().getViewState().type === 'release-notes':																	// leaf is release notes
+									case (!/markdown/.test(this_activeleaf().getViewState().type)):													// leaf is empty (new tab)
 										if ( this_activeleaf().containerEl.previousSibling !== null ) {																// ignore if first leaf
 											this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) - 1],{focus:true});	// make previous leaf active 
-											this_editor().setCursor({line:this_editor().lastLine(),ch:this_editor().lastLine().length - 1});						// select last char
+											this_editor()?.setCursor({line:this_editor().lastLine(),ch:this_editor().lastLine().length - 1});						// select last char
 										}
 										break;
 								}
@@ -150,8 +150,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 								switch(true) {
 									case ( cursorAnchor?.ch === this_editor()?.getLine(this_editor().lastLine()).length && cursorAnchor?.line === this_editor()?.lineCount() - 1 ):
 									case this_activeleaf().getViewState().state.mode === 'preview':															// leaf is in preview mode
-									case this_activeleaf().getViewState().type === 'empty':																			// leaf is empty (new tab)
-									case this_activeleaf().getViewState().type === 'release-notes':																	// leaf is release notes
+									case (!/markdown/.test(this_activeleaf().getViewState().type)):													// leaf is empty (new tab)
 										this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) + 1],{focus:true}); 	// make next leaf active 
 										break;
 								}
