@@ -78,9 +78,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			this.registerEvent(
 				this.app.workspace.on("file-menu", (menu, file) => {
 					menu.addItem((item) => {
-						item.setTitle("Toggle continuous mode")
+						item.setTitle("Continuous mode")
 							.setIcon("book-down")
-							.onClick(async () => { toggleContinuousMode() }
+							.setSection("pane")
+							.setChecked(getActiveTabGroup().containerEl.classList.contains('is_continuous_mode') ? true : false )
+							.onClick(async () => { console.log(item), toggleContinuousMode() }
 						);
 					});
 				})
@@ -88,8 +90,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			this.registerEvent(
 				this.app.workspace.on("editor-menu", (menu, editor, view) => {
 					menu.addItem((item) => {
-						item.setTitle("Toggle continuous mode")
+						item.setTitle("Continuous mode")
 							.setIcon("book-down")
+							.setSection("pane")
+							.setChecked(getActiveTabGroup().containerEl.classList.contains('is_continuous_mode') ? true : false )
 							.onClick(async () => { toggleContinuousMode() }
 						);
 					});
@@ -175,17 +179,23 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			const toggleContinuousMode = (tabGroupID,bool) => {												// bool === true => add continuous mode to all tab groups
 		    	let groups = getAllTabGroups();
 				tabGroupID = tabGroupID || getActiveTabGroup().id;											// use the provided tabGroupID argument or get the active group ID
-				if ( tabGroupID ) {
-					let tabGroupContainer = getTabGroupByID(tabGroupID)?.containerEl;						// get the tab group ID
+				const toggleThis = (id) => {
+					let tabGroupContainer = getTabGroupByID(id)?.containerEl;						// get the tab group ID
 					if ( bool === true ) { tabGroupContainer?.classList.add('is_continuous_mode'); } else { tabGroupContainer?.classList.toggle('is_continuous_mode');	}	// toggle style
-					if ( this.settings.tabGroupIDs && this.settings.tabGroupIDs.includes(tabGroupID) && bool !== true ) {
-						this.settings.tabGroupIDs.splice(this.settings.tabGroupIDs.indexOf(tabGroupID),1)	// remove the index from settings
+					if ( this.settings.tabGroupIDs && this.settings.tabGroupIDs.includes(id) && bool !== true ) {
+						this.settings.tabGroupIDs.splice(this.settings.tabGroupIDs.indexOf(id),1)	// remove the index from settings
 					} else { 
-						this.settings.tabGroupIDs.push(tabGroupID);											// add the index to settings
+						this.settings.tabGroupIDs.push(id);											// add the index to settings
 					}
 					this.settings.tabGroupIDs = [...new Set(this.settings.tabGroupIDs)];					// remove dupe IDs
 					this.settings.tabGroupIDs.sort();														// sort the tabGroups setting
 					this.saveSettings();																	// save the settings
+				}
+				switch(true) {
+					case this_workspace.getLeftLeaf().parent === getActiveTabGroup():						// selecting toggle menu item in sidebar toggles all
+						console.log(getAllTabGroups());
+						break;
+					default: toggleThis(tabGroupID);	break; 
 				}
 			}
 			// ADD COMMAND PALETTE ITEMS
