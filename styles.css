@@ -102,8 +102,8 @@
 	margin-bottom:20px;
 }
 /* hide leaf headers */
-.is_continuous_mode.hide_view_headers .view-header,
-.is_continuous_mode.hide_view_headers .workspace-leaf-content[data-type="pdf"] .pdf-toolbar
+.is_continuous_mode.hide_note_titles .view-header,
+.is_continuous_mode.hide_note_titles .workspace-leaf-content[data-type="pdf"] .pdf-toolbar
 { 
 	display:none;
 }
