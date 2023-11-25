@@ -48,7 +48,7 @@
 	margin:var(--file-margins); 
 	padding:0 !important;
 }
-/* active leaf borders */
+/* active note borders */
 .workspace-tabs.is_continuous_mode .workspace-leaf.mod-active::before,
 .workspace-tabs.is_continuous_mode .workspace-leaf.mod-active + .workspace-leaf::before,
 .workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active)::before
@@ -75,11 +75,18 @@
 	border-bottom:1px solid var(--text-faint);
 	position:relative;
 }
-/* image leaf styles */
+/* image note styles */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-type="image"] div.image-container
 {
 	padding:var(--file-margins);
 }
+/* image size */
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-view img:not([width]), 
+.markdown-rendered img:not([width])
+{
+	max-width:calc(100% - 2*var(--file-margins));
+}
+/* pdf note styles */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-type="pdf"] .pdf-viewer
 {
 	padding-top:var(--file-margins);
@@ -91,11 +98,6 @@
 	margin-left:var(--file-margins);
 	margin-right:var(--file-margins);
 }
-/* image size */
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-view img:not([width]), .markdown-rendered img:not([width])
-{
-	max-width:calc(100% - 2*var(--file-margins));
-}
 /* empty-state tabs (new tab) */
 .workspace-leaf-content[data-type="empty"] .view-content .empty-state-container .empty-state-action-list
 {
@@ -106,4 +108,9 @@
 .is_continuous_mode.hide_note_titles .workspace-leaf-content[data-type="pdf"] .pdf-toolbar
 { 
 	display:none;
+}
+/* scroll active leaf into view behavior */
+.workspace-tab-container {
+	scroll-behavior:smooth;
+	scroll-padding-top:2px;
 }

@@ -17,36 +17,41 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE. 
 ***************************************************************************** */
 
-var __async = (__this, __arguments, generator) => {
+let __async = (__this, __arguments, generator) => {
 	return new Promise((resolve, reject) => {
-		var fulfilled = (value) => {
+		let fulfilled = (value) => {
 			try {
 				step(generator.next(value));
 			} catch (e) {
 				reject(e);
 			}
 		};
-		var rejected = (value) => {
+		let rejected = (value) => {
 			try {
 				step(generator.throw(value));
 			} catch (e) {
 				reject(e);
 			}
 		};
-		var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+		let step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
 		step((generator = generator.apply(__this, __arguments)).next());
 	});
 };
 const DEFAULT_SETTINGS = {
-	'openNewSplitsInContinuousMode': false,
-	'hideNoteHeaders': false,
 	'tabGroupIds': []
 };
-const getAllTabGroups = (workspace_rootsplit) => { let groups = []; 
-	workspace_rootsplit.children.forEach(child => { 
-		if ( !child.allowSingleChild ) { groups.push(...child.children) } else { groups.push(child) }	// get all tab groups in all root splits
-	}); 
-	return groups;
+
+function getAllTabGroups(beginNode,allTabs) {
+    let all_children = beginNode?.children;
+    if ( all_children === undefined ) { return }
+    allTabs = allTabs || [];
+	if ( beginNode.hasOwnProperty('children') ) {
+		beginNode.children.forEach(function(child) {
+			if (child.type === 'tabs') { allTabs.push(child); }
+			all_children = all_children.concat(getAllTabGroups(child,allTabs));
+		});
+	}
+    return allTabs;
 }
 
 class ContinuousModePlugin extends obsidian.Plugin {
@@ -58,65 +63,63 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			let tabGroupIds;
 			const this_workspace =					this.app.workspace;
 			const getActiveTabGroup = () =>			{ return this_workspace.activeTabGroup; }
-			const getTabGroupById = (id) =>			{ return getAllTabGroups(this_workspace.rootSplit).find( group => group.id === id ); }
+			const getTabGroupById = (id) =>			{ return getAllTabGroups(this_workspace.rootSplit)?.find( tab_group => tab_group.containerEl.dataset.tab_group_id === id ); }
 			const getTabGroupHeaders = (group) =>	{ return this_workspace.activeTabGroup.tabHeaderEls; }
 			const getTabHeaderIndex = (e) =>		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
-			const this_activeleaf = () =>			{ return this_workspace.activeLeaf; }
-			const this_editor = () =>				{ return this_workspace.activeEditor?.editor; }
+			const getActiveLeaf = () =>				{ return this_workspace.activeLeaf; }
+			const getActiveEditor = () =>			{ return this_workspace.activeEditor?.editor; }
 			/* ----------------------- */
-			// Register DOM events
+			// REGISTER EVENTS
 			this.registerDomEvent(document,'click', function (e) {
 				switch(true) {
-					case !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode'): return;			// ignore if target is not in continuous mode -- is this needed?
-					case ( /workspace-tab-header/.test(e.target.className) ): 
-					console.log(this_activeleaf());
-						//e.target.closest('.workspace-tabs').querySelector('.workspace-tab-header.is-active')?.click();
-						if ( getActiveTabGroup().containerEl.classList.contains('hide_note_titles') ) {
-							this_activeleaf()?.containerEl?.querySelector('.cm-editor').scrollIntoView({ behavior: "smooth", inline: "nearest" }); 
-						} else {
-							this_activeleaf()?.containerEl?.querySelector('.view-header').scrollIntoView({ behavior: "smooth", inline: "nearest" }); 
-						}
+					case !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode'): 
+						return; 
+					case ( /workspace-tab-header/.test(e.target.className) ):
+						scrollActiveLeafIntoView();
 						break;
 				}
 			});
-			this.registerDomEvent(document,'keydown', function (e)	{ 
-				if ( !this_activeleaf().containerEl.closest('.workspace-tabs')?.classList.contains('is_continuous_mode') ) { return; }
+			this.registerDomEvent(document,'keydown', function (e) {
+				if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
+				if ( !getActiveLeaf().containerEl.closest('.workspace-tabs')?.classList.contains('is_continuous_mode') ) { return; }
 				leafArrowNavigation(e); 
 			});	
-			this.registerDomEvent(document,'dragstart',function(e)	{ if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
+			this.registerDomEvent(document,'dragstart',function(e) { 
+				if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
 				if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }	// get initial tab header index for onTabHeaderDragEnd()
 			});
-			// Register events: add context menu items	
-			const addContinuousModeMenuItem = (item) => {
+			const addContinuousModeMenuItem = (item,type) => {
 				item.setTitle('Continuous mode')
 					.setIcon('book-down')
 					.setSection('pane')
 					.setChecked( getActiveTabGroup().containerEl.classList.contains('is_continuous_mode') ? true : false )
-					.onClick(async () => { toggleContinuousMode() }
+					.onClick(async () => { 
+						toggleContinuousMode(getActiveTabGroup().containerEl.dataset.tab_group_id || '') }
 				);
 			}
 			this.registerEvent(
-				this.app.workspace.on('file-menu', (menu) => {
-					menu.addItem((item) => { addContinuousModeMenuItem(item) });
+				this.app.workspace.on('file-menu', (menu,file,source,leaf) => {
+					this.app.workspace.setActiveLeaf(leaf,{focus:true});
+					scrollActiveLeafIntoView();
+					if (source !== 'file-explorer-context-menu' ) {menu.addItem((item) => { addContinuousModeMenuItem(item,'file-menu') }); }
 				})
-			);
+			)
 			this.registerEvent(
 				this.app.workspace.on('editor-menu', (menu) => {
-					menu.addItem((item) => { addContinuousModeMenuItem(item) });
+					menu.addItem((item) => { addContinuousModeMenuItem(item,'editor-menu') });
 				})
 			);
-			this.registerEvent(
+			this.registerEvent(													// initContinuousMode on layout change
+				this.app.workspace.on('layout-change', async () => { 
+					updateTabGroupIds(); 
+					updateDataTabGroupIds(); 
+				})
+			);
+			this.registerEvent(													// initContinuousMode on layout ready
 				this.app.workspace.on('layout-ready', async () => {
+					updateTabGroupIds(); 
+					updateDataTabGroupIds();
 					initContinuousMode();
-				})
-			);
-			this.registerEvent(
-				this.app.workspace.on('layout-change', async () => {
-					if ( this.settings.openNewSplitsInContinuousMode === true && !this.app.workspace.getMostRecentLeaf().parent.containerEl.classList.contains('is_continuous_mode') ) { 
-//						this.app.workspace.getMostRecentLeaf().parent.containerEl.classList.add('is_continuous_mode')
-					} else {
-//						this.app.workspace.getMostRecentLeaf().parent.containerEl.classList.remove('is_continuous_mode');
-					}
 				})
 			);
 			/*-----------------------------------------------*/
@@ -125,6 +128,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				e.target.ondragend = function(f) { 
 					if ( getTabHeaderIndex(f) !== initialTabHeaderIndex ) { rearrangeLeaves(f,initialTabHeaderIndex); }		// only rearrange leaves if tab header is actually moved to a new position
 				}
+			}
+			const scrollActiveLeafIntoView = () => {
+				let el = getActiveLeaf()?.containerEl;
+				el = ( getActiveTabGroup().containerEl.classList.contains('hide_note_titles') ? el?.querySelector('.cm-editor') : el.querySelector('.view-header') );
+				el.scrollIntoView();
 			}
 			// REARRANGE LEAVES on dragend
 			const rearrangeLeaves = (e,initialTabHeaderIndex) => {
@@ -140,11 +148,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 			// ARROW NAVIGATION between open leaves
 			const leafArrowNavigation = (e) => {
-				if ( this_activeleaf().containerEl.closest('.workspace-split.mod-root') === null ) { return; }								// return if not in leaf editor
-				// let cursorHead = this_editor()?.getCursor('head');
-				let cursorAnchor = this_editor()?.getCursor('anchor');
-				let activeTabGroupChildren = this_activeleaf().workspace.activeTabGroup.children;
-				let thisContentDOM = this_editor()?.cm.contentDOM;
+				if ( getActiveLeaf().containerEl.closest('.workspace-split.mod-root') === null ) { return; }								// return if not in leaf editor
+				let cursorAnchor = getActiveEditor()?.getCursor('anchor');
+				let activeTabGroupChildren = getActiveLeaf().workspace.activeTabGroup.children;
+				let thisContentDOM = getActiveEditor()?.cm.contentDOM;
 				switch(true) {
 					case ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):					// Arrow navigation between leaves
 						switch(e.key) {
@@ -153,21 +160,21 @@ class ContinuousModePlugin extends obsidian.Plugin {
 									case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:									// cursor in inline-title
 									case e.target.classList.contains('metadata-properties-heading'):																// cursor in properties header
 									case cursorAnchor?.line === 0 && cursorAnchor?.ch === 0:																		// cursor at first line, first char
-									case this_activeleaf().getViewState().state.mode === 'preview':																	// leaf is in preview mode
-									case (!/markdown/.test(this_activeleaf().getViewState().type)):													// leaf is empty (new tab)
-										if ( this_activeleaf().containerEl.previousSibling !== null ) {																// ignore if first leaf
-											this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) - 1],{focus:true});	// make previous leaf active 
-											this_editor()?.setCursor({line:this_editor().lastLine(),ch:this_editor().lastLine().length - 1});						// select last char
+									case getActiveLeaf().getViewState().state.mode === 'preview':																	// leaf is in preview mode
+									case (!/markdown/.test(getActiveLeaf().getViewState().type)):																	// leaf is empty (new tab)
+										if ( getActiveLeaf().containerEl.previousSibling !== null ) {																// ignore if first leaf
+											this_workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(getActiveLeaf()) - 1],{focus:true});	// make previous leaf active 
+											getActiveEditor()?.setCursor({line:getActiveEditor().lastLine(),ch:getActiveEditor().lastLine().length - 1});			// select last char
 										}
 										break;
 								}
 								break;
 							case 'ArrowDown':	case 'ArrowRight': 
 								switch(true) {
-									case ( cursorAnchor?.ch === this_editor()?.getLine(this_editor().lastLine()).length && cursorAnchor?.line === this_editor()?.lineCount() - 1 ):
-									case this_activeleaf().getViewState().state.mode === 'preview':															// leaf is in preview mode
-									case (!/markdown/.test(this_activeleaf().getViewState().type)):															// make next leaf active 
-										this_workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(this_activeleaf()) + 1] || this_activeleaf()),{focus:true}); 
+									case ( cursorAnchor?.ch === getActiveEditor()?.getLine(getActiveEditor().lastLine()).length && cursorAnchor?.line === getActiveEditor()?.lineCount() - 1 ):
+									case getActiveLeaf().getViewState().state.mode === 'preview':																	// leaf is in preview mode
+									case (!/markdown/.test(getActiveLeaf().getViewState().type)):																	// make next leaf active 
+										this_workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(getActiveLeaf()) + 1] || getActiveLeaf()),{focus:true}); 
 										break;
 								}
 								break;
@@ -176,62 +183,64 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					// Start another keydown case here
 				}
 			}
+			const updateTabGroupIds = () => {																								// add data tab_group_id to each .workspace-tabs
+				getAllTabGroups(this.app.workspace.rootSplit)?.forEach( 
+					tab_group => { if ( tab_group ) { tab_group.containerEl.dataset.tab_group_id = this.app.appId +'_'+ tab_group.id } }
+				);
+			}
+			const updateDataTabGroupIds = () => {																							// remove tab_group_ids from data.json
+				let all_tab_groups = getAllTabGroups(this.app.workspace.rootSplit) || [];
+				let all_tab_group_ids = [];
+				let data_tab_group_ids = this.settings.tabGroupIds;
+				all_tab_groups.forEach( tab_group => all_tab_group_ids.push(this.app.appId +'_'+ tab_group.id) );	//  get all tab group ids
+				data_tab_group_ids.forEach( id => { 
+					if ( this.app.appId === id.split('_')[0] ) {
+						if ( !all_tab_group_ids.includes(id) ) {
+							this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(id),1); 
+							this.saveSettings();
+						}
+					} 
+				})
+			}
+			updateTabGroupIds(); 
 			// INITIALIZE CONTINUOUS MODE = add class to workspace tab groups from plugin settings
 			const initContinuousMode = () => {
-				let all_tab_groups = getAllTabGroups(this.app.workspace.rootSplit), all_tab_group_ids = [];
-					all_tab_groups.forEach(group => all_tab_group_ids.push(group.id) );									//  get all tab group ids
-				if ( this.settings.tabGroupIds ) {
-					this.settings.tabGroupIds.forEach(settingsTabGroupId => {											// for each tab group id in settings...
-						if ( this.app.appId === settingsTabGroupId.split('_')[0] ) {
-							switch(true) {
-								case all_tab_group_ids.includes(settingsTabGroupId.split('_')[1]):
-								console.log("B")
-									toggleContinuousMode(settingsTabGroupId);													// else restore continuous mode
-									break;
-								case !all_tab_group_ids.includes(settingsTabGroupId.split('_')[1]):
-									console.log("A")
-									this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(settingsTabGroupId),1);	// remove closed tab group ids from settings
-									this.saveSettings();
-									break;
-							}
+				if ( this.settings.tabGroupIds ) {																				// if there are any saved tabGroupIds...
+					this.settings.tabGroupIds.forEach( tab_group_id => {													// for each id...
+						if ( this.app.appId === tab_group_id.split('_')[0] ) {											// if the tabgroup belongs to the current app (window)...
+							toggleContinuousMode(tab_group_id);															// toggle continuous mode
 						}
 					});
 				}
 			}
 			// TOGGLE CONTINUOUS MODE
-			const toggleContinuousMode = (tabGroupId) => { 
-				tabGroupId = tabGroupId ?? getActiveTabGroup().id;										// use provided tabGroupId from stored settings or use activeTabGroupId from toggle command
-				let settings_id = this.app.appId +'_'+ tabGroupId;										// prep id for settings
+			const toggleContinuousMode = (tab_group_id) => {
+				tab_group_id = tab_group_id ?? getActiveTabGroup().containerEl.dataset.tab_group_id;		// use provided tabGroupId from stored settings or use activeTabGroupId from toggle command
 				switch(true) {
-					case ( /_/.test(tabGroupId) ):														// from initContinuousMode: restore continuous mode; other ids will not include _
-						getTabGroupById(tabGroupId.split('_')[1])?.containerEl.classList.add('is_continuous_mode');
-						if ( this.settings.hideNoteHeaders === true ) { getTabGroupById(tabGroupId.split('_')[1])?.containerEl.classList.add('hide_note_titles'); }	// restore hidden note headers
+					case getTabGroupById(tab_group_id)?.containerEl?.classList.contains('is_continuous_mode'):						// if tab group is in continuous mode
+						getTabGroupById(tab_group_id)?.containerEl?.classList.remove('is_continuous_mode');							// remove style
+						this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(tab_group_id),1);						// remove tabGroupdId from data.json
 						break;
-					case getTabGroupById(tabGroupId)?.containerEl?.classList.contains('is_continuous_mode'):
-						getTabGroupById(tabGroupId)?.containerEl?.classList.remove('is_continuous_mode');		// toggle style
-						this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(settings_id),1);		// ...remove the tabGroupdId from settings
-						break;
-					default:
-						getTabGroupById(tabGroupId)?.containerEl?.classList.add('is_continuous_mode');								// toggle style
-						this.settings.tabGroupIds.push(settings_id);													// else add the tabGroupdId to settings
+					default:																										// if tab group is not in continuous mode (e.g., on app launch)
+						getTabGroupById(tab_group_id)?.containerEl?.classList.add('is_continuous_mode');							// add style
+						if ( !this.settings.tabGroupIds.includes(tab_group_id) ) { this.settings.tabGroupIds.push(tab_group_id); }	// add tabGroupdId to data.json if it is not already there
 				}
 				this.settings.tabGroupIds = [...new Set(this.settings.tabGroupIds)];					// remove dupe IDs if necessary
-				this.settings.tabGroupIds.sort();														// sort the tabGroups setting
-				this.saveSettings();																	// save the settings
+				this.settings.tabGroupIds.sort();																					// sort the tabGroupIds
+				this.saveSettings();																								// save the settings
 			}
+			initContinuousMode();
 			// ADD COMMAND PALETTE ITEMS
 			this.addCommand({																				// add command: toggle continuous mode in active tab group
 				id: 'toggle-continuous-mode-active',
-				name: 'Toggle continuous mode in active split',
+				name: 'Toggle continuous mode in active tab group',
 				callback: () => { toggleContinuousMode(); },
 			});
 			this.addCommand({																				// add command: toggle display of leaf headers
 				id: 'toggle-continuous-mode-view-headers',
-				name: 'Toggle visibility of note titles in active split',
+				name: 'Toggle visibility of note titles in active tab group',
 				callback: () => { getActiveTabGroup().containerEl.classList.toggle('hide_note_titles'); },
 			});
-			// ADD SETTINGS TO SETTINGS TAB
-			this.addSettingTab(new SettingsTab(this.app, this));										
 		});
 
     } // end onload
@@ -250,46 +259,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
     // on plugin unload
 	onunload() { 
 		console.log('Unloading the Continuous Mode plugin.');
-		Array.from(this.app.workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs.is_continuous_mode')).forEach(group => group.classList.remove('is_continuous_mode','hide_note_titles'));
+		Array.from(this.app.workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs')).forEach(
+			tab_group => { tab_group.classList.remove('is_continuous_mode','hide_note_titles'); delete tab_group.dataset.tab_group_id; }
+		);
     }
-}
-
-// SETTINGS TAB
-class SettingsTab extends obsidian.PluginSettingTab {
-	constructor(app, plugin) {
-		super(app, plugin);
-		this.app = app;
-		this.plugin = plugin;
-	}
-	display() {
-		const { containerEl } = this;
-		containerEl.empty();
-		containerEl.createEl('h2', { text: 'Settings' });
-		new obsidian.Setting(containerEl)
-			.setName('Open all new splits in continuous mode')
-			.addToggle((toggle) => toggle
-			.setValue(this.plugin.settings.openNewSplitsInContinuousMode)
-			.onChange((value) => __async(this, null, function* () {
-				this.plugin.settings.openNewSplitsInContinuousMode = value;
-				yield this.plugin.saveSettings();
-		})));
-		new obsidian.Setting(containerEl)
-			.setName('Hide note titles')
-			.addToggle((toggle) => toggle
-			.setValue(this.plugin.settings.hideNoteHeaders)
-			.onChange((value) => __async(this, null, function* () {
-				this.plugin.settings.hideNoteHeaders = value;
-				yield this.plugin.saveSettings();
-				let groups = getAllTabGroups(this.app.workspace.rootSplit); 
-				groups.forEach(group => {
-					switch(true) {
-						case !group.containerEl.classList.contains('is_continuous_mode'):					break;	// do nothing if group is not in continuous mode
-						case value === false:	group.containerEl.classList.remove('hide_note_titles');		break;
-						case value === true:	group.containerEl.classList.add('hide_note_titles');		break;
-					}
-				})
-		})));
-	}
 }
 
 module.exports = ContinuousModePlugin;
