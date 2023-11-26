@@ -15,15 +15,17 @@ Displays all open notes (“leaves”) in a tab group as a continuous scrollable
 
 <a href="https://www.buymeacoffee.com/fiLtliTFxQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;" ></a>
 
-Tab group with multiple notes open.
+## Screenshots:
+
+Tab group with multiple notes open
 
 ![<# alt text #>](assets/before.png "before.png")
 
-Continuous mode active.
+Continuous mode active
 
 ![<# alt text #>](assets/after.png "after.png")
 
-Continuous mode with headers hidden.
+Continuous mode with headers hidden
 
 ![<# alt text #>](assets/after-no-headers.png "after-no-headers.png")
 
