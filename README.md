@@ -17,15 +17,15 @@ Displays all open notes (“leaves”) in a tab group as a continuous scrollable
 
 ## Screenshots:
 
-Tab group with multiple notes open
+Before: tab group with multiple notes open
 
 ![<# alt text #>](assets/before.png "before.png")
 
-Continuous mode active
+After: Continuous Mode active
 
 ![<# alt text #>](assets/after.png "after.png")
 
-Continuous mode with headers hidden
+After: Continuous Mode active with headers hidden
 
 ![<# alt text #>](assets/after-no-headers.png "after-no-headers.png")
 
