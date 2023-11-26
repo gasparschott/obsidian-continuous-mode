@@ -10,6 +10,9 @@ Displays all open notes (“leaves”) in a tab group as a continuous scrollable
  - Reorder notes via tab drag-and-drop.
  - Show/hide note headers in active tab group from command palette to create a more "seamless" experience.
  
+![<# alt text #>](assets/before.png "before.png")
+
+![<# alt text #>](assets/after.png "after.png")
 
 ### Buy me a coffee:
 
