@@ -35,8 +35,8 @@
 	padding-bottom:0 !important;
 }
 /* markdown preview*/
-.workspace-leaf-content[data-mode="preview"] .view-content .markdown-reading-view, 
-.workspace-leaf-content[data-mode="preview"] .view-content .markdown-reading-view .markdown-preview-view
+.workspace-tabs.is_continuous_mode .workspace-leaf-content[data-mode="preview"] .view-content .markdown-reading-view, 
+.workspace-tabs.is_continuous_mode .workspace-leaf-content[data-mode="preview"] .view-content .markdown-reading-view .markdown-preview-view
 {
 	display:block !important; 
 	height:auto !important;
