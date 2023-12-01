@@ -2,21 +2,6 @@
 
 let obsidian = require('obsidian');
 
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED 'AS IS' AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE. 
-***************************************************************************** */
-
 let __async = (__this, __arguments, generator) => {
 	return new Promise((resolve, reject) => {
 		let fulfilled = (value) => {
@@ -45,7 +30,7 @@ function getAllTabGroups(beginNode,allTabs) {
     let all_children = beginNode?.children;
     if ( all_children === undefined ) { return }
     allTabs = allTabs || [];
-	if ( beginNode.hasOwnProperty('children') ) {
+	if ( beginNode.children ) {
 		beginNode.children.forEach(function(child) {
 			if (child.type === 'tabs') { allTabs.push(child); }
 			all_children = all_children.concat(getAllTabGroups(child,allTabs));
@@ -60,11 +45,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		return __async(this, null, function* () {
 			yield this.loadSettings();
 			// helpers
-			let tabGroupIds;
 			const this_workspace =					this.app.workspace;
 			const getActiveTabGroup = () =>			{ return this_workspace.activeTabGroup; }
 			const getTabGroupById = (id) =>			{ return getAllTabGroups(this_workspace.rootSplit)?.find( tab_group => tab_group.containerEl.dataset.tab_group_id === id ); }
-			const getTabGroupHeaders = (group) =>	{ return this_workspace.activeTabGroup.tabHeaderEls; }
+			const getTabGroupHeaders = () =>		{ return this_workspace.activeTabGroup.tabHeaderEls; }
 			const getTabHeaderIndex = (e) =>		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
 			const getActiveLeaf = () =>				{ return this_workspace.activeLeaf; }
 			const getActiveEditor = () =>			{ return this_workspace.activeEditor?.editor; }
@@ -88,7 +72,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
 				if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }	// get initial tab header index for onTabHeaderDragEnd()
 			});
-			const addContinuousModeMenuItem = (item,type) => {
+			const addContinuousModeMenuItem = (item) => {
 				item.setTitle('Continuous mode')
 					.setIcon('book-down')
 					.setSection('pane')
@@ -116,7 +100,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				})
 			);
 			this.registerEvent(													// initContinuousMode on layout ready
-				this.app.workspace.on('layout-ready', async () => {
+				this.app.workspace.onLayoutReady(() => {
 					updateTabGroupIds(); 
 					updateDataTabGroupIds();
 					initContinuousMode();
@@ -151,7 +135,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				if ( getActiveLeaf().containerEl.closest('.workspace-split.mod-root') === null ) { return; }								// return if not in leaf editor
 				let cursorAnchor = getActiveEditor()?.getCursor('anchor');
 				let activeTabGroupChildren = getActiveLeaf().workspace.activeTabGroup.children;
-				let thisContentDOM = getActiveEditor()?.cm.contentDOM;
 				switch(true) {
 					case ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ):					// Arrow navigation between leaves
 						switch(e.key) {

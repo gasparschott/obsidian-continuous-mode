@@ -99,7 +99,7 @@
 	margin-right:var(--file-margins);
 }
 /* empty-state tabs (new tab) */
-.workspace-leaf-content[data-type="empty"] .view-content .empty-state-container .empty-state-action-list
+.workspace-tabs.is_continuous_mode .workspace-leaf-content[data-type="empty"] .view-content .empty-state-container .empty-state-action-list
 {
 	margin-bottom:20px;
 }
@@ -110,7 +110,7 @@
 	display:none;
 }
 /* scroll active leaf into view behavior */
-.workspace-tab-container {
+.workspace-tabs.is_continuous_mode .workspace-tab-container {
 	scroll-behavior:smooth;
 	scroll-padding-top:2px;
 }

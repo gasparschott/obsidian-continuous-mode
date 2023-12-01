@@ -5,7 +5,7 @@
 	"minAppVersion": "0.15.0",
 	"description": "Displays all open notes (or \"leaves\") in a tab group as a continuous scrollable \"page\" (sometimes called \"Scrivenings mode\"). Features include arrow navigation between notes and the ability to reorder notes via tab header drag-and-drop.",
 	"author": "Michael Schrauzer",
-	"authorURL": "https://github.com/gasparschott/obsidian-continuous-mode",
+	"authorURL": "https://github.com/gasparschott/",
 	"fundingUrl": "https://www.buymeacoffee.com/fiLtliTFxQ",
 	"isDesktopOnly": false
 }
