@@ -54,7 +54,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		/* ----------------------- */
 		// TOGGLE CONTINUOUS MODE
 		const toggleContinuousMode = (tab_group_id) => {
-console.log(this.settings.tabGroupIds);		
 			tab_group_id = tab_group_id ?? getActiveTabGroup().containerEl.dataset.tab_group_id;		// use provided tabGroupId from stored settings or use activeTabGroupId from toggle command
 			if ( this.app.appId === tab_group_id.split('_')[0] ) {
 				switch(true) {
@@ -68,7 +67,6 @@ console.log(this.settings.tabGroupIds);
 				}
 			}
 			this.settings.tabGroupIds = [...new Set(this.settings.tabGroupIds)];					// remove dupe IDs if necessary
-console.log(this.settings.tabGroupIds);		
 			this.settings.tabGroupIds.sort();																					// sort the tabGroupIds
 			this.saveSettings();																								// save the settings
 		}
