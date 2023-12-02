@@ -2,7 +2,7 @@
 
 let obsidian = require('obsidian');
 
-const DEFAULT_SETTINGS = {
+let DEFAULT_SETTINGS = {
 	'tabGroupIds': []
 };
 
@@ -54,17 +54,21 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		/* ----------------------- */
 		// TOGGLE CONTINUOUS MODE
 		const toggleContinuousMode = (tab_group_id) => {
+console.log(this.settings.tabGroupIds);		
 			tab_group_id = tab_group_id ?? getActiveTabGroup().containerEl.dataset.tab_group_id;		// use provided tabGroupId from stored settings or use activeTabGroupId from toggle command
-			switch(true) {
-				case getTabGroupById(tab_group_id)?.containerEl?.classList.contains('is_continuous_mode'):						// if tab group is in continuous mode
-					getTabGroupById(tab_group_id)?.containerEl?.classList.remove('is_continuous_mode');							// remove style
-					this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(tab_group_id),1);						// remove tabGroupdId from data.json
-					break;
-				default:																										// if tab group is not in continuous mode (e.g., on app launch)
-					getTabGroupById(tab_group_id)?.containerEl?.classList.add('is_continuous_mode');							// add style
-					if ( !this.settings.tabGroupIds.includes(tab_group_id) ) { this.settings.tabGroupIds.push(tab_group_id); }	// add tabGroupdId to data.json if it is not already there
+			if ( this.app.appId === tab_group_id.split('_')[0] ) {
+				switch(true) {
+					case getTabGroupById(tab_group_id)?.containerEl?.classList.contains('is_continuous_mode'):						// if tab group is in continuous mode
+						getTabGroupById(tab_group_id)?.containerEl?.classList.remove('is_continuous_mode');							// remove style
+						this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(tab_group_id),1);						// remove tabGroupdId from data.json
+						break;
+					default:																										// if tab group is not in continuous mode (e.g., on app launch)
+						getTabGroupById(tab_group_id)?.containerEl?.classList.add('is_continuous_mode');							// add style
+						if ( !this.settings.tabGroupIds.includes(tab_group_id) ) { this.settings.tabGroupIds.push(tab_group_id); }	// add tabGroupdId to data.json if it is not already there
+				}
 			}
 			this.settings.tabGroupIds = [...new Set(this.settings.tabGroupIds)];					// remove dupe IDs if necessary
+console.log(this.settings.tabGroupIds);		
 			this.settings.tabGroupIds.sort();																					// sort the tabGroupIds
 			this.saveSettings();																								// save the settings
 		}
@@ -164,7 +168,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				.setSection('pane')
 				.setChecked( getActiveTabGroup().containerEl.classList.contains('is_continuous_mode') ? true : false )
 				.onClick(async () => { 
-					toggleContinuousMode(getActiveTabGroup().containerEl.dataset.tab_group_id || '') }
+					toggleContinuousMode(getActiveTabGroup().containerEl.dataset.tab_group_id) }
 			);
 		}
 		this.registerEvent(
@@ -185,14 +189,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				updateDataTabGroupIds(); 
 			})
 		);
-		this.registerEvent(													// initContinuousMode on layout ready
-			this.app.workspace.on('layout-ready', async () => { 
-//			this.app.workspace.onLayoutReady(() => {
-				updateTabGroupIds(); 
-				updateDataTabGroupIds();
-				initContinuousMode();
-			})
-		);
+		this.app.workspace.onLayoutReady( async () => {						// initContinuousMode on layout ready
+			updateTabGroupIds(); 
+			updateDataTabGroupIds();
+			initContinuousMode();
+		})
 		// ADD COMMAND PALETTE ITEMS
 		this.addCommand({																				// add command: toggle continuous mode in active tab group
 			id: 'toggle-continuous-mode-active',
