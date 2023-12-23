@@ -96,18 +96,16 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		// REARRANGE LEAVES on dragend
 		const rearrangeLeaves = (e,initialTabHeaderIndex) => {
 			let this_tab_container = e.target.closest('.workspace-tabs').querySelector('.workspace-tab-container');		// get current tab container
-			let leaves = Array.from(this_tab_container.querySelectorAll('.workspace-leaf'));							// get current tab container leaves
+			let leaves = Array.from(this_tab_container.children);														// get current tab container leaves
 			let finalTabHeaderIndex = getTabHeaderIndex(e);																// get final dropped tab header index
-			let rearranged = '';																						// define rearranged leaves variable
 			let moved = leaves.splice(initialTabHeaderIndex,1);															// get the moved leave
-			leaves.toSpliced(finalTabHeaderIndex,0,moved[0]);															// move the moved leaf into position
-			leaves.forEach( leaf => rearranged += leaf.outerHTML );														// compose rearranged HTML
-			this_tab_container.innerHTML = rearranged;																	// replace tab container content with rearranged leaves
+			let rearranged = leaves.toSpliced(finalTabHeaderIndex,0,moved[0]);											// move the moved leaf into position
+			this_tab_container.setChildrenInPlace(rearranged);															// replace tab container content with rearranged leaves
 			getTabGroupHeaders()[finalTabHeaderIndex].click();															// confirm drag and focus leaf by clicking tab
 		}
 		// ARROW NAVIGATION between open leaves
 		const leafArrowNavigation = (e) => {
-			if ( getActiveLeaf().containerEl.closest('.workspace-split.mod-root') === null ) { return; }								// return if not in leaf editor
+			if ( getActiveLeaf().containerEl.closest('.workspace-split.mod-root') === null || !getActiveEditor()?.hasFocus() ) { return; }	// return if not in leaf editor or editor not focussed
 			let cursorAnchor = getActiveEditor()?.getCursor('anchor');
 			let activeTabGroupChildren = getActiveLeaf().workspace.activeTabGroup.children;
 			switch(true) {
