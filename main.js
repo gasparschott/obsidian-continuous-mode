@@ -31,6 +31,9 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		const getTabHeaderIndex = (e) =>		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
 		const getActiveLeaf = () =>				{ return this_workspace.activeLeaf; }
 		const getActiveEditor = () =>			{ return this_workspace.activeEditor?.editor; }
+		const isContinuousMode = (id) =>        { return getTabGroupById(id).containerEl?.classList.contains('is_continuous_mode') }
+		const disableContinuousMode = (id) =>   { getTabGroupById(id).containerEl?.classList.remove('is_continuous_mode') }
+		const enableContinuousMode = (id) =>    { getTabGroupById(id).containerEl?.classList.add('is_continuous_mode') }
 		const updateTabGroupIds = () => {																								// add data tab_group_id to each .workspace-tabs
 			getAllTabGroups(this.app.workspace.rootSplit)?.forEach( 
 				tab_group => { if ( tab_group ) { tab_group.containerEl.dataset.tab_group_id = this.app.appId +'_'+ tab_group.id } }
@@ -55,14 +58,17 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		// TOGGLE CONTINUOUS MODE
 		const toggleContinuousMode = (tab_group_id) => {
 			tab_group_id = tab_group_id ?? getActiveTabGroup().containerEl.dataset.tab_group_id;		// use provided tabGroupId from stored settings or use activeTabGroupId from toggle command
+
 			if ( this.app.appId === tab_group_id.split('_')[0] ) {
 				switch(true) {
-					case getTabGroupById(tab_group_id)?.containerEl?.classList.contains('is_continuous_mode'):						// if tab group is in continuous mode
-						getTabGroupById(tab_group_id)?.containerEl?.classList.remove('is_continuous_mode');							// remove style
+					case isContinuousMode(tab_group_id):									// if tab group is in continuous mode
+						disableContinuousMode(tab_group_id);							// remove style
 						this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(tab_group_id),1);						// remove tabGroupdId from data.json
 						break;
 					default:																										// if tab group is not in continuous mode (e.g., on app launch)
-						getTabGroupById(tab_group_id)?.containerEl?.classList.add('is_continuous_mode');							// add style
+						let thisTabGroup = getTabGroupById(tab_group_id)
+						enableContinuousMode(tab_group_id);											// add style
+						if (thisTabGroup.isStacked) {thisTabGroup.setStacked(false)}						// disable stacked tabs
 						if ( !this.settings.tabGroupIds.includes(tab_group_id) ) { this.settings.tabGroupIds.push(tab_group_id); }	// add tabGroupdId to data.json if it is not already there
 				}
 			}
@@ -158,20 +164,19 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
 			if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }	// get initial tab header index for onTabHeaderDragEnd()
 		});
-		const addContinuousModeMenuItem = (item) => {
-			item.setTitle('Continuous mode')
+		const addContinuousModeMenuItem = (item, tab_group_id) => {
+			item.setTitle(isContinuousMode(tab_group_id) ? 'Disable Continuous' : 'Enable Continuous')
 				.setIcon('book-down')
-				.setSection('pane')
-				.setChecked( getActiveTabGroup().containerEl.classList.contains('is_continuous_mode') ? true : false )
+				.setSection('action')
 				.onClick(async () => { 
-					toggleContinuousMode(getActiveTabGroup().containerEl.dataset.tab_group_id) }
+					toggleContinuousMode(tab_group_id) }
 			);
 		}
 		this.registerEvent(
-			this.app.workspace.on('file-menu', (menu,file,source,leaf) => {
-				this.app.workspace.setActiveLeaf(leaf,{focus:true});
-				scrollActiveLeafIntoView();
-				if (source !== 'file-explorer-context-menu' ) {menu.addItem((item) => { addContinuousModeMenuItem(item,'file-menu') }); }
+			this.app.workspace.on('tab-group-menu', (menu,tab_group) => {
+				let tab_group_id = tab_group.containerEl.dataset.tab_group_id
+				
+				menu.addItem((item) => { addContinuousModeMenuItem(item, tab_group_id) });
 			})
 		)
 		this.registerEvent(
