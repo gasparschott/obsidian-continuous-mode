@@ -31,9 +31,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		const getTabHeaderIndex = (e) =>		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
 		const getActiveLeaf = () =>				{ return this_workspace.activeLeaf; }
 		const getActiveEditor = () =>			{ return this_workspace.activeEditor?.editor; }
+		const findStackedMenuEntry = (menu) =>    { return menu.items.filter(entry => {return entry.dom.outerText == "Stack tabs" | entry.dom.outerText == "Unstack tabs" })[0] }
 		const isContinuousMode = (id) =>        { return getTabGroupById(id).containerEl?.classList.contains('is_continuous_mode') }
 		const disableContinuousMode = (id) =>   { getTabGroupById(id).containerEl?.classList.remove('is_continuous_mode') }
 		const enableContinuousMode = (id) =>    { getTabGroupById(id).containerEl?.classList.add('is_continuous_mode') }
+		const STACKED_TABS_WARNING = "Continous Mode: Stacked tabs have been modified by this plugin. If you have any trouble with stacking tabs, please try disabling this plugin before reporting errors to the Obsidian team."
 		const updateTabGroupIds = () => {																								// add data tab_group_id to each .workspace-tabs
 			getAllTabGroups(this.app.workspace.rootSplit)?.forEach( 
 				tab_group => { if ( tab_group ) { tab_group.containerEl.dataset.tab_group_id = this.app.appId +'_'+ tab_group.id } }
@@ -53,6 +55,23 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				} 
 			})
 		}
+
+		console.warn(STACKED_TABS_WARNING)
+		
+		this.original_stacked_tabs_cmd = this.app.commands.commands['workspace:toggle-stacked-tabs'].checkCallback                    // preserve default obsidian behavior... very important! We'll need it to restore the state on unload
+		let stacked_tabs_cmd = this.original_stacked_tabs_cmd                                                                         // get a reference in context so that it can be grafted into the new callback
+		this.app.commands.commands['workspace:toggle-stacked-tabs'].checkCallback = function(e){                                      // ...now hijack stacked tabs command to disable continous mode. This is sketchy stuff.
+			if(!e){
+				try{                                                                                                                  // wrap the plugin functionality in a try/catch block for an extra layer of safety
+					let id = getActiveTabGroup().containerEl.dataset.tab_group_id;
+					if ( isContinuousMode(id) ) { toggleContinuousMode(id) }
+				} catch { }                                                                                                           // just carry on if the plugin behavior fails
+			} else {
+				console.warn(STACKED_TABS_WARNING)
+			}
+			return e || stacked_tabs_cmd(e)
+		}
+
 		updateTabGroupIds(); 
 		/* ----------------------- */
 		// TOGGLE CONTINUOUS MODE
@@ -172,18 +191,27 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					toggleContinuousMode(tab_group_id) }
 			);
 		}
+		const hijackStackedTabsMenuItem = (menu, tab_group_id) => {
+			let stack_menu_entry = findStackedMenuEntry(menu)
+				let original_stack_menu_callback = stack_menu_entry.callback
+				stack_menu_entry.callback = () => {                         // hijack stacked menu toggle to disable contionous when stacked is enabled
+					console.warn(STACKED_TABS_WARNING)
+					try {                                                   // wrap the plugin functionality in a try/catch block for an extra layer of safety
+						if ( isContinuousMode(tab_group_id) ) {
+							toggleContinuousMode(tab_group_id)
+						}
+					} catch { }
+					original_stack_menu_callback()
+				}
+		}
 		this.registerEvent(
 			this.app.workspace.on('tab-group-menu', (menu,tab_group) => {
 				let tab_group_id = tab_group.containerEl.dataset.tab_group_id
 				
+				hijackStackedTabsMenuItem(menu, tab_group_id)
 				menu.addItem((item) => { addContinuousModeMenuItem(item, tab_group_id) });
 			})
 		)
-		this.registerEvent(
-			this.app.workspace.on('editor-menu', (menu) => {
-				menu.addItem((item) => { addContinuousModeMenuItem(item,'editor-menu') });
-			})
-		);
 		this.registerEvent(													// initContinuousMode on layout change
 			this.app.workspace.on('layout-change', async () => { 
 				updateTabGroupIds(); 
@@ -214,6 +242,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		Array.from(this.app.workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs')).forEach(
 			tab_group => { tab_group.classList.remove('is_continuous_mode','hide_note_titles'); delete tab_group.dataset.tab_group_id; }
 		);
+		this.app.commands.commands['workspace:toggle-stacked-tabs'].checkCallback = this.original_stacked_tabs_cmd
     }
 	// load settings
     async loadSettings() {
