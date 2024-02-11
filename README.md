@@ -1,6 +1,6 @@
 # obsidian-continuous-mode
 
-Displays all open notes (“leaves”) in a tab group as a continuous scrollable “page” (sometimes called “Scrivenings mode”). 
+Displays all open notes (“leaves”) in a tab group as a continuous scrollable document (sometimes called “Scrivenings mode”). 
 
 ## Features: 
  - Toggle continuous mode via context menus.
