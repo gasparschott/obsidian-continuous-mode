@@ -106,7 +106,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		// ARROW NAVIGATION between open leaves
 		const leafArrowNavigation = (e) => {
 			if ( getActiveLeaf()?.containerEl?.closest('.workspace-split.mod-root') === null && !getActiveEditor()?.hasFocus() ) { return; }	// return if not in leaf editor or editor not focussed
-			if ( getActiveLeaf().containerEl.closest('.workspace-split.mod-root') === null || !getActiveEditor()?.hasFocus() ) { return; }	// return if not in leaf editor or editor not focussed
+			if ( getActiveLeaf().containerEl.closest('.workspace-split.mod-root') === null && !getActiveEditor()?.hasFocus() ) { return; }	// return if not in leaf editor or editor not focussed
 			let cursorAnchor = getActiveEditor()?.getCursor('anchor');
 			let activeTabGroupChildren = getActiveLeaf().workspace.activeTabGroup.children;
 			switch(e.key) {
