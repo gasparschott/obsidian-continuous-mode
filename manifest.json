@@ -1,9 +1,9 @@
 {
 	"id": "continuous-mode",
 	"name": "Continuous Mode",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Displays all open notes (or \"leaves\") in a tab group as a continuous scrollable \"page\" (sometimes called \"Scrivenings mode\"). Features include arrow navigation between notes and the ability to reorder notes via tab header drag-and-drop.",
+	"description": "Displays all open notes (or \"leaves\") in a tab group as a continuous scrollable document (sometimes called \"Scrivenings mode\"). Features include arrow navigation between notes and the ability to reorder notes via tab header drag-and-drop.",
 	"author": "Michael Schrauzer",
 	"authorURL": "https://github.com/gasparschott/",
 	"fundingUrl": "https://www.buymeacoffee.com/fiLtliTFxQ",
