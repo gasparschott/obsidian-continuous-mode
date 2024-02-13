@@ -55,20 +55,24 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		// TOGGLE CONTINUOUS MODE
 		const toggleContinuousMode = (tab_group_id) => {
 			tab_group_id = tab_group_id ?? getActiveTabGroup().containerEl.dataset.tab_group_id;		// use provided tabGroupId from stored settings or use activeTabGroupId from toggle command
-			if ( this.app.appId === tab_group_id.split('_')[0] ) {
-				switch(true) {
-					case getTabGroupById(tab_group_id)?.containerEl?.classList.contains('is_continuous_mode'):						// if tab group is in continuous mode
-						getTabGroupById(tab_group_id)?.containerEl?.classList.remove('is_continuous_mode');							// remove style
-						this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(tab_group_id),1);						// remove tabGroupdId from data.json
-						break;
-					default:																										// if tab group is not in continuous mode (e.g., on app launch)
-						getTabGroupById(tab_group_id)?.containerEl?.classList.add('is_continuous_mode');							// add style
-						if ( !this.settings.tabGroupIds.includes(tab_group_id) ) { this.settings.tabGroupIds.push(tab_group_id); }	// add tabGroupdId to data.json if it is not already there
-				}
+			const active_floating_tab_group = () => { return this.app.workspace.floatingSplit?.children[0]?.children?.filter( child => child.containerEl.classList.contains('mod-active'))[0]; }
+			const isFloatingWindow = () => { return this.app.workspace.floatingSplit.children.length > 0 && active_floating_tab_group() !== undefined; }
+			switch(true) {
+				case isFloatingWindow():	active_floating_tab_group().containerEl.classList.toggle('is_continuous_mode');		break;	// if floating window, don't save tabGroupIds
+				case this.app.appId === tab_group_id?.split('_')[0]:
+					switch(true) {
+						case getTabGroupById(tab_group_id)?.containerEl?.classList.contains('is_continuous_mode'):						// if tab group is in continuous mode
+							getTabGroupById(tab_group_id)?.containerEl?.classList.remove('is_continuous_mode');							// remove style
+							this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(tab_group_id),1);						// remove tabGroupdId from data.json
+							break;
+						default:																										// if tab group is not in continuous mode (e.g., on app launch)
+							getTabGroupById(tab_group_id)?.containerEl?.classList.add('is_continuous_mode');							// add style
+							if ( !this.settings.tabGroupIds.includes(tab_group_id) ) { this.settings.tabGroupIds.push(tab_group_id); }	// add tabGroupdId to data.json if it is not already there
+					}
+					this.settings.tabGroupIds = [...new Set(this.settings.tabGroupIds)];												// remove dupe IDs if necessary
+					this.settings.tabGroupIds.sort();																					// sort the tabGroupIds
+					this.saveSettings();																								// save the settings
 			}
-			this.settings.tabGroupIds = [...new Set(this.settings.tabGroupIds)];					// remove dupe IDs if necessary
-			this.settings.tabGroupIds.sort();																					// sort the tabGroupIds
-			this.saveSettings();																								// save the settings
 		}
 		// INITIALIZE CONTINUOUS MODE = add class to workspace tab groups from plugin settings
 		const initContinuousMode = () => {
@@ -90,8 +94,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		}
 		const scrollActiveLeafIntoView = (e) => {
 			let el = getActiveLeaf()?.containerEl, scroll_block = ( e?.key && /down|right/.test(e.key) ? 'top' : e?.key && /up|left/.test(e.key) ? 'end' : 'top' );
-			el = ( getActiveTabGroup().containerEl.classList.contains('hide_note_titles') ? el?.querySelector('.cm-editor') : el.querySelector('.view-header') );
-			el.scrollIntoView({behavior:'smooth' });
+			el = ( getActiveTabGroup().containerEl.classList.contains('hide_note_titles') ? el?.querySelector('.cm-editor') : el?.querySelector('.view-header') );
+			el?.scrollIntoView({behavior:'smooth' });
 		}
 		// REARRANGE LEAVES on dragend
 		const rearrangeLeaves = (e,initialTabHeaderIndex) => {
