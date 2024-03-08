@@ -21,7 +21,8 @@
 	display:block !important;
 }
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container .pdf-viewer-container
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container .pdf-viewer-container,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="canvas"] .view-content .canvas-wrapper
 {
 	position:relative !important;
 }

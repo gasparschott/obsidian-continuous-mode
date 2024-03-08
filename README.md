@@ -1,14 +1,14 @@
 # obsidian-continuous-mode
 
-Displays all open notes (“leaves”) in a tab group as a continuous scrollable document (sometimes called “Scrivenings mode”). 
+An Obsidian plugin that displays all open notes in a tab group as a single continuous document (sometimes called "Scrivenings mode"). 
 
 ## Features: 
  - Toggle continuous mode via context menus.
  - Toggle continuous mode in active tag group from command palette.
- - On Obsidian launch, restore continuous mode in tab groups that were in continuous mode when Obsidian was shut down.
+ - Save and restore continuous mode settings in tab groups when shutting down/starting up Obsidian.
  - Navigate between notes with arrow keys.
  - Reorder notes via tab drag-and-drop.
- - Show/hide note headers in active tab group from command palette to create a more "seamless" experience.
+ - Show/hide note headers in active tab group from command palette to create a more seamless experience.
  - Notes scroll into view when tab is clicked.
 
 ### Buy me a coffee:

@@ -194,7 +194,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		);
 		this.app.workspace.onLayoutReady( async () => {						// initContinuousMode on layout ready
 			updateTabGroupDatasetIds(); 
-			cleanDataTabGroupIds();										// disabled
+			cleanDataTabGroupIds();											// disabled
 			initContinuousMode();
 		})
 		// ADD COMMAND PALETTE ITEMS
