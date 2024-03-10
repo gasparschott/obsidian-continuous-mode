@@ -20,6 +20,7 @@
 {
 	display:block !important;
 }
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container .pdf-viewer-container,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="canvas"] .view-content .canvas-wrapper
@@ -108,10 +109,11 @@
 .is_continuous_mode.hide_note_titles .view-header,
 .is_continuous_mode.hide_note_titles .workspace-leaf-content[data-type="pdf"] .pdf-toolbar
 { 
-	display:none;
+	height:0;
+	visibility:hidden;
 }
 /* scroll active leaf into view behavior */
 .workspace-tabs.is_continuous_mode .workspace-tab-container {
 	scroll-behavior:smooth;
-	scroll-padding-top:2px;
 }
+.

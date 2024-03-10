@@ -93,9 +93,17 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 		}
 		const scrollActiveLeafIntoView = (e) => {
-			let el = getActiveLeaf()?.containerEl, scroll_block = ( e?.key && /down|right/.test(e.key) ? 'top' : e?.key && /up|left/.test(e.key) ? 'end' : 'top' );
-			el = ( getActiveTabGroup().containerEl.classList.contains('hide_note_titles') ? el?.querySelector('.cm-editor') : el?.querySelector('.view-header') );
-			el?.scrollIntoView({behavior:'smooth' });
+			let view_type = getActiveLeaf().view.getViewType(), offset_top;
+			switch(true) {
+				case ( /pdf/.test(view_type) ):
+					offset_top = getActiveLeaf().view.headerEl.offsetHeight
+								+ getActiveLeaf().view.viewer?.containerEl?.querySelector('.pdf-toolbar')?.offsetHeight
+								+ ( getActiveLeaf().view.containerEl.offsetTop || 0 ) 
+								+ ( getActiveLeaf().view.viewer?.containerEl?.querySelector('.focused_page')?.offsetTop || 0 );								break;
+				case ( /canvas/.test(view_type) ):	offset_top = getActiveLeaf().view.headerEl.offsetTop + getActiveLeaf().view.headerEl.offsetHeight;		break;
+				default: 							offset_top = getActiveLeaf().view.headerEl.offsetTop;													break;
+			}
+			getActiveLeaf()?.containerEl.closest('.workspace-tab-container').scrollTo(0,offset_top - 2);
 		}
 		// REARRANGE LEAVES on dragend
 		const rearrangeLeaves = (e,initialTabHeaderIndex) => {
@@ -116,6 +124,14 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			switch(e.key) {
 				case 'ArrowUp': case 'ArrowLeft':
 					switch(true) {
+						case ( /html/.test(getActiveLeaf().view.getViewType()) && e.key === 'ArrowLeft' ): 
+								getActiveLeaf().containerEl.querySelector('iframe').focus();
+								getActiveLeaf().containerEl.querySelector('iframe').contentWindow.scrollBy({top:-250,left:0,behavior:'smooth'});			
+								break;
+						case ( /pdf/.test(getActiveLeaf().view.getViewType()) && e.key === 'ArrowLeft' ):		pdfPageNavigation(e);					break;
+						case ( /pdf/.test(getActiveLeaf().view.getViewType()) && e.key === 'ArrowUp' ):
+								getActiveLeaf().view.viewer?.containerEl?.querySelector('.pdf-toolbar')?.blur();
+						 		getActiveLeaf().view.viewer.containerEl.querySelector('.focused_page')?.classList.remove('focused_page');				// nobreak
 						case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:									// cursor in inline-title
 						case e.target.classList.contains('metadata-properties-heading'):																// cursor in properties header
 						case cursorAnchor?.line === 0 && cursorAnchor?.ch === 0:																		// cursor at first line, first char
@@ -130,6 +146,14 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					break;
 				case 'ArrowDown':	case 'ArrowRight': 
 					switch(true) {
+						case ( /html/.test(getActiveLeaf().view.getViewType()) && e.key === 'ArrowRight' ): 
+								getActiveLeaf().containerEl.querySelector('iframe').focus();
+								getActiveLeaf().containerEl.querySelector('iframe').contentWindow.scrollBy({top:250,left:0,behavior:'smooth'});			
+								break;
+						case ( /pdf/.test(getActiveLeaf().view.getViewType()) && e.key === 'ArrowRight' ):		pdfPageNavigation(e);					break;
+						case ( /pdf/.test(getActiveLeaf().view.getViewType()) && e.key === 'ArrowDown' ):
+								getActiveLeaf().view.viewer?.containerEl?.querySelector('.pdf-toolbar')?.blur();
+						 		getActiveLeaf().view.viewer.containerEl.querySelector('.focused_page')?.classList.remove('focused_page');				// nobreak
 						case ( cursorAnchor?.ch === getActiveEditor()?.getLine(getActiveEditor().lastLine()).length && cursorAnchor?.line === getActiveEditor()?.lineCount() - 1 ):
 						case getActiveLeaf().getViewState().state.mode === 'preview':																	// leaf is in preview mode
 						case (!/markdown/.test(getActiveLeaf().getViewState().type)):																	// make next leaf active 
@@ -137,16 +161,41 @@ class ContinuousModePlugin extends obsidian.Plugin {
 							break;
 					}
 					break;
+			} 
+			// scroll non-md leaves into view; this allows default arrow navigation scrolling in md notes; allows pdf pages to be navigated:
+			if ( !/markdown/.test(getActiveLeaf().view.getViewType()) ) { scrollActiveLeafIntoView(e); }	
+		}
+		function pdfPageNavigation(e) {
+			let focused_page = getActiveLeaf().view.viewer.containerEl.querySelector('.focused_page');
+			let pdf_pages = getActiveLeaf().view.viewer.child.pdfViewer.pdfViewer._pages;
+			let activeTabGroupChildren = getActiveLeaf().workspace.activeTabGroup.children;
+			switch(true) {
+				case ( e.key === 'ArrowRight' ):
+					switch(true) {
+						case focused_page === null:					 pdf_pages[0].div.classList.add('focused_page'); 					break;	// add class to first page
+						case focused_page.nextSibling !== null: 	 focused_page.nextSibling.classList.add('focused_page');					// add class to next page
+																	 focused_page.classList.remove('focused_page');						break;	// remove class from previous page
+						case focused_page.nextSibling === null:		 focused_page.classList.remove('focused_page');								// remove class from last page
+							 this_workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(getActiveLeaf()) + 1] || getActiveLeaf()),{focus:true});	// focus next leaf
+							 scrollActiveLeafIntoView();																				break;
+					}																													break;
+				case ( e.key === 'ArrowLeft' ):
+					switch(true) {
+						case focused_page === null:					 pdf_pages[pdf_pages.length - 1].div.classList.add('focused_page');	break;	// add class to last page
+						case focused_page.previousSibling !== null:	 focused_page.previousSibling.classList.add('focused_page');				// add class to previous page
+																	 focused_page.classList.remove('focused_page');						break;	// remove class from last page
+						case focused_page.previousSibling === null:	 focused_page.classList.remove('focused_page');								// remove class from first page
+							 this_workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(getActiveLeaf()) - 1] || getActiveLeaf()),{focus:true});	// focus previous leaf
+							 scrollActiveLeafIntoView();																				break;
+					}																													break;
 			}
+			getActiveLeaf().view.viewer?.containerEl?.querySelector('.pdf-toobar')?.click();	// needed to focus pdf viewer and enable proper page navigation by arrow keys
 		}
 		// REGISTER EVENTS
 		this.registerDomEvent(document,'click', function (e) {
 			switch(true) {
-				case !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode'): 
-					return; 
-				case ( /workspace-tab-header/.test(e.target.className) ):
-					scrollActiveLeafIntoView();
-					break;
+				case !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode'):									return; 
+				case ( /workspace-tab-header/.test(e.target.className) ):								scrollActiveLeafIntoView();		break;
 			}
 		});
 		this.registerDomEvent(document,'keydown', function (e) {
@@ -196,6 +245,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			updateTabGroupDatasetIds(); 
 			cleanDataTabGroupIds();											// disabled
 			initContinuousMode();
+			scrollActiveLeafIntoView();
 		})
 		// ADD COMMAND PALETTE ITEMS
 		this.addCommand({																				// add command: toggle continuous mode in active tab group
