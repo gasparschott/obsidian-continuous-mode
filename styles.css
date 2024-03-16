@@ -15,21 +15,6 @@
 {
 	display:contents !important;
 }
-/* pdf content display */
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content
-{
-	display:block !important;
-}
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container .pdf-viewer-container,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="canvas"] .view-content .canvas-wrapper
-{
-	position:relative !important;
-}
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] {
-	height:auto;
-}
 /* padding bottom */
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container, 
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .cm-editor .cm-content
@@ -89,6 +74,21 @@
 	max-width:calc(100% - 2*var(--file-margins));
 }
 /* pdf note styles */
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content
+{
+	display:block !important;
+	overflow:scroll;
+}
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container .pdf-viewer-container,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="canvas"] .view-content .canvas-wrapper
+{
+	position:relative !important;
+}
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] {
+	height:100%;
+}
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-type="pdf"] .pdf-viewer
 {
 	padding-top:var(--file-margins);

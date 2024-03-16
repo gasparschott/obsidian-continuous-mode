@@ -92,6 +92,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				if ( getTabHeaderIndex(f) !== initialTabHeaderIndex ) { rearrangeLeaves(f,initialTabHeaderIndex); }		// only rearrange leaves if tab header is actually moved to a new position
 			}
 		}
+		// SCROLL ACTIVE LEAF INTO VIEW
 		const scrollActiveLeafIntoView = (e) => {
 			let view_type = getActiveLeaf().view.getViewType(), offset_top;
 			switch(true) {
@@ -165,6 +166,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			// scroll non-md leaves into view; this allows default arrow navigation scrolling in md notes; allows pdf pages to be navigated:
 			if ( !/markdown/.test(getActiveLeaf().view.getViewType()) ) { scrollActiveLeafIntoView(e); }	
 		}
+		// PDF PAGE NAVIGATION
 		function pdfPageNavigation(e) {
 			let focused_page = getActiveLeaf().view.viewer.containerEl.querySelector('.focused_page');
 			let pdf_pages = getActiveLeaf().view.viewer.child.pdfViewer.pdfViewer._pages;

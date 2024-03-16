@@ -6,10 +6,11 @@ An Obsidian plugin that displays all open notes in a tab group as a single conti
  - Toggle continuous mode via context menus.
  - Toggle continuous mode in active tag group from command palette.
  - Save and restore continuous mode settings in tab groups when shutting down/starting up Obsidian.
+ - Reorder notes via tab header drag-and-drop.
+ - Notes scroll into view when tab header is clicked.
  - Navigate between notes with arrow keys.
- - Reorder notes via tab drag-and-drop.
+ - Use left and right arrow keys to scroll html notes or jump from page to page in pdfs.
  - Show/hide note headers in active tab group from command palette to create a more seamless experience.
- - Notes scroll into view when tab is clicked.
 
 ### Buy me a coffee:
 
