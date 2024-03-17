@@ -1,6 +1,6 @@
 # obsidian-continuous-mode
 
-An Obsidian plugin that displays all open notes in a tab group as a single continuous document (sometimes called "Scrivenings mode"). 
+An Obsidian plugin that displays all open notes in a tab group as if they were a single continuous document (sometimes called "Scrivenings mode"). 
 
 ## Features: 
  - Toggle continuous mode via context menus.
