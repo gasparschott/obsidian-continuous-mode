@@ -116,4 +116,7 @@
 .workspace-tabs.is_continuous_mode .workspace-tab-container {
 	scroll-behavior:smooth;
 }
-.
+/* min width for tab headers; needed when opening many tabs */
+.workspace.mod-root.workspace-tab-header {
+	min-width:100px;
+}
