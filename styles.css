@@ -120,3 +120,17 @@
 .workspace.mod-root.workspace-tab-header {
 	min-width:100px;
 }
+.workspace-tab-header-container-inner {
+	flex-direction:column;
+}
+.workspace-tab-header-container-inner:has(.workspace-tab-header:hover) {
+	overflow:auto;
+	position:absolute;
+	z-index:10;
+	background:var(--titlebar-background-focused)
+}
+.workspace .mod-root .workspace-tab-header {
+	width:auto;
+	max-width:100%;
+	padding:6px 3px 6px 6px !important;
+}
