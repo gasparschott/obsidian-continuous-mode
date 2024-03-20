@@ -265,13 +265,13 @@ console.log(this.app.workspace.getLeavesOfType('file-explorer')[0].view.fileItem
 				.setIcon('book-down')
 				.setSection('pane')
 				.setSubmenu().addItem((item2) => {
-					item2.setTitle('Open folder in left split')
+					item2.setTitle('Open folder in split left')
 					.onClick(async () => { 
 						openFolderInContinuousMode(file,'left');
 					})
 				})
 				.addItem((item3) => {
-					item3.setTitle('Open folder in right split')
+					item3.setTitle('Open folder in split right')
 					.onClick(async () => { 
 						openFolderInContinuousMode(file,'right');
 					})
