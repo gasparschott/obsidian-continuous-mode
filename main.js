@@ -255,6 +255,7 @@ console.log(this.app.workspace.getLeavesOfType('file-explorer')[0].view.fileItem
 				})
 				.addItem((item3) => {
 					item3.setTitle( getTabGroupById(tab_group_id).containerEl.classList.contains('hide_note_titles') ? 'Show note headers' : 'Hide note headers' )
+					.setDisabled( getTabGroupById(tab_group_id).containerEl.classList.contains('is_continuous_mode') ? false : true )
 					.onClick(async () => { 
 						getActiveTabGroup().containerEl.classList.toggle('hide_note_titles');
 					})
