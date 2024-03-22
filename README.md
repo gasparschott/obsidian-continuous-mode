@@ -23,11 +23,7 @@ Before: tab group with multiple notes open
 
 ![<# alt text #>](assets/before.png "before.png")
 
-After: Continuous Mode active
+After: Continuous Mode active, show various functions
 
-![<# alt text #>](assets/after.png "after.png")
-
-After: Continuous Mode active with headers hidden
-
-![<# alt text #>](assets/after-no-headers.png "after-no-headers.png")
+![<# alt text #>](assets/after.png "after.gif")
 
