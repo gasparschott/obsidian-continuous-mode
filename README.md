@@ -19,11 +19,5 @@ An Obsidian plugin that displays all open notes in a tab group as if they were a
 
 ## Screenshots:
 
-Before: tab group with multiple notes open
-
-![<# Before #>](assets/before.png "before.png")
-
-After: Continuous Mode active, showing various functions
-
 ![<# After #>](assets/after.gif "after.gif")
 
