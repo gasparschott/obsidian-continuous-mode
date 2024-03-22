@@ -23,7 +23,7 @@ Before: tab group with multiple notes open
 
 ![<# Before #>](assets/before.png "before.png")
 
-After: Continuous Mode active, show various functions
+After: Continuous Mode active, showing various functions
 
 ![<# After #>](assets/after.gif "after.gif")
 
