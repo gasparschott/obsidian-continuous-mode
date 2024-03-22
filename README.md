@@ -21,9 +21,9 @@ An Obsidian plugin that displays all open notes in a tab group as if they were a
 
 Before: tab group with multiple notes open
 
-![<# alt text #>](assets/before.png "before.png")
+![<# Before #>](assets/before.png "before.png")
 
 After: Continuous Mode active, show various functions
 
-![<# alt text #>](assets/after.png "after.gif")
+![<# After #>](assets/after.gif "after.gif")
 
