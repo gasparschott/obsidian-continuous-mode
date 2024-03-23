@@ -122,7 +122,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			if ( getActiveLeaf().containerEl.closest('.workspace-split.mod-root') === null && !getActiveEditor()?.hasFocus() ) { return; }	// return if not in leaf editor or editor not focussed
 			let cursorAnchor = getActiveEditor()?.getCursor('anchor');
 			let activeTabGroupChildren = getActiveLeaf().workspace.activeTabGroup.children;
-console.log(this.app.workspace.getLeavesOfType('file-explorer')[0].view.fileItems);
 			switch(e.key) {
 				case 'ArrowUp': case 'ArrowLeft':
 					switch(true) {
@@ -250,7 +249,7 @@ console.log(this.app.workspace.getLeavesOfType('file-explorer')[0].view.fileItem
 					item2.setTitle('Toggle Continuous Mode')
 					.setChecked( getTabGroupById(tab_group_id).containerEl.classList.contains('is_continuous_mode') ? true : false )
 					.onClick(async () => { 
-						toggleContinuousMode(tab_group_id);
+						toggleContinuousMode(tab_group_id || this.app.appId+'_'+getActiveTabGroup().id);
 					})
 				})
 				.addItem((item3) => {
@@ -311,9 +310,10 @@ console.log(this.app.workspace.getLeavesOfType('file-explorer')[0].view.fileItem
 		);
 		this.registerEvent(													// initContinuousMode on layout change
 			this.app.workspace.on('layout-change', async () => { 
-//				updateTabGroupDatasetIds(); 
-//				cleanDataTabGroupIds(); 									// disabled
-//				initContinuousMode();
+				updateTabGroupDatasetIds(); 
+				cleanDataTabGroupIds(); 									// disabled
+				initContinuousMode();
+				scrollActiveLeafIntoView();
 			})
 		);
 		this.app.workspace.onLayoutReady( async () => {						// initContinuousMode on layout ready

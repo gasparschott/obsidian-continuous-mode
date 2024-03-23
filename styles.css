@@ -71,7 +71,7 @@
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-view img:not([width]), 
 .markdown-rendered img:not([width])
 {
-	max-width:calc(100% - 2*var(--file-margins));
+/*	max-width:calc(100% - 2*var(--file-margins)); */
 }
 /* pdf note styles */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content
