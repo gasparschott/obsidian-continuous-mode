@@ -3,15 +3,27 @@
 An Obsidian plugin that displays all open notes in a tab group as if they were a single continuous document (sometimes called "Scrivenings mode").  
 
 ## Features: 
- - Toggle continuous mode via contextual menus.
- - Toggle continuous mode in active tag group from command palette.
- - Save and restore continuous mode settings in tab groups when shutting down/starting up Obsidian.
- - Reorder notes via tab header drag-and-drop.
+
+#### File and Editor Contextual Menus:
+ - Toggle continuous mode in active tab group.
+ - Show/hide note headers in active tab group.
+
+#### File Explorer Contextual Menu:  
+ - Open all files from selected folder in Continuous Mode. Currently only markdown files, images (bmp, jpg, jpeg, gif, png, svg, webp), and pdfs are opened.  
+ - Open or append files from selected folder in active tab group; files from the folder will not be duplicated if they are already open.  
+ - Replace active tab group with files from selected folder: i.e., close all open notes in active tab group and replace with folder items.  
+
+#### Command Palette:  
+ - Toggle continuous mode in active tag group.
+ - Show/hide note headers in active tab group.
+ 
+#### Other functions:  
+ - Navigate between notes with up and down arrow keys (and left and right arrow keys if at the beginning or end of the note).
+   - Also use left and right arrow keys to scroll html notes or jump from page to page in pdfs.
  - Notes scroll into view when tab header is clicked.
- - Navigate between notes with arrow keys.
- - Use left and right arrow keys to scroll html notes or jump from page to page in pdfs.
- - Show/hide note headers in active tab group via menu or command palette.
- - Open all files in folder in Continuous Mode via contextual menu in File Explorer.
+ - Reorder notes via tab header drag-and-drop.
+ - Save and restore continuous mode tab group settings when shutting down/starting up Obsidian.
+
 
 ### Buy me a coffee:
 

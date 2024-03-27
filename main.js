@@ -51,7 +51,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				} 
 			})
 		}
-		updateTabGroupDatasetIds(); 
+		updateTabGroupDatasetIds(); // disabled
 		/* ----------------------- */
 		// TOGGLE CONTINUOUS MODE
 		const toggleContinuousMode = (tab_group_id,bool) => {
@@ -100,7 +100,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					offset_top = getActiveLeaf().view.headerEl.offsetHeight
 								+ getActiveLeaf().view.viewer?.containerEl?.querySelector('.pdf-toolbar')?.offsetHeight
 								+ ( getActiveLeaf().view.containerEl.offsetTop || 0 ) 
-								+ ( getActiveLeaf().view.viewer?.containerEl?.querySelector('.focused_page')?.offsetTop || 0 );								break;
+								+ ( getActiveLeaf().view.viewer?.containerEl?.querySelector('.focused_pdf_page')?.offsetTop || 0 );								break;
 				case ( /canvas/.test(view_type) ):	offset_top = getActiveLeaf()?.view?.headerEl?.offsetTop + getActiveLeaf().view.headerEl.offsetHeight;		break;
 				default: 							offset_top = getActiveLeaf()?.view?.headerEl?.offsetTop;													break;
 			}
@@ -132,7 +132,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						case ( /pdf/.test(getActiveLeaf().view.getViewType()) && e.key === 'ArrowLeft' ):		pdfPageNavigation(e);					break;
 						case ( /pdf/.test(getActiveLeaf().view.getViewType()) && e.key === 'ArrowUp' ):
 								getActiveLeaf().view.viewer?.containerEl?.querySelector('.pdf-toolbar')?.blur();
-						 		getActiveLeaf().view.viewer.containerEl.querySelector('.focused_page')?.classList.remove('focused_page');				// nobreak
+						 		getActiveLeaf().view.viewer.containerEl.querySelector('.focused_pdf_page')?.classList.remove('focused_pdf_page');				// nobreak
 						case e.target.classList.contains('inline-title') && window.getSelection().anchorOffset === 0:									// cursor in inline-title
 						case e.target.classList.contains('metadata-properties-heading'):																// cursor in properties header
 						case cursorAnchor?.line === 0 && cursorAnchor?.ch === 0:																		// cursor at first line, first char
@@ -154,7 +154,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						case ( /pdf/.test(getActiveLeaf().view.getViewType()) && e.key === 'ArrowRight' ):		pdfPageNavigation(e);					break;
 						case ( /pdf/.test(getActiveLeaf().view.getViewType()) && e.key === 'ArrowDown' ):
 								getActiveLeaf().view.viewer?.containerEl?.querySelector('.pdf-toolbar')?.blur();
-						 		getActiveLeaf().view.viewer.containerEl.querySelector('.focused_page')?.classList.remove('focused_page');				// nobreak
+						 		getActiveLeaf().view.viewer.containerEl.querySelector('.focused_pdf_page')?.classList.remove('focused_pdf_page');				// nobreak
 						case ( cursorAnchor?.ch === getActiveEditor()?.getLine(getActiveEditor().lastLine()).length && cursorAnchor?.line === getActiveEditor()?.lineCount() - 1 ):
 						case getActiveLeaf().getViewState().state.mode === 'preview':																	// leaf is in preview mode
 						case (!/markdown/.test(getActiveLeaf().getViewState().type)):																	// make next leaf active 
@@ -168,60 +168,88 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		}
 		// PDF PAGE NAVIGATION
 		function pdfPageNavigation(e) {
-			let focused_page = getActiveLeaf().view.viewer.containerEl.querySelector('.focused_page');
+			let focused_pdf_page = getActiveLeaf().view.viewer.containerEl.querySelector('.focused_pdf_page');
 			let pdf_pages = getActiveLeaf().view.viewer.child.pdfViewer.pdfViewer._pages;
 			let activeTabGroupChildren = getActiveLeaf().workspace.activeTabGroup.children;
 			switch(true) {
 				case ( e.key === 'ArrowRight' ):
 					switch(true) {
-						case focused_page === null:					 pdf_pages[0].div.classList.add('focused_page'); 					break;	// add class to first page
-						case focused_page.nextSibling !== null: 	 focused_page.nextSibling.classList.add('focused_page');					// add class to next page
-																	 focused_page.classList.remove('focused_page');						break;	// remove class from previous page
-						case focused_page.nextSibling === null:		 focused_page.classList.remove('focused_page');								// remove class from last page
+						case focused_pdf_page === null:					 pdf_pages[0].div.classList.add('focused_pdf_page'); 					break;	// add class to first page
+						case focused_pdf_page.nextSibling !== null: 	 focused_pdf_page.nextSibling.classList.add('focused_pdf_page');				// add class to next page
+																		 focused_pdf_page.classList.remove('focused_pdf_page');					break;	// remove class from previous page
+						case focused_pdf_page.nextSibling === null:		 focused_pdf_page.classList.remove('focused_pdf_page');							// remove class from last page
 							 this_workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(getActiveLeaf()) + 1] || getActiveLeaf()),{focus:true});	// focus next leaf
-							 scrollActiveLeafIntoView();																				break;
-					}																													break;
+							 scrollActiveLeafIntoView();																						break;
+					}																															break;
 				case ( e.key === 'ArrowLeft' ):
 					switch(true) {
-						case focused_page === null:					 pdf_pages[pdf_pages.length - 1].div.classList.add('focused_page');	break;	// add class to last page
-						case focused_page.previousSibling !== null:	 focused_page.previousSibling.classList.add('focused_page');				// add class to previous page
-																	 focused_page.classList.remove('focused_page');						break;	// remove class from last page
-						case focused_page.previousSibling === null:	 focused_page.classList.remove('focused_page');								// remove class from first page
+						case focused_pdf_page === null:					 pdf_pages[pdf_pages.length - 1].div.classList.add('focused_pdf_page');	break;	// add class to last page
+						case focused_pdf_page.previousSibling !== null:	 focused_pdf_page.previousSibling.classList.add('focused_pdf_page');			// add class to previous page
+																		 focused_pdf_page.classList.remove('focused_pdf_page');					break;	// remove class from last page
+						case focused_pdf_page.previousSibling === null:	 focused_pdf_page.classList.remove('focused_pdf_page');							// remove class from first page
 							 this_workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(getActiveLeaf()) - 1] || getActiveLeaf()),{focus:true});	// focus previous leaf
-							 scrollActiveLeafIntoView();																				break;
-					}																													break;
+							 scrollActiveLeafIntoView();																						break;
+					}																															break;
 			}
 			getActiveLeaf().view.viewer?.containerEl?.querySelector('.pdf-toobar')?.click();	// needed to focus pdf viewer and enable proper page navigation by arrow keys
 		}
 		// OPEN FOLDER IN CONTINUOUS MODE
 		const openFolderInContinuousMode = (file,direction) => { 
-			let folder, new_tab, pinned_tabs = [], bool = ( direction === 'left' ? false : true);
+			let folder, active_split, new_split, new_tab, pin_leaf = true, pinned_tabs = [], bool = ( direction === 'left' ? false : direction === 'right' ? true : direction);
 			folder = ( file instanceof obsidian.TFile ? file.parent : file instanceof obsidian.TFolder ? file : null);	// allows opening from folder as well as a file items
+			const isEmpty = (leaf) => { return leaf.getViewState().type === 'empty' }
 			switch(true) {
 				case folder.children.length > 99 && !window.confirm('You are about to open '+ folder.children.length +'. Are you sure you want to do this?'): return;	// warn on opening > 99 notes
 				case folder.children.length === 0: 																		return alert('Folder is empty.');				// folder is empty
 				case folder.children.every( child => !/md|bmp|jpg|jpeg|gif|pdf|png|svg|webp/.test(child.extension) ):	return alert('No readable files in folder.');	// no readable files
 			}
-			this_workspace.iterateRootLeaves( leaf => {
-				if ( leaf.pinned === true ) {  pinned_tabs.push(leaf.id) } else { leaf.setPinned(true); }	// get list of already pinned tabs, else pin unpinned tabs
+
+			this_workspace.iterateRootLeaves( leaf => {															// pin tabs
+				if ( leaf.pinned === true ) { pinned_tabs.push(leaf.id) } else { leaf.setPinned(true) }			// make list of already pinned tabs or pin all unpinned tabs
 			});
-			let new_split = this_workspace.createLeafBySplit(this_workspace.rootSplit,'vertical',bool);	// create new split before active split; bool === false => open split on left
-			this_workspace.setActiveLeaf(this_workspace.getLeafById(new_split.id),{focus:true});		// focus new split
-			// folder.children.sort((a,b) => a.name.localeCompare(b.name),navigator.language);			// sort files by name; change to allow other sorts? or add sorting elsewhere?
-			folder.children.forEach( child => {
-				if ( child instanceof obsidian.TFile && /md|bmp|jpg|jpeg|gif|pdf|png|svg|webp/.test(child.extension) ) {
-					new_tab = this_workspace.getLeaf();													// open new tab/leaf
-					new_tab.openFile(child);															// open file
-					new_tab.setPinned(true);															// pin tab to prevent Obsidian reusing it to open next file in loop
+
+			switch(true) {
+// FIX: append folder > replace folder with same folder incorrectly adds first item again
+				case bool === 'append':																													// append items to active tab group
+					this_workspace.setActiveLeaf(this_workspace.getMostRecentLeaf(),{focus:true});														// set most recent leaf to active
+					if ( getActiveLeaf().parent.children.length === 1 && isEmpty(getActiveLeaf()) ) { this_workspace.activeLeaf.setPinned(false); } 	// unpin single active empty leaf
+					folder.children.forEach( file => {
+						getActiveTabGroup().children.forEach( leaf => {
+							if ( file === leaf.view.file ) { folder.children.splice(folder.children.indexOf(leaf.view.file,1)) } 						// don't duplicate open files
+						});	
+					});
+					break;
+				case bool === 'replace':																												// close all leaves
+					this_workspace.setActiveLeaf(this_workspace.getMostRecentLeaf(),{focus:true});
+					getActiveTabGroup().children.forEach( child => { 
+						sleep(0).then( () => { 
+							child.setPinned(false); 
+							child.detach(); 
+						}); 
+					});				// unpin & close all leaves in active tab group
+					break;
+				default:																						// i.e., bool === false || bool === true:			
+					new_split = ( direction === 'down' ? this_workspace.createLeafBySplit(this_workspace.getMostRecentLeaf(),'horizontal',false) : direction === 'up' ? this_workspace.createLeafBySplit(this_workspace.getMostRecentLeaf(),'horizontal',true) : this_workspace.createLeafBySplit(this_workspace.rootSplit,'vertical',bool) )
+					// create new split before active split; bool === false => open split on left
+					this_workspace.setActiveLeaf(this_workspace.getLeafById(new_split.id),{focus:true});		// focus new split
+					active_split = new_split;
+					// folder.children.sort((a,b) => a.name.localeCompare(b.name),navigator.language);			// sort files by name; change to allow other sorts? or add sorting elsewhere?
+					break;
+			}
+
+			folder.children.forEach( child => {																	// open the files
+				if ( child instanceof obsidian.TFile && /md|bmp|jpg|jpeg|gif|pdf|png|svg|webp/.test(child.extension) ) {	// TODO: include test for plugins that allow other file types to be opened
+					active_split = this_workspace.getLeaf();													// open new tab/leaf
+					active_split.openFile(child);																// open file
+					active_split.setPinned(true);																// pin new tab/leaf to prevent Obsidian reusing it to open next file in loop
 				}
 			});
 			this_workspace.iterateRootLeaves( leaf => {
-				if ( !pinned_tabs.includes(leaf.id) ) { leaf.setPinned(false); }						// unpin tabs, except for previously pinned tabs
+				if ( !pinned_tabs.includes(leaf.id) ) { leaf.setPinned(false); }								// unpin all tabs, except for originally pinned tabs
 			});
-			getActiveTabGroup().containerEl.classList.add('is_continuous_mode'); 
-			toggleContinuousMode(this.app.appId +'_'+getActiveTabGroup().id)
-			this_workspace.setActiveLeaf(getActiveTabGroup().children[0]);
-			scrollActiveLeafIntoView();
+			toggleContinuousMode(this.app.appId +'_'+getActiveTabGroup().id,true)								// enable continuous mode
+			this_workspace.setActiveLeaf(getActiveTabGroup().children[0]);										// set active leaf
+			scrollActiveLeafIntoView();																			// scroll into view
 		 }		
   		
 		// REGISTER EVENTS
@@ -241,12 +269,23 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }	// get initial tab header index for onTabHeaderDragEnd()
 		});
 		// ADD CONTEXTUAL MENU ITEMS
+		const icons = {
+		panelTopDashed: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panel-top-dashed"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M14 9h1"/><path d="M19 9h2"/><path d="M3 9h2"/><path d="M9 9h1"/></svg>',
+		appendFolder: '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-arrow-down" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <rect width="18" height="18" x="3" y="3" rx="2" id="rect1" /> <path d="m 12,8 v 8" id="path1" /> <path d="m 8,12 4,4 4,-4" id="path2" /> <path d="M 15.999999,8 H 8" id="path1-2" /></svg>',
+		replaceFolder: '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-arrow-down" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <rect width="18" height="18" x="3" y="3" rx="2" id="rect1" /> <path d="m 8,14 4,4 4,-4" id="path2" /> <path d="m 8,9.9999586 4,-4 4,4" id="path2-3" /></svg>'
+		}
+		const addIcons = () => {
+		  Object.keys(icons).forEach((key) => {
+			  (0, obsidian.addIcon)(key, icons[key]);
+		  });
+		};
 		const addContinuousModeMenuItem = (item,tab_group_id) => {
 			item.setTitle('Continuous mode')
-				.setIcon('book-down')
+				.setIcon('scroll-text')
 				.setSection('pane')
 				.setSubmenu().addItem((item2) => {
 					item2.setTitle('Toggle Continuous Mode')
+					.setIcon('scroll-text')
 					.setChecked( getTabGroupById(tab_group_id).containerEl.classList.contains('is_continuous_mode') ? true : false )
 					.onClick(async () => { 
 						toggleContinuousMode(tab_group_id || this.app.appId+'_'+getActiveTabGroup().id);
@@ -254,6 +293,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				})
 				.addItem((item3) => {
 					item3.setTitle( getTabGroupById(tab_group_id).containerEl.classList.contains('hide_note_titles') ? 'Show note headers' : 'Hide note headers' )
+					.setIcon('panelTopDashed')
 					.setDisabled( getTabGroupById(tab_group_id).containerEl.classList.contains('is_continuous_mode') ? false : true )
 					.onClick(async () => { 
 						getActiveTabGroup().containerEl.classList.toggle('hide_note_titles');
@@ -262,18 +302,49 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		}
 		const addContinuousModeFileExplorerItem = (item,file) => {
 			item.setTitle('Continuous mode')
-				.setIcon('book-down')
+				.setIcon('scroll-text')
 				.setSection('pane')
 				.setSubmenu().addItem((item2) => {
-					item2.setTitle('Open folder in split left')
+					item2.setTitle('Open folder in new split left')
+					.setIcon('panel-left-close')
 					.onClick(async () => { 
 						openFolderInContinuousMode(file,'left');
 					})
 				})
 				.addItem((item3) => {
-					item3.setTitle('Open folder in split right')
+					item3.setTitle('Open folder in new split right')
+					.setIcon('panel-right-close')
 					.onClick(async () => { 
 						openFolderInContinuousMode(file,'right');
+					})
+				})
+				.addItem((item4) => {
+					item4.setTitle('Open folder in new split down')
+					.setIcon('panel-bottom-close')
+					.onClick(async () => { 
+						openFolderInContinuousMode(file,'down');
+					})
+				})
+				.addItem((item5) => {
+					item5.setTitle('Open folder in new split up')
+					.setIcon('panel-top-close')
+					.onClick(async () => { 
+						openFolderInContinuousMode(file,'up');
+					})
+				})
+				.addItem((item0) => { item0.setTitle('').setDisabled(true); })
+				.addItem((item6) => {
+					item6.setTitle('Open or append folder in active tab group')
+					.setIcon('appendFolder')
+					.onClick(async () => { 
+						openFolderInContinuousMode(file,'append');
+					})
+				})
+				.addItem((item7) => {
+					item7.setTitle('Replace active tab group with folder')
+					.setIcon('replaceFolder')
+					.onClick(async () => {
+						if ( window.confirm('Warning: This will close all open notes in the active tab group. Are you sure you want to do this?') ) { openFolderInContinuousMode(file,'replace') }
 					})
 				})
 		}		
