@@ -2,7 +2,7 @@
 
 An Obsidian plugin that displays all open notes in a tab group as if they were a single continuous document (sometimes called "Scrivenings mode").  
 
-## Features: 
+## Features:  
 
 #### File and Editor Contextual Menus:
  - Toggle continuous mode in active tab group.
