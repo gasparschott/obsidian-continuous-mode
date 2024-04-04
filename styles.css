@@ -8,13 +8,18 @@
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf,
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]),
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]) .view-content,
-.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-mode="source"]:not([data-type="pdf"]):not([data-type="image"]) .view-content > div:not([style*="display"]),
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-mode="source"]:not([data-type="pdf"]):not([data-type="image"]):not([data-type="graph"]) .view-content > div:not([style*="display"]),
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-mode="source"]:not([data-type="pdf"]) .view-content .markdown-preview-view,
 .workspace-leaf-content[data-type="empty"] .view-content .empty-state,
 .workspace-leaf-content[data-type="empty"] .view-content .empty-state-container
 {
 	display:contents !important;
 }
+.workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf
+.workspace-leaf-content[data-type="graph"] .view-content {
+	display:flex !important;
+}
+
 /* padding bottom */
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container, 
 .workspace-split.mod-vertical.mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .cm-editor .cm-content
@@ -120,7 +125,13 @@
 .workspace.mod-root.workspace-tab-header {
 	min-width:100px;
 }
-/* 
+/* prevent canvas scroll in continuous mode */
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .canvas-wrapper,
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active)  .workspace-leaf-content[data-type="graph"] .view-content 
+{
+	pointer-events:none !important;
+}
+/* Dropdown menu for tab-headers?
 .workspace-tab-header-container-inner {
 	flex-direction:column;
 }
