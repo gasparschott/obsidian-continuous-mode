@@ -16,17 +16,41 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		this.addSettingTab(new ContinuousModeSettings(this.app, this));
 		/* ----------------------- */
 		// HELPERS
-		const getAllTabGroups = () => {
+		const OLDgetAllTabGroups = () => {
 			let root_tab_children = this.app.workspace.rootSplit?.children, root_tab_groups = [];										// get rootSplit children
 				root_tab_children?.forEach( child => { 
 					if ( child.type === 'split' ) { root_tab_groups.push(...child.children) } else { root_tab_groups.push(child) }		// get rootSplit tab groups
 				});
 			let floating_windows = this.app.workspace.floatingSplit?.children || [], floating_window_tab_groups = [];					// get floating windows
-				floating_windows?.forEach(floating_window => floating_window_tab_groups.push(...floating_window?.children));			// get floating window tab groups
+				floating_windows?.forEach(floating_window => {
+					floating_window.children?.forEach( child => {
+						if ( child.type === 'split' ) { floating_window_tab_groups.push(...child.children) } else { floating_window_tab_groups.push(child) }	// get floating tab groups
+					});
+				});
 			let all_tab_groups = floating_window_tab_groups.concat(root_tab_groups);
 				all_tab_groups = [...new Set(all_tab_groups)].filter(Boolean);
 			return all_tab_groups;
 		}
+		const getAllTabGroups = () => {
+			let nodes = (this.app.workspace.floatingSplit?.children || []).concat(this.app.workspace.rootSplit?.children || []);
+			let all_tab_groups = [];
+			nodes.forEach( node => { if ( node.type === 'tabs' ) { all_tab_groups.push(node) } else { all_tab_groups = getTabGroupsRecursively(node,all_tab_groups) } });
+			return all_tab_groups;
+		}
+		const getTabGroupsRecursively = (begin_node,all_tab_groups) => {
+			let all_children = begin_node?.children;
+			if ( all_children === undefined ) { return }
+			all_tab_groups = all_tab_groups || [];
+			if ( begin_node.children ) {
+				begin_node.children.forEach(function(child) {
+					if (child.type === 'tabs') { all_tab_groups.push(child); }
+					all_children = all_children.concat(getTabGroupsRecursively(child,all_tab_groups));
+				});
+			}
+			return all_tab_groups;
+		}
+		
+		
 		const this_workspace =					this.app.workspace; 
 		const getActiveTabGroup = () =>			{ return this_workspace.activeTabGroup; }
 		const getTabGroupByDataId = (id) =>		{ return getAllTabGroups()?.find( tab_group => tab_group.containerEl.dataset.tab_group_id === id ); }
