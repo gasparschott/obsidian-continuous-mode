@@ -38,7 +38,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		const isFloatingWindow = () => 			{ return this.app.workspace.floatingSplit?.children?.length > 0 && getActiveFloatingTabGroup() !== undefined; }
 		const updateTabGroupDatasetIds = obsidian.debounce( () => {
 			getAllTabGroups().forEach( tab_group => { tab_group.containerEl.dataset.tab_group_id = this.app.appId +'_'+ tab_group.id });
-		},25,true)
+		},25,true);
+		updateTabGroupDatasetIds();
 		/* ----------------------- */
 		// TOGGLE CONTINUOUS MODE
 		const toggleContinuousMode = (tab_group_id,bool) => {
