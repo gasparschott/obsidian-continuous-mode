@@ -18,7 +18,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		// HELPERS
 		const getAllTabGroups = () => {
 			let root_tab_children = this.app.workspace.rootSplit?.children, root_tab_groups = [];										// get rootSplit children
-				root_tab_children.forEach( child => { 
+				root_tab_children?.forEach( child => { 
 					if ( child.type === 'split' ) { root_tab_groups.push(...child.children) } else { root_tab_groups.push(child) }		// get rootSplit tab groups
 				});
 			let floating_windows = this.app.workspace.floatingSplit?.children || [], floating_window_tab_groups = [];					// get floating windows
