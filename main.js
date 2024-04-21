@@ -16,51 +16,42 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		this.addSettingTab(new ContinuousModeSettings(this.app, this));
 		/* ----------------------- */
 		// HELPERS
-		const getAllTabGroups = (begin_node,all_tabs) => {
-			let all_children = begin_node?.children;
-			if ( all_children === undefined ) { return }
-			all_tabs = all_tabs || [];
-			if ( begin_node.children ) {
-				begin_node.children.forEach(function(child) {
-					if (child.type === 'tabs') { all_tabs.push(child); }
-					all_children = all_children.concat(getAllTabGroups(child,all_tabs));
-				});
-			}
-			return all_tabs;
+		const getAllTabGroups = () => {
+			let root_tab_groups = this.app.workspace.rootSplit?.children;																// get rootSplit tab groups
+			let floating_windows = this.app.workspace.floatingSplit?.children || [], floating_window_tab_groups = [];					// get floating windows
+				floating_windows?.forEach(floating_window => floating_window_tab_groups.push(...floating_window?.children));			// get floating window tab groups
+			let all_tab_groups = floating_window_tab_groups.concat(root_tab_groups);
+				all_tab_groups = [...new Set(all_tab_groups)].filter(Boolean);
+			return all_tab_groups;
 		}
 		const this_workspace =					this.app.workspace; 
 		const getActiveTabGroup = () =>			{ return this_workspace.activeTabGroup; }
-		const getTabGroupByDataId = (id) =>		{ return getAllTabGroups(this_workspace.rootSplit)?.find( tab_group => tab_group.containerEl.dataset.tab_group_id === id ); }
+		const getTabGroupByDataId = (id) =>		{ return getAllTabGroups()?.find( tab_group => tab_group.containerEl.dataset.tab_group_id === id ); }
 		const getTabGroupHeaders = () =>		{ return this_workspace.activeTabGroup.tabHeaderEls; }
 		const getTabHeaderIndex = (e) =>		{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
 		const getActiveLeaf = () =>				{ return this_workspace.activeLeaf; }
 		const getActiveEditor = () =>			{ return this_workspace.activeEditor?.editor; }
-		const updateTabGroupDatasetIds = () => {																								// add tab_group_id dataset to each .workspace-tabs
-			getAllTabGroups(this.app.workspace.rootSplit)?.forEach( 
-				tab_group => { if ( tab_group ) { tab_group.containerEl.dataset.tab_group_id = this.app.appId +'_'+ tab_group.id } }
-			);
-		}
-		updateTabGroupDatasetIds(); // disabled
+		const getActiveFloatingTabGroup = () => { return this.app.workspace.floatingSplit?.children[0]?.children?.filter( child => child.containerEl.classList.contains('mod-active'))[0]; }
+		const isFloatingWindow = () => 			{ return this.app.workspace.floatingSplit?.children?.length > 0 && getActiveFloatingTabGroup() !== undefined; }
+		const updateTabGroupDatasetIds = obsidian.debounce( () => {
+			getAllTabGroups().forEach( tab_group => { tab_group.containerEl.dataset.tab_group_id = this.app.appId +'_'+ tab_group.id });
+		},25,true)
 		/* ----------------------- */
 		// TOGGLE CONTINUOUS MODE
 		const toggleContinuousMode = (tab_group_id,bool) => {
-			const active_floating_tab_group = () => { return this.app.workspace.floatingSplit?.children[0]?.children?.filter( child => child.containerEl.classList.contains('mod-active'))[0]; }
-			const isFloatingWindow = () => { return this.app.workspace.floatingSplit?.children?.length > 0 && active_floating_tab_group() !== undefined; }
-			switch(true) {
-				case isFloatingWindow():	active_floating_tab_group().containerEl.classList.toggle('is_continuous_mode');		break;	// if floating window, don't save tabGroupIds
-				case this.app.appId === tab_group_id?.split('_')[0]:
-					switch(true) {
-						case getTabGroupByDataId(tab_group_id)?.containerEl?.classList.contains('is_continuous_mode') && bool !== true:	// if tab group is in continuous mode, remove continuous mode
-							getTabGroupByDataId(tab_group_id)?.containerEl?.classList.remove('is_continuous_mode');						// remove style
-							this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(tab_group_id),1);						// remove tabGroupdId from data.json
-							break;
-						default:																										// if tab group is not in continuous mode (e.g., on app launch)
-							getTabGroupByDataId(tab_group_id)?.containerEl?.classList.add('is_continuous_mode');						// add style
-							if ( !this.settings.tabGroupIds.includes(tab_group_id) ) { this.settings.tabGroupIds.push(tab_group_id); }	// add tabGroupdId to data.json if it is not already there
-					}
-					this.settings.tabGroupIds = [...new Set(this.settings.tabGroupIds)];												// remove dupe IDs if necessary
-					this.settings.tabGroupIds.sort();																					// sort the tabGroupIds
-					this.saveSettings();																								// save the settings
+					if ( this.app.appId === tab_group_id?.split('_')[0] ) {
+				switch(true) {
+					case getTabGroupByDataId(tab_group_id)?.containerEl?.classList.contains('is_continuous_mode') && bool !== true:	// if tab group is in continuous mode, remove continuous mode
+						getTabGroupByDataId(tab_group_id)?.containerEl?.classList.remove('is_continuous_mode');						// remove style
+						this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(tab_group_id),1);						// remove tabGroupdId from data.json
+						break;
+					default:																										// if tab group is not in continuous mode (e.g., on app launch)
+						getTabGroupByDataId(tab_group_id)?.containerEl?.classList.add('is_continuous_mode');						// add style
+						if ( !this.settings.tabGroupIds.includes(tab_group_id) ) { this.settings.tabGroupIds.push(tab_group_id); }	// add tabGroupdId to data.json if it is not already there
+				}
+				this.settings.tabGroupIds = [...new Set(this.settings.tabGroupIds)];												// remove dupe IDs if necessary
+				this.settings.tabGroupIds.sort();																					// sort the tabGroupIds
+				this.saveSettings();																								// save the settings
 			}
 		}
 		// INITIALIZE CONTINUOUS MODE = add continuous mode class to workspace tab groups from plugin settings
@@ -73,7 +64,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				});
 			}
 		}
-		initContinuousMode();
 		/*-----------------------------------------------*/
 		// DRAG TAB HEADERS to Rearrange Leaves on dragstart
 		const onTabHeaderDragEnd = (e,initial_tab_header_index) => {
@@ -463,13 +453,13 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			})
 		)
 		this.registerEvent(
-			this.app.workspace.on('editor-menu', (menu,editor) => {
-				menu.addItem((item) => { addContinuousModeMenuItem(item,editor.containerEl.closest('.workspace-tabs').dataset.tab_group_id) });
+			this.app.workspace.on('editor-menu', (menu,editor,leaf) => {
+				menu.addItem((item) => { addContinuousModeMenuItem(item,editor.containerEl?.closest('.workspace-tabs').dataset.tab_group_id) });
 			})
 		);
 		this.registerEvent(
 			this.app.workspace.on('tab-group-menu', (menu,tab_group) => {
-				menu.addItem((item) => { addContinuousModeMenuItem(item,tab_group.containerEl.dataset.tab_group_id) });
+				menu.addItem((item) => { addContinuousModeMenuItem(item,tab_group.containerEl?.dataset.tab_group_id) });
 			})
 		);		
 		this.registerEvent(
@@ -482,14 +472,16 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			})
 		);
 		this.registerEvent(
-			this.app.workspace.on('layout-change', async () => {
+			this.app.workspace.on('layout-change', () => {
 				updateTabGroupDatasetIds();
-				initContinuousMode();
-				scrollActiveLeafIntoView(true);
+				setTimeout(() => {
+					initContinuousMode();
+					scrollActiveLeafIntoView(true);
+				},250);
 			})
 		);
 		this.registerEvent(
-			this.app.workspace.on('active-leaf-change', async () => {
+			this.app.workspace.on('active-leaf-change', () => {
 				scrollActiveLeafIntoView(true);
 			})
 		)
