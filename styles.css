@@ -149,3 +149,7 @@
 	content:'• ';
 	color:var(--text-normal);
 }
+/* hide conditionally displayed menu items */
+div.menu-item:has(.menu-item-title:empty) {
+	display:none !important;
+}

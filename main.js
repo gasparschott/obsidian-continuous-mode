@@ -16,21 +16,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		this.addSettingTab(new ContinuousModeSettings(this.app, this));
 		/* ----------------------- */
 		// HELPERS
-		const OLDgetAllTabGroups = () => {
-			let root_tab_children = this.app.workspace.rootSplit?.children, root_tab_groups = [];										// get rootSplit children
-				root_tab_children?.forEach( child => { 
-					if ( child.type === 'split' ) { root_tab_groups.push(...child.children) } else { root_tab_groups.push(child) }		// get rootSplit tab groups
-				});
-			let floating_windows = this.app.workspace.floatingSplit?.children || [], floating_window_tab_groups = [];					// get floating windows
-				floating_windows?.forEach(floating_window => {
-					floating_window.children?.forEach( child => {
-						if ( child.type === 'split' ) { floating_window_tab_groups.push(...child.children) } else { floating_window_tab_groups.push(child) }	// get floating tab groups
-					});
-				});
-			let all_tab_groups = floating_window_tab_groups.concat(root_tab_groups);
-				all_tab_groups = [...new Set(all_tab_groups)].filter(Boolean);
-			return all_tab_groups;
-		}
 		const getAllTabGroups = () => {
 			let nodes = (this.app.workspace.floatingSplit?.children || []).concat(this.app.workspace.rootSplit?.children || []);
 			let all_tab_groups = [];
@@ -49,8 +34,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 			return all_tab_groups;
 		}
-		
-		
+		const getAllLeaves = () => {
+			let all_leaves = [];
+			getAllTabGroups().forEach(tab_group => { all_leaves.push(...tab_group.children) })
+			return all_leaves;
+		}
 		const this_workspace =					this.app.workspace; 
 		const getActiveTabGroup = () =>			{ return this_workspace.activeTabGroup; }
 		const getTabGroupByDataId = (id) =>		{ return getAllTabGroups()?.find( tab_group => tab_group.containerEl.dataset.tab_group_id === id ); }
@@ -234,7 +222,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				case items.every( item => ( !included_extensions.test(item.extension) || this.settings.excludedNames.some( name => { return RegExp(name,'m').test(item.name) } ) ) ): 
 																												return alert('No readable files in folder.');			// no readable files
 			}
-			this_workspace.iterateRootLeaves( leaf => {															// pin tabs to prevent tab reuse, i.e., coerce new tab creation
+			getAllLeaves().forEach( leaf => {																	// pin tabs to prevent tab reuse, i.e., coerce new tab creation
 				if ( leaf.pinned === true ) { pinned_tabs.push(leaf.id) } else { leaf.setPinned(true) }			// make list of already pinned tabs or pin all unpinned tabs
 			});
 			switch(true) {
@@ -275,7 +263,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					active_split.setPinned(true);																// pin new tab/leaf to prevent Obsidian reusing it to open next file in loop
 				}
 			});
-			this_workspace.iterateRootLeaves( leaf => {
+			getAllLeaves().forEach( leaf => {
 				if ( !pinned_tabs.includes(leaf.id) ) { leaf.setPinned(false); }								// unpin all tabs, except for originally pinned tabs
 			});
 			getActiveTabGroup().containerEl.dataset.sort_order = sort_order;
@@ -295,7 +283,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				case 'byCreatedTime':			sorted = items.toSorted((a,b) => b.view.file.stat.ctime - a.view.file.stat.ctime);						break;
 				case 'byCreatedTimeReverse':	sorted = items.toSorted((a,b) => a.view.file.stat.ctime - b.view.file.stat.ctime);						break;
 			}
-			this_workspace.iterateRootLeaves( leaf => {															// pin tabs to prevent tab reuse, i.e., coerce new tab creation
+			getAllLeaves().forEach( leaf => {																	// pin tabs to prevent tab reuse, i.e., coerce new tab creation
 				if ( leaf.pinned === true ) { pinned_tabs.push(leaf.id) } else { leaf.setPinned(true) }			// make list of already pinned tabs or pin all unpinned tabs
 			});
 			this_workspace.setActiveLeaf(active_tab_group.children[0],{focus:true});
@@ -310,7 +298,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				active_split.openFile(item.view.file);															// open file
 				active_split.setPinned(true);																	// pin new tab/leaf to prevent Obsidian reusing it to open next file in loop
 			});
-			this_workspace.iterateRootLeaves( leaf => {
+			getAllLeaves().forEach( leaf => {
 				if ( !pinned_tabs.includes(leaf.id) ) { leaf.setPinned(false); }								// unpin all tabs, except for originally pinned tabs
 			});
 			active_tab_group.containerEl.dataset.sort_order = sort_order;
