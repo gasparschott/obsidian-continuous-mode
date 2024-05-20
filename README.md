@@ -1,9 +1,15 @@
 # obsidian-continuous-mode
 
-An Obsidian plugin that displays all open notes in a tab group as if they were a single continuous document (sometimes called "Scrivenings mode").  
-Features include open all notes in a folder, arrow navigation between notes, reorder notes via tab header drag-and-drop, sorting, more.
+Displays all open notes in a tab group as if they were a continuous scrollable document (sometimes called “Scrivenings mode”). Open all notes in Continuous Mode from a folder, search results, or links in a file or Dataview/query block; use arrow keys to navigate between notes; reorder notes via tab header drag-and-drop, sorting, more.
 
 ## Features:  
+
+- File explorer menu: Open all items in selected folder in Continuous Mode.  
+- File explorer menu: Open selected files in Continuous Mode.  
+- Search results menu: Open all search results in Continuous Mode.  
+- Search results menu: Open selected files in Continuous Mode.  
+- File Mene/Editor Menu: Open all links from Dataview and Query blocks in Continuous Mode. (Limitation: not available in floating windows.)
+- File Menu/Editor Menu: Open all document links (not in Dataview or Query blocks) in Continuous Mode.
 
 #### File and Editor Contextual Menus, Command Palette:  
 - Toggle continuous mode in active tab group.  
@@ -29,7 +35,8 @@ Opening folders is not recursive—only the top level notes will be opened.
 - Reorder notes in tab group via tab header drag-and-drop.  
  
 #### User Settings:
-- “Open folder in Continuous Mode” menu options: Filter folder files by type (e.g., markdown, images, canvas, etc.), extension, or file name.  
+- “Allow single click to open folder items in Continuous Mode”: Enable this setting to make it possible to open all items in File Explorer folder with a click. Select option for default action: open folder in new split left, right, down, up, or append or replace.
+- “Open folder in Continuous Mode” menu options: Filter folder files by type (e.g., markdown, images, canvas, media, pdf), custom extensions, or file name. Option to exclude embedded files.  
 - “Clear stored data”: Empty the list of stored tab groups, ignoring currently open tab groups with continuous mode active. This optional action prevents the list from getting unwieldy or cluttered with stale data, which can happen if you frequently open and close new tab groups.
 - Disable scroll active leaf into view: If you find the plugin’s default scroll behavior on arrow navigation (which keeps the insertion point more or less centered by line/paragraph, similar to “typewriter mode”) distracting, enable this setting. Clicking tab headers will still scroll notes into view.
 - Donate link.
