@@ -52,3 +52,5 @@ Opening folders is not recursive—only the top level notes will be opened.
 
 ![<# After #>](assets/after.gif "after.gif")
 
+![<# Settings #>](assets/settings.jpg" "settings.jpg")
+
