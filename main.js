@@ -90,7 +90,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			if ( this.app.appId === tab_group_id?.split('_')[0] ) {
 				switch(true) {
 					case getTabGroupByDataId(tab_group_id)?.containerEl?.classList.contains('is_continuous_mode') && bool !== true:	// if tab group is in continuous mode, remove continuous mode
-						getActiveTabGroup().children.forEach(leaf => { if ( !leaf.containerEl.classList.contains('mod-active') ) { leaf.containerEl.style.display = 'none' } });
+						getActiveTabGroup().children.forEach(leaf => { 
+							leaf.containerEl.querySelectorAll('.continuous_mode_open_links_button').forEach( btn => btn?.remove() );
+							if ( !leaf.containerEl.classList.contains('mod-active') ) { leaf.containerEl.style.display = 'none'; } 
+						});
 						getTabGroupByDataId(tab_group_id)?.containerEl?.classList.remove('is_continuous_mode');						// remove style
 						this.settings.tabGroupIds.splice(this.settings.tabGroupIds.indexOf(tab_group_id),1);						// remove tabGroupdId from data.json
 						break;
@@ -321,14 +324,14 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			this_workspace.setActiveLeaf(active_tab_group.children[0],{focus:true});
 			active_tab_group.children.forEach( child => { 
 				sleep(0).then( () => {
-					child.setPinned(false);																		// unpin all leaves in active tab group
-					child.detach(); 																			// close all leaves in active tab group
+					child.setPinned(false);																			// unpin all leaves in active tab group
+					child.detach(); 																				// close all leaves in active tab group
 				}); 
-			});																									// unpin & close all leaves in active tab group
-			sorted.forEach( item => {																			// open the files
-				active_split = this_workspace.getLeaf();														// open new tab/leaf
-				active_split.openFile(item.view.file);															// open file
-				active_split.setPinned(true);																	// pin new tab/leaf to prevent Obsidian reusing it to open next file in loop
+			});																										// unpin & close all leaves in active tab group
+			sorted.forEach( item => {																				// open the files
+				active_split = this_workspace.getLeaf();															// open new tab/leaf
+				active_split.openFile(item.view.file);																// open file
+				active_split.setPinned(true);																		// pin new tab/leaf to prevent Obsidian reusing it to open next file in loop
 			});
 			getAllLeaves().forEach( leaf => { if ( !pinned_tabs.includes(leaf.id) ) { leaf.setPinned(false); } });	// unpin all tabs, except for originally pinned tabs
 			active_tab_group.containerEl.dataset.sort_order = sort_order;											// set data-sort_order
@@ -349,7 +352,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		this.registerDomEvent(window,'mouseover',function (e) {
 			let continuous_mode_open_links_button, button_container_el;
 			switch(true) {
-				case e.target.closest('.markdown-reading-view,.markdown-preview-view') !== null:										// show button in reading view
+				case e.target.closest('.markdown-reading-view,.markdown-preview-view') !== null:				// show button in reading view
 					switch(true) {
 						case e.target.closest('.block-language-dataview') !== null:
 								button_container_el = e.target.closest('.block-language-dataview');
@@ -370,24 +373,14 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					}
 					break;
 				}
-				if ( button_container_el?.querySelector('.continuous_mode_open_links_button') === null ) {
+				if ( button_container_el?.querySelector('.continuous_mode_open_links_button') === null ) {		// add open links button if not there already
 					continuous_mode_open_links_button = button_container_el?.createEl('div',{cls:'continuous_mode_open_links_button clickable-icon'});
 					continuous_mode_open_links_button.setAttribute('aria-label','Continuous Mode');
 					continuous_mode_open_links_button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>';
 				}
 		});
-		this.registerDomEvent(window,'mouseout',function (e) { let class_names = e.target.className, test_class_names = /internal-query|block-language|continuous_mode_open_links_button/;
-			switch(true) {
-				case e.target.closest('.cm-preview-code-block,.block-language-dataview') !== null && !test_class_names.test(class_names) && !/path|svg/.test(e.target.tagName):
-					e.target.closest('.cm-preview-code-block,.block-language-dataview')?.querySelector('.continuous_mode_open_links_button')?.remove();
-					break;
-				case e.target.closest('.internal-query') !== null && !test_class_names.test(class_names) && !/path|svg/.test(e.target.tagName):
-					e.target.closest('.internal-query')?.querySelector('.continuous_mode_open_links_button')?.remove();
-					break;
-			}
-		});
 		this.registerDomEvent(window,'keydown', function (e) {
-			if ( e.target.tagName === 'body' )													 							{ return; }	// do nothing if tab group is not active
+			if ( e.target.tagName.toLowerCase() === 'body' )									 							{ return; }	// do nothing if tab group is not active
 			if ( !getActiveLeaf().containerEl.closest('.workspace-tabs')?.classList.contains('is_continuous_mode') )		{ return; }	// do nothing if continuous mode is not active in tab group
 			if ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ) { leafArrowNavigation(e); }				// else arrow navigation			
 		});	
@@ -610,7 +603,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		nodes.forEach(
 			node => { 
 				node.containerEl.querySelectorAll('.is_continuous_mode,.hide_note_titles').forEach( 
-					el => { el?.classList?.remove('is_continuous_mode','hide_note_titles'); delete el?.dataset?.tab_group_id; delete el?.dataset?.sort_order; }
+					el => {
+						el?.classList?.remove('is_continuous_mode','hide_note_titles'); delete el?.dataset?.tab_group_id; delete el?.dataset?.sort_order; 
+						el?.querySelectorAll('.continuous_mode_open_links_button').forEach(btn => btn?.remove() );
+					}
 				)
 			}
 		);
