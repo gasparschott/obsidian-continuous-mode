@@ -33,6 +33,11 @@ Opening folders is not recursive—only the top level notes will be opened.
 - While editing notes, the insertion point will scroll so as to remain more or less in the center of the screen, similar to “typewriter mode”; this behavior can be disabled in the settings.  
 - Scroll notes into view by clicking the tab header. Note: scroll into view fails when clicking the tab headers the first time, and before the note has been scrolled into view at least once. This appears to be an issue with Obsidian.  
 - Reorder notes in tab group via tab header drag-and-drop.  
+
+#### Continuous Mode and other Plugins:
+The Continuous Mode menus are available or compatible with the following third-party plugins:
+- “<a href="https://obsidian.md/plugins?id=file-tree-alternative" target="_blank">File Tree Alternative</a>” plugin.  
+- “<a href="https://obsidian.md/plugins?id=longform" target="_blank">Longform</a>” plugin. Basic support: Files are opened in their project or scene order (i.e. not alphabetically); however, tab order is not automatically refreshed when the project order is changed, nor are new files automatically opened when new scenes are created. While technically feasible, there are too many variables to make this work predictably. Instead, open the project again in Continuous Mode using the "replace" option.
  
 #### User Settings:
 - “Allow single click to open folder items in Continuous Mode”: Enable this setting to make it possible to open all items in File Explorer folder with a click. Select option for default action: open folder in new split left, right, down, up, or append or replace.

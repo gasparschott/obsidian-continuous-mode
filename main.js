@@ -72,6 +72,29 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			})
 			return files;
 		}
+		// OTHER PLUG-INS SUPPORT
+		const getLongformItems = (longform_index_file,kind,file) => {
+			let longform_frontmatter = this.app.metadataCache.getFileCache(longform_index_file).frontmatter.longform;
+			let longform_sceneFolder = longform_frontmatter.sceneFolder, longform_scenes, this_scene, this_scene_index;
+			let longform_scenes_links = [];
+			switch(kind) {
+				case 'project': 
+					longform_scenes = longform_frontmatter.scenes.flat(Infinity);
+					break;
+				case 'scenes':  
+					longform_scenes = longform_frontmatter.scenes;
+					this_scene = longform_scenes.flat(Infinity).filter( scene => scene === file.basename ), this_scene_index = longform_scenes.flat(Infinity).indexOf(this_scene[0]?.toString());
+					if ( typeof longform_scenes[this_scene_index + 1] === 'object' ) {
+						longform_scenes = this_scene.concat(longform_scenes[this_scene_index + 1]).flat(Infinity);			// if selected scene is a folder, get sub-scenes
+					} else {
+						longform_scenes = longform_scenes.flat(Infinity).filter( scene => scene === this_scene[0] )			// else just get the selected scene
+					}
+					break;
+			}
+			longform_scenes.forEach( scene => longform_scenes_links.push(longform_index_file.parent.path + longform_sceneFolder + scene) )
+			return getFilesFromLinks(longform_scenes_links);
+		}
+		// ICONS
 		const icons = {
 			appendFolder: `<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-arrow-down" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <rect width="18" height="18" x="3" y="3" rx="2" id="rect1" /> <path d="m 12,8 v 8" id="path1" /> <path d="m 8,12 4,4 4,-4" id="path2" /> <path d="M 15.999999,8 H 8" id="path1-2" /></svg>`,
 			panelTopDashed: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panel-top-dashed"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M14 9h1"/><path d="M19 9h2"/><path d="M3 9h2"/><path d="M9 9h1"/></svg>`,
@@ -236,7 +259,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		}
 		// OPEN ITEMS IN CONTINUOUS MODE
 		const openItemsInContinuousMode = (items,action,type) => {
-			// temp: replace settings.folderFileTypes with settings.includedFileTypes; remove after next update
+			// temp: replace settings.folderFileTypes with settings.includedFileTypes; remove after next update:
 			if ( this.settings.folderFileTypes !== undefined ) { this.settings.includedFileTypes = this.settings.folderFileTypes; delete this.settings['folderFileTypes']; this.saveSettings(); }
 
 			let active_split, new_split, pinned_tabs = [];
@@ -245,27 +268,33 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			this.app.workspace.getMostRecentLeaf().parent.children.forEach( child => open_files.push(child.view.file) );							// get open files
 			let extensions = { 
 				markdown:	['md'],
-				images:		['avif','bmp','jpg','jpeg','gif','^png','svg','webp'],
+				images:		['avif','bmp','jpg','jpeg','gif','png','svg','webp'],
 				canvas:		['canvas'],
 				media:		['aac','aif','aiff','ape','flac','m4a','mka','mp3','ogg','opus','wav','m4v','mkv','mov','mp4','mpeg','webm'],
 				pdf:		['pdf'],
 				extra:		this.settings.extraFileTypes
 			};
 			for (const [key, value] of Object.entries(extensions)) { if ( this.settings.includedFileTypes.includes(key) ) { included_extensions.push(value); } }	// get included extensions
-			// filter items
+			// filter items:
 			items = items.filter( item => item instanceof obsidian.TFile );																			// item must be obsidian.TFile
 			items = items.filter( item => included_extensions.flat().includes( item.extension ));													// remove excluded items by extension
 			items = items.filter( item => !this.settings.excludedNames.includes( item.basename +'.'+ item.extension ));								// remove excluded items by name
-			// warnings
+			// warnings:
 			switch(true) {
 				case items.length > 99 && !window.confirm('You are about to open '+ items.length +'. Are you sure you want to do this?'): return;	// warn on opening > 99 notes
 				case items.length === 0:  		return alert(type === 'document links' ? 'No document links found.' : 'No readable files found.');
 			}
-			// pin currently open tabs to prevent tab reuse, i.e., coerce new tab creation for each item
+			// pin currently open tabs to prevent tab reuse, i.e., coerce new tab creation for each item:
 			getAllLeaves().forEach( leaf => { if ( leaf.pinned === true ) { pinned_tabs.push(leaf.id) } else { leaf.setPinned(true) } });
 			switch(true) {
-				case action === 'append':																		// append items to active tab group
-					this_workspace.setActiveLeaf(this_workspace.getMostRecentLeaf(),{focus:true});				// set most recent leaf to active
+				case (/append/.test(action)):																		// append items to currently active tab group
+//				case action === 'append':																		// append items to currently active tab group
+					if ( action.includes('last') ) {
+						let last_active_tab_group = getAllTabGroups()?.find( tab_group => this_workspace.containerEl.dataset.last_active_tab_group === tab_group.id );
+						this_workspace.setActiveLeaf(last_active_tab_group.children[0],{focus:true})
+					} else {
+						this_workspace.setActiveLeaf(this_workspace.getMostRecentLeaf(),{focus:true});				// set most recent leaf to active
+					}
 					if ( getActiveLeaf().parent.children.length === 1 && getActiveLeaf().getViewState().type === 'empty' ) { getActiveLeaf().setPinned(false); } 	// unpin single active empty leaf
 					items = items.filter( item => !open_files.includes(item) );									// filter already open files (this filter only needed here)
 					break;
@@ -284,8 +313,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					active_split = new_split;
 					break;
 			}
-			// sort items
-			let sort_order = ( type ===  undefined ? 'alphabetical' : /search/.test(type) ? this.app.workspace.getLeavesOfType('search')[0].view.dom.sortOrder : this.app.workspace.getLeavesOfType('file-explorer')[0].view.sortOrder );
+			// sort items:
+			let sort_order = ( type === undefined ? 'alphabetical' : /longform/i.test(type) ? 'longform' : /search/.test(type) ? this.app.workspace.getLeavesOfType('search')[0].view.dom.sortOrder : this.app.workspace.getLeavesOfType('file-explorer')[0].view.sortOrder );
 			switch(sort_order) {
 				case 'alphabetical':			items.sort((a,b) => a?.name.localeCompare(b?.name),navigator.language);	break;
 				case 'alphabeticalReverse':		items.sort((a,b) => b?.name.localeCompare(a?.name),navigator.language);	break;
@@ -293,18 +322,22 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				case 'byModifiedTimeReverse':	items.sort((a,b) => a?.stat.mtime - b?.stat.mtime);						break;
 				case 'byCreatedTime':			items.sort((a,b) => b?.stat.ctime - a?.stat.ctime);						break;
 				case 'byCreatedTimeReverse':	items.sort((a,b) => a?.stat.ctime - b?.stat.ctime);						break;
+				case 'longform':																						break;	// no sort
 			}
-			// open sorted items
-			for ( let i = 0; i < maximumItemsToOpen && i < items.length; i++ ) {								// limit number of items to open
-				active_split = this_workspace.getLeaf();														// open new tab/leaf
-				active_split.openFile(items[i]);																// open file
-				active_split.setPinned(true);																	// pin each new tab/leaf to prevent Obsidian reusing it to open next file in loop
+			// open sorted items:
+			for ( let i = 0; i < maximumItemsToOpen && i < items.length; i++ ) {										// limit number of items to open
+				active_split = this_workspace.getLeaf();																// open new tab/leaf
+				active_split.openFile(items[i]);																		// open file
+				active_split.setPinned(true);																			// pin each new tab/leaf to stop Obsidian reusing it to open next file in loop
 			}
-			// unpin tabs
-			getAllLeaves().forEach( leaf => { if ( !pinned_tabs.includes(leaf.id) ) { leaf.setPinned(false); } });
-			getActiveTabGroup().containerEl.dataset.sort_order = sort_order;									// set data-sort_order
-			toggleContinuousMode(this.app.appId +'_'+getActiveTabGroup().id,true)								// enable continuous mode
-			this_workspace.setActiveLeaf(getActiveTabGroup().children[0]);										// set active leaf
+			// unpin tabs:
+			getAllLeaves().forEach( leaf => { if ( !pinned_tabs.includes(leaf.id) ) { leaf.setPinned(false); } });		// reset pinned status
+			getActiveTabGroup().containerEl.dataset.sort_order = sort_order;											// set data-sort_order
+			toggleContinuousMode(this.app.appId +'_'+ getActiveTabGroup().id,true)										// enable continuous mode
+			setTimeout(() => {
+				this_workspace.containerEl.dataset.last_active_tab_group = active_split.parent.id;
+				this_workspace.setActiveLeaf(active_split.parent.children[0],{focus:true}); 
+			},0);		// focus new split
 		 }
 		 // end openItemsInContinuousMode	
 		 // Sort Items
@@ -344,9 +377,14 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					let action = (this.app.plugins.plugins['continuous-mode'].settings.allowSingleClickOpenFolderAction || 'open_left');
 						openItemsInContinuousMode(files,action,'folder');																				break;
 				case e.target.classList.contains('continuous_mode_open_links_button'):
-				case e.target.closest('.continuous_mode_open_links_button') !== null:					openLinksMenu(e);								break;	// open links in continuous mode
+				case e.target.closest('.continuous_mode_open_links_button') !== null:					showLinksMenu(e);								break;	// open links in continuous mode
 				case !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode'):													return;	// do nothing if not in continuous mode
 				case ( /workspace-tab-header/.test(e.target.className) ):								scrollActiveLeafIntoView(false);				break;
+			}
+		});
+		this.registerDomEvent(window,'mousedown', function (e) {
+			if (e.buttons === 2 && e.target.closest('#select-projects') !== null || (e.buttons === 2 || e.altKey) && e.target.classList.contains('current-draft-path')) {
+				showLongformMenu(e);																															// show longform menu
 			}
 		});
 		this.registerDomEvent(window,'mouseover',function (e) {
@@ -384,7 +422,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			if ( !getActiveLeaf().containerEl.closest('.workspace-tabs')?.classList.contains('is_continuous_mode') )		{ return; }	// do nothing if continuous mode is not active in tab group
 			if ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ) { leafArrowNavigation(e); }				// else arrow navigation			
 		});	
-		this.registerDomEvent(window,'dragstart',function(e) { 
+		this.registerDomEvent(window,'dragstart',function(e) {
 			if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
 			if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }					// get initial tab header index for onTabHeaderDragEnd()
 		});
@@ -504,25 +542,92 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						})
 					})
 		}
+		const openItemsInLastTagGroupMenuItems = (item,file,type) => {
+			item.setSubmenu()
+				.addSeparator()
+				.addItem((item8) => {
+					item8.setTitle('Open or append '+type+' in last active tab group')
+					.setIcon('appendFolder')
+					.onClick(async () => { openItemsInContinuousMode(file,'append_last',type); })
+				})
+				.addItem((item9) => {
+					item9.setTitle('Replace last active tab group with '+type)
+					.setIcon('replaceFolder')
+					.onClick(async () => {
+						if ( window.confirm('Warning: This will close all open notes in the active tab group. Are you sure you want to do this?') ) {
+							openItemsInContinuousMode(file,'replace_last',type) 
+						}
+					})
+				})
+		}
+		const showLinksMenu = (e) => {
+			const open_links_menu = new obsidian.Menu(); let links, file, files = [];
+			switch(true) {
+				case e.target.closest('.cm-preview-code-block') !== null:																				// editing view
+					links = e.target.closest('.cm-preview-code-block')?.querySelectorAll('a.internal-link,.search-result .tree-item-inner');	break;
+				case e.target.closest('.internal-query') !== null:																						// reading-view
+					links = e.target.closest('.internal-query')?.querySelectorAll('.search-result .tree-item-inner');							break;
+				case e.target.closest('.block-language-dataview') !== null:																				// reading-view
+					links = e.target.closest('.block-language-dataview')?.querySelectorAll('a.internal-link');									break;
+			}
+			links = Array.from(links).map( link => link.dataset?.href || link.innerText );																// get links
+			files = getFilesFromLinks(links);																											// get files
+			open_links_menu.setUseNativeMenu(false);
+			open_links_menu.addItem(
+				item => openItemsInContinuousModeMenuItems(item,files,'query block links')
+			)
+			open_links_menu.showAtMouseEvent(e);
+		}
+		const showLongformMenu = (e) => {
+			const open_longform_menu = new obsidian.Menu(); 
+			let current_draft_path = e.target.closest('#project-picker-container').querySelector('.current-draft-path').innerText;
+			let longform_index_file = getFilesFromLinks([current_draft_path])[0];
+			let items = getLongformItems(longform_index_file,'project');
+			open_longform_menu.setUseNativeMenu(false);
+			open_longform_menu.addItem(
+				item => openItemsInContinuousModeMenuItems(item,items,'Longform project')
+			)
+			open_longform_menu.showAtMouseEvent(e);
+		}
 		// CONTEXT MENU EVENTS
 		this.registerEvent(
 			this.app.workspace.on('editor-menu', (menu,editor/*,info*/) => {																			// on editor-menu
 				menu.addItem((item) => { 
 					let links = getDocumentLinks('document links',editor.editorComponent.view.file,editor.editorComponent.view.leaf), files = getFilesFromLinks(links);
-					addContinuousModeMenuItem(item,editor?.containerEl?.closest('.workspace-tabs').dataset.tab_group_id);
-					openItemsInContinuousModeMenuItems(item,files,'document links');																	// add open document links items
+					addContinuousModeMenuItem(item,editor?.containerEl?.closest('.workspace-tabs').dataset.tab_group_id)								// add continuous mode items
+					openItemsInContinuousModeMenuItems(item,files,'document links')																	// add open document links items
 				});
 			})
 		);
 		this.registerEvent(
 			this.app.workspace.on('file-menu', (menu,file,source,leaf) => {																				// on file-menu
 				switch(true) {
-					case (/link-context-menu|file-explorer-context-menu/.test(source)):																	// link context menu/file-explorer menu
-						menu.addItem((item) => { openItemsInContinuousModeMenuItems(item,file) });												break;
+					case (/link-context-menu/.test(source)):
+						menu.addItem((item) => { 
+							openItemsInContinuousModeMenuItems(item,file,'link');																		// add open link items
+							openItemsInLastTagGroupMenuItems(item,file,'link');
+						});																														break;
+					case (/file-explorer-context-menu/.test(source)):																					// link context menu/file-explorer menu
+						menu.addItem((item) => { 
+							openItemsInContinuousModeMenuItems(item,file);																				// add open files items
+						});																														break;
+					case (/file-explorer/.test(source)):																								// file-tree-alternative plugin support
+						if ( this.app.workspace.getActiveViewOfType(obsidian.View).leaf === this.app.workspace.getLeavesOfType('file-tree-view')[0] ) {
+							menu.addItem((item) => { 
+								openItemsInContinuousModeMenuItems(item,file);
+							});
+						}																														break;
+					case (/longform/.test(source)):																										// longform plugin support
+						let ctx = this.app.workspace.getLeavesOfType('VIEW_TYPE_LONGFORM_EXPLORER')[0].view.explorerView.$$.ctx[1];
+						let longform_index_file = getFilesFromLinks([ctx.vaultPath])[0];
+						let items = getLongformItems(longform_index_file,'scenes',file);
+						menu.addItem((item) => { 
+							openItemsInContinuousModeMenuItems(item,items,'Longform scenes')
+						});																														break;
 					default:
 						menu.addItem((item) => {																										// file menu
 							let links = getDocumentLinks('document links',file,leaf), files = getFilesFromLinks(links);
-							addContinuousModeMenuItem(item,leaf?.containerEl?.closest('.workspace-tabs').dataset.tab_group_id, leaf, links)
+							addContinuousModeMenuItem(item,leaf?.containerEl?.closest('.workspace-tabs').dataset.tab_group_id, leaf, links)				// add continuous mode items
 							openItemsInContinuousModeMenuItems(item,files,'document links');															// add open document links items
 						});																														break;
 				}
@@ -550,24 +655,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				})
 			})
 		);
-		const openLinksMenu = (e) => {
-			const open_links_menu = new obsidian.Menu(); let links, file, files = [];
-			switch(true) {
-				case e.target.closest('.cm-preview-code-block') !== null:																				// editing view
-					links = e.target.closest('.cm-preview-code-block')?.querySelectorAll('a.internal-link,.search-result .tree-item-inner');	break;
-				case e.target.closest('.internal-query') !== null:																						// reading-view
-					links = e.target.closest('.internal-query')?.querySelectorAll('.search-result .tree-item-inner');							break;
-				case e.target.closest('.block-language-dataview') !== null:																				// reading-view
-					links = e.target.closest('.block-language-dataview')?.querySelectorAll('a.internal-link');									break;
-			}
-			links = Array.from(links).map( link => link.dataset?.href || link.innerText );																// get links
-			files = getFilesFromLinks(links);																											// get files
-			open_links_menu.setUseNativeMenu(false);
-			open_links_menu.addItem(
-				item => openItemsInContinuousModeMenuItems(item,files,'query block links')
-			)
-			open_links_menu.showAtMouseEvent(e);
-		}
 		// OTHER EVENTS
 		this.registerEvent(
 			this.app.workspace.on('layout-change', () => {
@@ -688,7 +775,7 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 				await this.plugin.saveSettings();
 		}));
 		new obsidian.Setting(containerEl).setName('Maximum number of items to open at one time').setDesc('Leave empty (or set to 0) to open all items at once. Otherwise, setting a value here allows you to incrementally open the items in a folder (or search results or document links) by repeatedly selecting “Open or append items in Continuous Mode.” Useful for dealing with folders containing a large number of items.')
-			.addText((A) => A.setPlaceholder("").setValue(this.plugin.settings.maximumItemsToOpen.toString())
+			.addText((A) => A.setPlaceholder("").setValue(this.plugin.settings.maximumItemsToOpen?.toString() || "")
 			.onChange(async (value) => {
 				if ( isNaN(Number(value)) || !Number.isInteger(Number(value)) ) { 
 					alert('Please enter a positive integer, 0, or leave blank.');
@@ -699,7 +786,7 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 				}
 		}));
         new obsidian.Setting(containerEl).setName('Allow single click to open File Explorer folders in Continuous Mode').setDesc('Enable this setting to make it possible to open all items in a File Explorer folder with a single click. Set the default single click action below.')
-        	.addToggle( A => A.setValue(this.plugin.settings.allowSingleClickOpenFolder)
+        	.addToggle( (A) => A.setValue(this.plugin.settings.allowSingleClickOpenFolder)
         	.onChange(async (value) => {
         		this.plugin.settings.allowSingleClickOpenFolder = value;
         		await this.plugin.saveSettings();
