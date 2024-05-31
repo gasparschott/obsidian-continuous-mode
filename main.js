@@ -56,7 +56,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			if ( this.settings.excludeEmbeddedFiles === false ) { document_links = document_links.concat(document_embeds); }							// concat doc links & embedded files
 			let query_links, query_block_links = [];
 			let query_blocks = leaf.view?.editor?.containerEl?.querySelectorAll('.block-language-dataview,.internal-query .search-result-container');	// get query block link elements
-			for ( let i = 0; i < query_blocks.length; i++ ) {
+			for ( let i = 0; i < query_blocks?.length; i++ ) {
 				query_links = [];
 				query_blocks[i].querySelectorAll('a')?.forEach( link => query_links.push(link.href) ) || query_blocks[i].querySelectorAll('.search-result-container .tree-item-inner span:nth-of-type(2)')?.forEach( query_result => query_links.push(query_result?.innerText) );
 				query_block_links.push(query_links)
@@ -288,7 +288,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			getAllLeaves().forEach( leaf => { if ( leaf.pinned === true ) { pinned_tabs.push(leaf.id) } else { leaf.setPinned(true) } });
 			switch(true) {
 				case (/append/.test(action)):																		// append items to currently active tab group
-//				case action === 'append':																		// append items to currently active tab group
 					if ( action.includes('last') ) {
 						let last_active_tab_group = getAllTabGroups()?.find( tab_group => this_workspace.containerEl.dataset.last_active_tab_group === tab_group.id );
 						this_workspace.setActiveLeaf(last_active_tab_group.children[0],{focus:true})
@@ -314,7 +313,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					break;
 			}
 			// sort items:
-			let sort_order = ( type === undefined ? 'alphabetical' : /longform/i.test(type) ? 'longform' : /search/.test(type) ? this.app.workspace.getLeavesOfType('search')[0].view.dom.sortOrder : this.app.workspace.getLeavesOfType('file-explorer')[0].view.sortOrder );
+			let sort_order = ( type === undefined ? 'alphabetical' : /query block links|document links|longform/i.test(type) ? 'none' : /search/.test(type) ? this.app.workspace.getLeavesOfType('search')[0].view.dom.sortOrder : this.app.workspace.getLeavesOfType('file-explorer')[0].view.sortOrder );
 			switch(sort_order) {
 				case 'alphabetical':			items.sort((a,b) => a?.name.localeCompare(b?.name),navigator.language);	break;
 				case 'alphabeticalReverse':		items.sort((a,b) => b?.name.localeCompare(a?.name),navigator.language);	break;
@@ -322,7 +321,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				case 'byModifiedTimeReverse':	items.sort((a,b) => a?.stat.mtime - b?.stat.mtime);						break;
 				case 'byCreatedTime':			items.sort((a,b) => b?.stat.ctime - a?.stat.ctime);						break;
 				case 'byCreatedTimeReverse':	items.sort((a,b) => a?.stat.ctime - b?.stat.ctime);						break;
-				case 'longform':																						break;	// no sort
+				case 'none':																							break;	// no sort
 			}
 			// open sorted items:
 			for ( let i = 0; i < maximumItemsToOpen && i < items.length; i++ ) {										// limit number of items to open
@@ -751,13 +750,13 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 				await this.plugin.saveSettings();
 		}));
 		new obsidian.Setting(containerEl).setName('Include other file extensions').setDesc('If you have installed plugins that allow Obsidian to support file types or extensions not included above, add the file extensions here, comma-separated.').setClass("setting-indent")
-			.addText((value) => value.setPlaceholder("e.g. html, js, py, etc.").setValue(this.plugin.settings.extraFileTypes.join(','))
+			.addText((value) => value.setPlaceholder("e.g. html, js, py, etc.").setValue(this.plugin.settings.extraFileTypes?.join(',') || '')
 			.onChange(async (value) => {
 				this.plugin.settings.extraFileTypes = [...new Set(value.split(','))].filter(Boolean);								// add unique file types, remove empty items
 				await this.plugin.saveSettings();
 		}));
 		new obsidian.Setting(containerEl).setName('Excluded files').setDesc('Exclude files by name and/or extension. Comma-separated, case-sensitive, partial name and Regex allowed. (Note: If the file name contains commas, use periods [wildcard character] instead.) Extensions added here will override the settings in the above categories.').setClass("setting-indent")
-			.addText((value) => value.setPlaceholder("e.g., “index.md”").setValue(this.plugin.settings.excludedNames.join(','))
+			.addText((value) => value.setPlaceholder("e.g., “index.md”").setValue(this.plugin.settings.excludedNames?.join(',') || '')
 			.onChange(async (value) => {
 				this.plugin.settings.excludedNames = [...new Set(value.split(','))].filter(Boolean);									// add unique excluded names, remove empty items
 				await this.plugin.saveSettings();
@@ -775,7 +774,7 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 				await this.plugin.saveSettings();
 		}));
 		new obsidian.Setting(containerEl).setName('Maximum number of items to open at one time').setDesc('Leave empty (or set to 0) to open all items at once. Otherwise, setting a value here allows you to incrementally open the items in a folder (or search results or document links) by repeatedly selecting “Open or append items in Continuous Mode.” Useful for dealing with folders containing a large number of items.')
-			.addText((A) => A.setPlaceholder("").setValue(this.plugin.settings.maximumItemsToOpen?.toString() || "")
+			.addText((A) => A.setPlaceholder("").setValue(this.plugin.settings.maximumItemsToOpen?.toString() || '')
 			.onChange(async (value) => {
 				if ( isNaN(Number(value)) || !Number.isInteger(Number(value)) ) { 
 					alert('Please enter a positive integer, 0, or leave blank.');
