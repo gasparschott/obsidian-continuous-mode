@@ -25,7 +25,7 @@ A plugin for Obsidian that displays all open notes in a tab group as if they wer
 
 ### Basic Example
 With multiple notes already open, toggle Continuous Mode and note headers, scroll notes into view by clicking tab or making it active:
-<img src="assets/01-basic.gif" style="width:448px;" alt="Tab Group Menu" />
+<img src="assets/01-basic.gif" style="width:672px;" alt="Tab Group Menu" />
 
 ### Commands
 Two commands are currently available:
