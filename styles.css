@@ -116,20 +116,16 @@
 	visibility:hidden;
 }
 /* SETTINGS PANE */
-.setting-indent 
+.cm-setting-indent 
 {
 	padding-left:2em;
 	position:relative;
 	box-sizing:content-box;
 }
-.setting-indent div.setting-item-name::before 
+.cm-setting-indent div.setting-item-name::before 
 {
 	content:'• ';
 	color:var(--text-normal);
-}
-/* hide conditionally displayed menu items */
-div.menu-item:has(.menu-item-title:empty) {
-	display:none !important;
 }
 /* OPEN LINKS IN CONTINUOUS MODE BUTTON */
 .continuous_mode_open_links_button {
@@ -154,4 +150,14 @@ div.menu-item:has(.menu-item-title:empty) {
 }
 .block-language-dataview:has(.continuous_mode_open_links_button), .internal-query:has(.continuous_mode_open_links_button) {
 	position:relative;
+}
+/* OutlinerMD plugin fixes */
+.workspace-tabs.is_continuous_mode div.outliner-editor {
+	height:auto !important;
+}
+body:not(.is-mobile) .mod-root div.is_continuous_mode div.outliner-editor .markdown-source-view.mod-cm6 .cm-sizer:has(.inline-title)
+{
+	transform:translateY(0) !important;
+	margin-bottom:48px !important;
+	padding-bottom:48px !important;
 }
