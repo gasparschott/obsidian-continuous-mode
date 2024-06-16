@@ -12,8 +12,8 @@
 	5. [Maximum number of items to open at one time](#maximum-number-of-items-to-open-at-one-time)
 	6. [Allow single click to open File Explorer folders in Continuous Mode](#allow-single-click-to-open-file-explorer-folders-in-continuous-mode)
 - [Other Functions](#other-functions)
-- [Continuous Mode and other Plugins](#continuous-ode-and-other-plugins)
-- [The Settings Window](#the-ettings-window)
+- [Continuous Mode and other Plugins](#continuous-mode-and-other-plugins)
+- [The Settings Window](#the-settings-window)
 - [Troubleshooting](#troubleshooting)
 
 ## Introduction
