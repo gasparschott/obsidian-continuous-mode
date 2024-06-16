@@ -372,7 +372,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		 };
 		// REGISTER EVENTS
 		this.registerDomEvent(window,'click', function (e) {
-console.log(e.target);
 			switch(true) {
 				case (/nav-folder/.test(e.target.classList) && this.app.plugins.plugins['continuous-mode'].settings.allowSingleClickOpenFolder === true ):		// open folders on single click
 					let path = e.target.closest('.nav-folder-title').dataset.path, files = this.app.vault.getFolderByPath(e.target.closest('.nav-folder-title').dataset.path).children;
@@ -431,11 +430,10 @@ console.log(e.target);
 				}
 		});
 		this.registerDomEvent(window,'keydown', function (e) {
-console.log(e.target);
 			switch(true) {
 				case e.target.tagName.toLowerCase() === 'body':									 									return;	// do nothing if tab group is not active
 				case !getActiveLeaf().containerEl.closest('.workspace-tabs')?.classList.contains('is_continuous_mode'):				return;	// do nothing if continuous mode inactive in tab group
-				case ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ): console.log(getActiveEditor());	leafArrowNavigation(e);		break;	// else arrow navigation			
+				case ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ): leafArrowNavigation(e);		break;	// else arrow navigation			
 			}
 		});	
 		this.registerDomEvent(window,'dragstart',function(e) {
@@ -797,9 +795,7 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 				dropDown.addOption("open_down", "Open folder in new split down");
 				dropDown.addOption("append", "Append folder in active tab group");
 				dropDown.addOption("replace", "Replace active tab group with folder");
-//					this.plugin.settings.allowSingleClickOpenFolderAction = ( this.plugin.settings.allowSingleClickOpenFolderAction === undefined || this.plugin.settings.allowSingleClickOpenFolder === 'false' ? "Disabled" : this.plugin.settings.allowSingleClickOpenFolderAction )
 				dropDown.setValue( ( this.plugin.settings.allowSingleClickOpenFolderAction === undefined || this.plugin.settings.allowSingleClickOpenFolder === false ? 'disabled' : this.plugin.settings.allowSingleClickOpenFolderAction ) )
-//				dropDown.setValue( this.plugin.settings.allowSingleClickOpenFolderAction )
 				dropDown.onChange(async (value) => {
 					this.plugin.settings.allowSingleClickOpenFolderAction = value;
 					await this.plugin.saveSettings();
