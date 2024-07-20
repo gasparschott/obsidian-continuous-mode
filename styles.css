@@ -1,33 +1,75 @@
-/* set display:block for workspace tab container */
+.workspace-tabs.is_continuous_mode:not(.mod-stacked)
+{
+	
+}
+
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container
 {
 	display:block !important;
-	overflow:scroll !important;
-	position:relative !important;
-	scroll-behavior:smooth;
+	overflow-y:scroll;
 }
-/* set display:contents for key elements */
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:not(:has( div[data-type="pdf"])),
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]),
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .workspace-leaf-content:not([data-type="pdf"]) .view-content,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .workspace-leaf-content[data-mode="source"]:not([data-type="pdf"]):not([data-type="image"]):not([data-type="graph"]) .view-content > div:not([style*="display"]),
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .workspace-leaf-content .view-content .markdown-source-view,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .workspace-leaf-content[data-mode="source"]:not([data-type="pdf"]) .view-content .markdown-preview-view
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf
 {
-	display:contents !important;
-	height:fit-content !important;
-	max-height:fit-content !important;
-	min-height:max-content !important;
-	justify-self:start;
+	contain:none !important;
+	display:flex !important;
+	height:auto !important;
 }
-/* padding bottom */
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container, 
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .cm-content,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .markdown-preview-sizer
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-content .cm-sizer,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-content .cm-content,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-content > div > div
 {
 	padding-bottom:0 !important;
+	min-height:fit-content !important;
 }
-/* ACTIVE NOTE BORDERS */
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-content > div > div > div
+{
+	padding-bottom:var(--file-margins) !important;
+}
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .empty-state
+{
+	position:relative !important;
+}
+
+/* SPECIFIC VIEW TYPES */
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="canvas"]),
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="graph"]),
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="html-view"]),
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="pdf"]),
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"],
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .pdf-container,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .pdf-content-container,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="html-view"]) .view-content,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="canvas"] .view-content .canvas-wrapper
+{
+	height:calc(100% - 2px) !important;
+}
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="canvas"] .view-content .canvas-wrapper
+{
+	contain:unset;
+}
+/* prevent scroll in inactive canvas, graph, html, pdf leaves in continuous mode */
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .canvas-wrapper,
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="html-view"] .view-content,
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="html-view"] iframe,
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="pdf"] .view-content,
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="graph"] .view-content 
+{
+	pointer-events:none !important;
+}
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="html-view"]):not(.mod-active) .view-content::before
+{
+	content:'';
+	display:block;
+	position:absolute;
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	pointer-events:none;
+}
+
+
+/* ACTIVE LEAF BORDERS */
 .workspace-tabs.is_continuous_mode .workspace-leaf.mod-active::before,
 .workspace-tabs.is_continuous_mode .workspace-leaf.mod-active + .workspace-leaf::before,
 .workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active)::before
@@ -54,60 +96,7 @@
 	border-bottom:1px solid var(--text-faint);
 	position:relative;
 }
-/* IMAGE LEAF STYLES */
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-type="image"] div.image-container
-{
-	padding:var(--file-margins);
-}
-/* PDF LEAF STYLES */
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has( div[data-type="pdf"])
-{
-	display:flex !important;
-}
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .pdf-toolbar
-{
-	display:contents !important;
-}
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container
-{
-	overflow:scroll !important;
-}
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .view-content .pdf-container .pdf-content-container .pdf-viewer-container,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="canvas"] .view-content .canvas-wrapper
-{
-	position:relative !important;
-}
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container .workspace-leaf .workspace-leaf-content[data-type="pdf"] .pdf-viewer
-{
-	padding-top:var(--file-margins);
-	padding-bottom:var(--file-margins);
-}
-/* GRAPH and CANVAS styles */
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has( div[data-type="canvas"])
-{
-}
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="graph"] .view-content,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="canvas"] .view-content .canvas-wrapper
-{
-	height:calc(100% - var(--header-height) - 3px);
-}
-/* prevent pdf, graph, and canvas scrolling in inactive leaves in continuous mode */
-.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .canvas-wrapper,
-.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="pdf"] .view-content,
-.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="graph"] .view-content 
-{
-	pointer-events:none !important;
-}
-/* EMPTY-STATE tabs (new tab) */
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="empty"] .view-content .empty-state 
-{
-	position:relative;
-}
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="empty"] .view-content .empty-state-container .empty-state-action-list
-{
-	margin-bottom:20px;
-}
+
 /* HIDE LEAF HEADERS */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked).hide_note_titles .view-header,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked).hide_note_titles .workspace-leaf-content[data-type="pdf"] .pdf-toolbar
@@ -151,13 +140,10 @@
 .block-language-dataview:has(.continuous_mode_open_links_button), .internal-query:has(.continuous_mode_open_links_button) {
 	position:relative;
 }
+
 /* OutlinerMD plugin fixes */
-.workspace-tabs.is_continuous_mode div.outliner-editor {
-	height:auto !important;
-}
-body:not(.is-mobile) .mod-root div.is_continuous_mode div.outliner-editor .markdown-source-view.mod-cm6 .cm-sizer:has(.inline-title)
+.workspace-tabs.is_continuous_mode .workspace-leaf-content[data-type="outliner-editor-view"] div.outliner-editor .cm-editor
 {
-	transform:translateY(0) !important;
-	margin-bottom:48px !important;
-	padding-bottom:48px !important;
+	min-height:fit-content !important;
 }
+
