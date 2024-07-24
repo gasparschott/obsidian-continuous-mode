@@ -161,13 +161,13 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		// SCROLL ACTIVE LEAF INTO VIEW
 		const scrollActiveLeafIntoView = obsidian.debounce( (bool) => {
 			let active_leaf = getActiveLeaf();
-			if (!active_leaf || active_leaf.containerEl.closest('.is_continuous_mode') === null) { return }
+			if ( !active_leaf || active_leaf.containerEl.closest('.is_continuous_mode') === null ) { return }
 			if ( bool === false || this.settings.disableScrollActiveLeafIntoView === false ) {
 				active_leaf.containerEl.closest('.workspace-tab-container')
-					.scrollTo({top:Number(active_leaf.containerEl.offsetTop) - Number(active_leaf.containerEl.querySelector('.view-header').offsetHeight) - 2,behavior:'smooth'});
+					.scrollTo({top:Number(active_leaf.containerEl?.offsetTop) - Number(active_leaf.containerEl.querySelector('.view-header')?.offsetHeight) - 2,behavior:'smooth'});
+				active_leaf.tabHeaderEl.scrollIntoView({ behavior:"instant", inline:"nearest" });
 			}
 			if ( isVisible.observe(active_leaf.containerEl) ) { workspace.setActiveLeaf(active_leaf,{focus:true}); isVisible.disconnect(); }	// set active leaf when visible; prevents scroll bounce
-			// sleep(1000).then( () => { this.app.workspace.setActiveLeaf(active_leaf,{focus:true}) });					// set active leaf after scrolling complete
 		},0 );
 		// ARROW NAVIGATION between open leaves
 		const leafArrowNavigation = (e) => {
@@ -255,7 +255,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 																																				break;
 					}																															break;
 			}
-			scroll_top = (getActiveLeaf().view.viewer?.containerEl?.querySelector('.focused_pdf_page')?.offsetTop || 0) + getActiveLeaf().containerEl?.querySelector('.pdf-toolbar').offsetHeight;
+			scroll_top = (getActiveLeaf().view.viewer?.containerEl?.querySelector('.focused_pdf_page')?.offsetTop || 0) + getActiveLeaf().containerEl?.querySelector('.pdf-toolbar')?.offsetHeight;
 			getActiveLeaf().containerEl?.querySelector('.pdf-container').scrollTo({left:0,top:scroll_top,behavior:'smooth'});
 			getActiveLeaf().view.viewer?.containerEl?.querySelector('.pdf-toobar')?.click();	// needed to focus pdf viewer and enable proper page navigation by arrow keys
 		}
@@ -309,8 +309,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			// sort items:
 			let sort_order = ( type === undefined ? 'alphabetical' : /query block links|document links|longform/i.test(type) ? 'none' : /search/.test(type) ? workspace.getLeavesOfType('search')[0].view.dom.sortOrder : workspace.getLeavesOfType('file-explorer')[0].view.sortOrder );
 			switch(sort_order) {
-				case 'alphabetical':			items.sort((a,b) => a?.name.localeCompare(b?.name),navigator.language);	break;
-				case 'alphabeticalReverse':		items.sort((a,b) => b?.name.localeCompare(a?.name),navigator.language);	break;
+				case 'alphabetical':			items.sort((a,b) => (a.name).localeCompare(b.name,navigator.language,{numeric:true}));	break;
+				case 'alphabeticalReverse':		items.sort((a,b) => (b.name).localeCompare(a.name,navigator.language,{numeric:true}));	break;
 				case 'byModifiedTime':			items.sort((a,b) => b?.stat.mtime - a?.stat.mtime);						break;
 				case 'byModifiedTimeReverse':	items.sort((a,b) => a?.stat.mtime - b?.stat.mtime);						break;
 				case 'byCreatedTime':			items.sort((a,b) => b?.stat.ctime - a?.stat.ctime);						break;
@@ -319,7 +319,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 			// open sorted items:
 			for ( let i = 0; i < maximumItemsToOpen && i < items.length; i++ ) {										// limit number of items to open
-				active_split = workspace.getLeaf();																// open new tab/leaf
+				active_split = workspace.getLeaf();																		// open new tab/leaf
 				active_split.openFile(items[i]);																		// open file
 				active_split.setPinned(true);																			// pin each new tab/leaf to stop Obsidian reusing it to open next file in loop
 			}
@@ -337,8 +337,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		 	let items = active_tab_group.children, sorted = [], pinned_tabs = [], active_split;
 		 	if ( items === null ) { return }
 			switch(sort_order) {																				// sort files
-				case 'alphabetical':			sorted = items.toSorted((a,b) => a?.view.file.name.localeCompare(b?.view.file.name),navigator.language);	break;
-				case 'alphabeticalReverse':		sorted = items.toSorted((a,b) => b?.view.file.name.localeCompare(a?.view.file.name),navigator.language);	break;
+				case 'alphabetical':			sorted = items.toSorted((a,b) => (a?.view.file.name).localeCompare(b?.view.file.name,navigator.language,{numeric:true}));	break;
+				case 'alphabeticalReverse':		sorted = items.toSorted((a,b) => (b?.view.file.name).localeCompare(a?.view.file.name,navigator.language,{numeric:true}));	break;
 				case 'byModifiedTime':			sorted = items.toSorted((a,b) => b?.view.file.stat.mtime - a?.view.file.stat.mtime);						break;
 				case 'byModifiedTimeReverse':	sorted = items.toSorted((a,b) => a?.view.file.stat.mtime - b?.view.file.stat.mtime);						break;
 				case 'byCreatedTime':			sorted = items.toSorted((a,b) => b?.view.file.stat.ctime - a?.view.file.stat.ctime);						break;
