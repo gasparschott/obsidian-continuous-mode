@@ -287,7 +287,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			getAllLeaves().forEach( leaf => { if ( leaf.pinned === true ) { pinned_tabs.push(leaf.id) } else { leaf.setPinned(true) } });
 			switch(true) {
 				case (/append/.test(action)):																	// append items...
-					workspace.setActiveLeaf(workspace.getMostRecentLeaf(),{focus:true});				// set most recent leaf to active
+					workspace.setActiveLeaf(workspace.getMostRecentLeaf(),{focus:true});						// set most recent leaf to active
 					if ( getActiveLeaf().parent?.children.length === 1 && getActiveLeaf().getViewState().type === 'empty' ) { getActiveLeaf().setPinned(false); } 	// unpin single active empty leaf
 					items = items.filter( item => !open_files.includes(item) );									// filter already open files (this filter only needed here)
 					break;
@@ -302,21 +302,22 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					break;
 				default:																						// create new group left/right/up/down
 					new_split = ( /down/.test(action) ? workspace.createLeafBySplit(workspace.getMostRecentLeaf(),'horizontal',false) : /up/.test(action) ? workspace.createLeafBySplit(workspace.getMostRecentLeaf(),'horizontal',true) : workspace.createLeafBySplit(workspace.rootSplit,'vertical',(/left/.test(action) ? false : true )) );
-					workspace.setActiveLeaf(workspace.getLeafById(new_split.id),{focus:true});		// focus new group
+					workspace.setActiveLeaf(workspace.getLeafById(new_split.id),{focus:true});					// focus new group
 					active_split = new_split;
 					break;
 			}
 			// sort items:
 			let sort_order = ( type === undefined ? 'alphabetical' : /query block links|document links|longform/i.test(type) ? 'none' : /search/.test(type) ? workspace.getLeavesOfType('search')[0].view.dom.sortOrder : workspace.getLeavesOfType('file-explorer')[0].view.sortOrder );
 			switch(sort_order) {
-				case 'alphabetical':			items.sort((a,b) => (a.name).localeCompare(b.name,navigator.language,{numeric:true}));	break;
-				case 'alphabeticalReverse':		items.sort((a,b) => (b.name).localeCompare(a.name,navigator.language,{numeric:true}));	break;
+				case 'alphabetical':			items.sort((a,b) => (a.basename).localeCompare(b.basename,navigator.language,{sensitivity:'base',numeric:true}));	break;
+				case 'alphabeticalReverse':		items.sort((a,b) => (b.basename).localeCompare(a.basename,navigator.language,{sensitivity:'base',numeric:true}));	break;
 				case 'byModifiedTime':			items.sort((a,b) => b?.stat.mtime - a?.stat.mtime);						break;
 				case 'byModifiedTimeReverse':	items.sort((a,b) => a?.stat.mtime - b?.stat.mtime);						break;
 				case 'byCreatedTime':			items.sort((a,b) => b?.stat.ctime - a?.stat.ctime);						break;
 				case 'byCreatedTimeReverse':	items.sort((a,b) => a?.stat.ctime - b?.stat.ctime);						break;
 				case 'none':																							break;	// no sort
 			}
+console.log(items.forEach(item => console.log(item.name)))
 			// open sorted items:
 			for ( let i = 0; i < maximumItemsToOpen && i < items.length; i++ ) {										// limit number of items to open
 				active_split = workspace.getLeaf();																		// open new tab/leaf
@@ -337,8 +338,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		 	let items = active_tab_group.children, sorted = [], pinned_tabs = [], active_split;
 		 	if ( items === null ) { return }
 			switch(sort_order) {																				// sort files
-				case 'alphabetical':			sorted = items.toSorted((a,b) => (a?.view.file.name).localeCompare(b?.view.file.name,navigator.language,{numeric:true}));	break;
-				case 'alphabeticalReverse':		sorted = items.toSorted((a,b) => (b?.view.file.name).localeCompare(a?.view.file.name,navigator.language,{numeric:true}));	break;
+				case 'alphabetical':			sorted = items.toSorted((a,b) => 
+															(a?.view.file.basename).localeCompare(b?.view.file.basename,navigator.language,{sensitivity:'base',numeric:true}));	break;
+				case 'alphabeticalReverse':		sorted = items.toSorted((a,b) => 
+															(b?.view.file.basename).localeCompare(a?.view.file.basename,navigator.language,{sensitivity:'base',numeric:true}));	break;
 				case 'byModifiedTime':			sorted = items.toSorted((a,b) => b?.view.file.stat.mtime - a?.view.file.stat.mtime);						break;
 				case 'byModifiedTimeReverse':	sorted = items.toSorted((a,b) => a?.view.file.stat.mtime - b?.view.file.stat.mtime);						break;
 				case 'byCreatedTime':			sorted = items.toSorted((a,b) => b?.view.file.stat.ctime - a?.view.file.stat.ctime);						break;
