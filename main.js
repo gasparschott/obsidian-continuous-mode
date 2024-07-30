@@ -161,8 +161,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		// SCROLL ACTIVE LEAF INTO VIEW
 		const scrollActiveLeafIntoView = obsidian.debounce( (bool) => {
 			let active_leaf = getActiveLeaf();
-			if ( !active_leaf || active_leaf.containerEl.closest('.is_continuous_mode') === null ) { return }
-			if ( bool === false || this.settings.disableScrollActiveLeafIntoView === false ) {
+			if ( !active_leaf || !active_leaf?.containerEl?.closest('.is_continuous_mode') ) { return }
+			if ( !bool || !this.settings.disableScrollActiveLeafIntoView ) {
 				active_leaf.containerEl.closest('.workspace-tab-container')
 					.scrollTo({top:Number(active_leaf.containerEl?.offsetTop) - Number(active_leaf.containerEl.querySelector('.view-header')?.offsetHeight) - 2,behavior:'smooth'});
 				active_leaf.tabHeaderEl.scrollIntoView({ behavior:"instant", inline:"nearest" });
@@ -172,7 +172,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		// ARROW NAVIGATION between open leaves
 		const leafArrowNavigation = (e) => {
 			switch(true) {																												// Ignore arrow navigation function in these cases:
-				case ( /input|textarea/.test(document.activeElement.tagName.toLowerCase())):											// input or textarea
+				case !getActiveLeaf()?.containerEl?.closest('.workspace-tabs')?.classList.contains('is_continuous_mode'):
+				case ( /input|textarea/.test(document?.activeElement?.tagName?.toLowerCase())):											// input or textarea
 				case getActiveLeaf()?.containerEl?.closest('.mod-root') === null && !getActiveEditor()?.hasFocus():						// not in leaf editor or editor not focussed
 				case e.target.querySelector('.canvas-node.is-focused') && /Arrow/.test(e.key): 											// editing canvas
 				case e.target.querySelector('.workspace-leaf-content[data-set="graph"]') && /Arrow/.test(e.key) && e.shiftKey:	return;	// graph active; use shift key to move graph
@@ -201,7 +202,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 							if ( active_leaf.containerEl.previousSibling !== null ) {																	// ignore if first leaf
 								workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(active_leaf) - 1],{focus:true});			// make previous leaf active 
 								getActiveEditor()?.setCursor({line:getActiveEditor().lastLine(),ch:getActiveEditor().lastLine().length - 1});			// select last char
-								scrollActiveLeafIntoView(false);
 							}
 							break;
 					}
@@ -221,13 +221,12 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						case active_leaf.getViewState().state.mode === 'preview':																		// leaf is in preview mode
 						case (!/markdown/.test(active_leaf.getViewState().type)):																		// make next leaf active
 							workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(active_leaf) + 1] || active_leaf),{focus:true});
-							scrollActiveLeafIntoView(false);
 							break;
 					}
 					break;
 			}
 		    const pos = { line:getActiveEditor()?.getCursor().line, ch:getActiveEditor()?.getCursor().ch } || { line:0,ch:0 };
-			if ( e.target?.cmView && this.settings.disableScrollActiveLeafIntoView === true ) { return } else { getActiveEditor()?.scrollIntoView({to:pos,from:pos},true); }
+			if ( e.target?.cmView && this.settings.disableScrollActiveLeafIntoView === true ) { return } else { getActiveEditor()?.scrollIntoView({to:pos,from:pos},true); }	// "typewriter scroll"
 		}
 		// PDF PAGE NAVIGATION
 		function pdfPageNavigation(e) {
@@ -317,7 +316,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				case 'byCreatedTimeReverse':	items.sort((a,b) => a?.stat.ctime - b?.stat.ctime);						break;
 				case 'none':																							break;	// no sort
 			}
-console.log(items.forEach(item => console.log(item.name)))
 			// open sorted items:
 			for ( let i = 0; i < maximumItemsToOpen && i < items.length; i++ ) {										// limit number of items to open
 				active_split = workspace.getLeaf();																		// open new tab/leaf
@@ -432,7 +430,7 @@ console.log(items.forEach(item => console.log(item.name)))
 				}
 		});
 		this.registerDomEvent(document,'keydown', (e) => {
-			if ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && workspace.getActiveViewOfType(obsidian.View).getViewType() !== 'file-explorer' && getActiveLeaf().containerEl.closest('.workspace-tabs')?.classList.contains('is_continuous_mode') ) { 
+			if ( /Arrow/.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ) { 
 					leafArrowNavigation(e);
 			}
 		});	
@@ -590,7 +588,7 @@ console.log(items.forEach(item => console.log(item.name)))
 			this.app.workspace.on('editor-menu', (menu,editor/*,info*/) => {																			// on editor-menu
 				menu.addItem((item) => { 
 					let links = getDocumentLinks('document links',editor.editorComponent.view.file,editor.editorComponent.view.leaf), files = getFilesFromLinks(links);
-					addContinuousModeMenuItem(item,editor?.containerEl?.closest('.workspace-tabs').dataset.tab_group_id)								// add continuous mode items
+					addContinuousModeMenuItem(item,editor?.containerEl?.closest('.workspace-tabs')?.dataset?.tab_group_id)								// add continuous mode items
 					openItemsInContinuousModeMenuItems(item,files,'document links')																		// add open document links items
 				});
 			})
@@ -623,7 +621,7 @@ console.log(items.forEach(item => console.log(item.name)))
 					default:
 						menu.addItem((item) => {																										// file menu
 							links = getDocumentLinks('document links',file,leaf), files = getFilesFromLinks(links);
-							addContinuousModeMenuItem(item,leaf?.containerEl?.closest('.workspace-tabs').dataset.tab_group_id, leaf, links)				// add continuous mode items
+							addContinuousModeMenuItem(item,leaf?.containerEl?.closest('.workspace-tabs')?.dataset?.tab_group_id, leaf, links)				// add continuous mode items
 							openItemsInContinuousModeMenuItems(item,files,'document links');															// add open document links items
 						});																														break;
 				}
@@ -639,7 +637,7 @@ console.log(items.forEach(item => console.log(item.name)))
 		)
 		this.registerEvent(
 			this.app.workspace.on('tab-group-menu', (menu,tab_group) => {																				// on tab-group-menu
-				menu.addItem((item) => { addContinuousModeMenuItem(item,tab_group.containerEl?.dataset.tab_group_id) });
+				menu.addItem((item) => { addContinuousModeMenuItem(item,tab_group?.containerEl?.dataset?.tab_group_id) });
 			})
 		);
 		this.registerEvent(

@@ -34,6 +34,7 @@
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="canvas"]),
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="graph"]),
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="html-view"]),
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="surfing-view"]),
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="pdf"]),
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"],
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .pdf-container,
