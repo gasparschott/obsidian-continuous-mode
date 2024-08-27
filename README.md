@@ -60,9 +60,9 @@ See the Settings for options to:
 - open File Explorer folder items with one click.  
 
 **Notes:**   
-Opening folders is not recursive—only the top level notes in the folder will be opened.  
-Sort order of the source (e.g., File Explorer, Search Results) is respected when opening multiple items. Once opened, sort order does not dynamically update when it is changed in the file explorer; reopen the folder in Continuous Mode to accomplish this.  
-Similarly, after opening multiple files, the tab group will not dynamically reflect any changes you make to the folder structure in the file explorer. If you do make any changes (e.g., move, create, or delete a note), you'll have to reopen the folder to see the updated structure.
+- Opening folders is not recursive—only the top level notes in the folder will be opened.  
+- Sort order of the source (e.g., File Explorer, Search Results) is respected when opening multiple items. Once opened, sort order does not dynamically update when it is changed in the file explorer; reopen the folder in Continuous Mode to accomplish this.  
+- Similarly, after opening multiple files, the tab group will not dynamically reflect any changes you make to the folder structure in the file explorer. If you do make any changes (e.g., move, create, or delete a note), you'll have to reopen the folder to see the updated structure.
 
 ## Commands
 Many of the above functions can be invoked via the Command Palette.
