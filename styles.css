@@ -13,17 +13,15 @@
 	contain:none !important;
 	display:flex !important;
 	height:auto !important;
+	min-height:fit-content !important;
 }
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-content .cm-sizer,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-content .cm-content,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-content > div > div
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .workspace-leaf-content:not([data-type="backlink"]) .view-content > div > div,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .markdown-preview-sizer.markdown-preview-section
 {
 	padding-bottom:0 !important;
 	min-height:fit-content !important;
-}
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-content > div > div > div
-{
-	padding-bottom:var(--file-margins) !important;
 }
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .empty-state
 {
@@ -37,8 +35,8 @@
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="surfing-view"]),
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="pdf"]),
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"],
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .pdf-container,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .pdf-content-container,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .pdf-container,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .pdf-content-container,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="html-view"]) .view-content,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="canvas"] .view-content .canvas-wrapper
 {
@@ -48,7 +46,161 @@
 {
 	contain:unset;
 }
-/* prevent scroll in inactive canvas, graph, html, pdf leaves in continuous mode */
+.workspace-tabs.is_continuous_mode .workspace-leaf-content[data-type="search"] .search-result-container
+{
+	display:table !important;
+}
+/* SIDEBAR PANES */
+/* Show pane titles, add borders, and fix display issues in Continuous Mode */
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .view-header, 
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .view-header .view-header-title-container,
+.workspace-fake-target-overlay.is-in-sidebar .view-header
+{
+	display:flex;
+	text-align:center;
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode .backlink-pane,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode .outgoing-link-pane
+{
+	display:table;
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .view-header :is(.view-header-left,.view-actions),
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="all-properties"],[data-type="bookmarks"]) .view-header
+{
+	display:none !important;
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode .workspace-leaf-content:is([data-type="all-properties"],[data-type="file-explorer"],[data-type="bookmarks"],[data-type="backlink"]) .nav-header,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode.hide_note_titles .workspace-leaf-content:is([data-type="outline"]) .nav-header,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="outline"]) .view-header
+{
+	margin-bottom: var(--size-4-3);
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content .nav-header
+{
+	background-color:var(--background-primary);
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="file-explorer"],[data-type="bookmarks"]) .nav-header
+{
+	padding:0 0 var(--size-4-2);
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="all-properties"]) .search-input-container
+{
+	margin-left:var(--size-4-4);
+	margin-right:var(--size-4-4);
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="backlink"], [data-type="outgoing-link"], [data-type="outline"]) .view-header
+{
+	height:100%;
+	background-color:var(--background-primary);
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="backlink"], [data-type="outgoing-link"], [data-type="outline"]) .view-header-title-container
+{
+	flex-direction:column;
+	gap:0;
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="backlink"],[data-type="outgoing-link"], [data-type="outline"]) .view-header-title-parent
+{
+	max-width:100%;
+	overflow:auto;
+	padding:var(--size-4-2);
+	padding-bottom:0 !important;
+	background-color:var(--background-primary);
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="backlink"], [data-type="outgoing-link"], [data-type="outline"]) .view-header-title
+{
+	color:var(--text-muted);
+	display:table;
+	padding:var(--size-4-2);
+	background-color:var(--background-primary);
+}
+/* sidebar pane titles */
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="all-properties"]) .nav-header::before,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="bookmarks"]) .nav-header::before,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="file-explorer"]) .nav-header::before,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="search"])::before,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="tag"]) .nav-header::before
+{
+	color:var(--text-muted);
+	font-family:var(--file-header-font);
+	font-size:var(--file-header-font-size);
+	font-weight:var(--file-header-font-weight);
+	display:block;
+	text-align:center;
+	margin-bottom:var(--size-4-2);
+	padding:var(--size-4-2);
+	background-color:var(--background-primary);
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="all-properties"],[data-type="tag"]) .nav-header::before
+{
+	padding:0 var(--size-4-2) var(--size-4-2);
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="all-properties"]) .nav-header::before
+{
+	content:"All properties";
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="bookmarks"]) .nav-header::before
+{
+	content:"Bookmarks";
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="file-explorer"]) .nav-header::before
+{
+	content:"File Explorer";
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="search"])::before
+{
+	content:"Search"; 
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="tag"]) .nav-header::before
+{
+	content:"Tags";
+}
+/* ACTIVE LEAF BORDERS */
+.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active::before,
+.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active + .workspace-leaf::before,
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active)::before
+{
+	content:'';
+	width:100%;
+	display:block !important;
+	position:relative;
+}
+.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active::before
+{
+	border-top:2px solid var(--text-faint);
+}
+.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active + .workspace-leaf::before 
+{
+	border-top:1px solid var(--text-faint) !important;
+}
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active)::before,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode .workspace-leaf.mod-active .workspace-leaf-content:is([data-type="tag"]) .nav-header::after
+{
+	border-top:2px dotted var(--text-faint);
+}
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf.mod-active .workspace-leaf-content:is([data-type="backlink"]) .view-header,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf.mod-active .workspace-leaf-content:is([data-type="outline"]) .nav-header,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf.mod-active .workspace-leaf-content:is([data-type="all-properties"],[data-type="file-explorer"],[data-type="bookmarks"],[data-type="tag"]) .nav-header::before
+{ 
+	border-bottom:2px dotted var(--text-faint);
+}
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .nav-header:not(:has( + .view-header)),
+.workspace-tabs.is_continuous_mode:not(.mod-stacked):not(.hide_note_titles) .workspace-leaf.mod-active .nav-header:has( + .view-header),
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode .workspace-leaf.mod-active .workspace-leaf-content:is([data-type="search"])::before,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .view-header,
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode.hide_note_titles .workspace-leaf.mod-active .workspace-leaf-content:is([data-type="all-properties"],[data-type="bookmarks"],[data-type="outline"]) .nav-header
+{ 
+	border-bottom:1px solid var(--text-faint);
+	position:relative;
+}
+
+/* HIDE LEAF HEADERS */
+.workspace-tabs.is_continuous_mode:not(.mod-stacked).hide_note_titles .view-header,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked).hide_note_titles .workspace-leaf-content[data-type="pdf"] .pdf-toolbar
+{ 
+	height:0;
+	visibility:hidden;
+}
+/* PREVENT SCROLL in inactive canvas, graph, html, pdf leaves in continuous mode */
 .workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .canvas-wrapper,
 .workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="html-view"] .view-content,
 .workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="html-view"] iframe,
@@ -69,42 +221,6 @@
 	pointer-events:none;
 }
 
-
-/* ACTIVE LEAF BORDERS */
-.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active::before,
-.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active + .workspace-leaf::before,
-.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active)::before
-{
-	content:'';
-	width:100%;
-	display:block !important;
-	position:relative;
-}
-.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active::before
-{
-	border-top:2px solid var(--text-faint);
-}
-.workspace-tabs.is_continuous_mode .workspace-leaf.mod-active + .workspace-leaf::before 
-{
-	border-top:1px solid var(--text-faint) !important;
-}
-.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active)::before
-{
-	border-top:2px dotted var(--text-faint);
-}
-.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf.mod-active .view-header
-{ 
-	border-bottom:1px solid var(--text-faint);
-	position:relative;
-}
-
-/* HIDE LEAF HEADERS */
-.workspace-tabs.is_continuous_mode:not(.mod-stacked).hide_note_titles .view-header,
-.workspace-tabs.is_continuous_mode:not(.mod-stacked).hide_note_titles .workspace-leaf-content[data-type="pdf"] .pdf-toolbar
-{ 
-	height:0;
-	visibility:hidden;
-}
 /* SETTINGS PANE */
 .cm-setting-indent 
 {
