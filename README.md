@@ -17,7 +17,7 @@
 - [Troubleshooting](#troubleshooting)
 
 ## Introduction
-A plugin for Obsidian that displays all open notes in a tab group as if they were a continuous scrollable document (sometimes called “Scrivenings mode”). Continuous Mode is available for notes in the Main Split and panes in the Sidebars. The plugin also allows keyboard navigation between notes, and provides several ways to open multiple notes at one time—from the File Explorer, search results, document links, or dataview/query blocks.
+A plugin for Obsidian that displays all open notes in a tab group as if they were a continuous scrollable document (sometimes called “Scrivenings mode”). Continuous Mode is available for notes in the Main Split and panes in the Sidebars. The plugin also allows keyboard navigation between notes, and provides several ways to open multiple notes at a time from the File Explorer, search results, document links, or dataview/query blocks.
 
 ### <a href="https://www.buymeacoffee.com/fiLtliTFxQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;" ></a>
 
@@ -49,15 +49,15 @@ In other contexts, the menu will include options to allow you to open multiple i
 
 <img src="assets/menu-open-folder.png" style="width:307px;" alt="Folder Menu" />  
 
-This menu will show “file,” “document links,” “query block links,” “search results” instead of “folder” depending on the context. You can:
+This menu will show “file,” “document links,” “query block links,” “search results” instead of “folder contents” depending on the context. You can:
 - Open items in a new split (left, right, up, down).  
 - Open or append items in the active tab group; files will not be duplicated if they are already open.  
 - Replace files in the active tab group with files from the selected folder (i.e., close all open notes in active tab group and replace with folder items).  
 
 See the Settings for options to:
-- filter (include or exclude) the files that are opened: by type (e.g., markdown, images, canvas, etc.), extension, or file name.  
-- set the number of items to open at one time.  
-- open File Explorer folder items with one click.  
+- filter (include or exclude) the folder items that are opened by type (e.g., markdown, images, canvas, etc.), extension, or file name;  
+- set the number of items to open at one time;  
+- open File Explorer folder contents with one click.  
 
 **Notes:**   
 - Opening folders is not recursive—only the top level notes in the folder will be opened.  
@@ -95,5 +95,5 @@ If you find that Continuous Mode interferes with or doesn’t work properly with
 
 
 ## Troubleshooting
-- “No readable files found”: If you know that there are readable files in the source you are trying to open, check the plugin settings to make sure that the “Filter file types” are set to include the file types .
+- “No readable files found”: If you know that there are readable files in the source you are trying to open, check the plugin settings to make sure that the “Filter file types” are set to include the file types. If you are attempting to open document or query block links, check that the links are valid and point to existing files.
 

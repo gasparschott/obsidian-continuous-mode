@@ -23,6 +23,10 @@
 	padding-bottom:0 !important;
 	min-height:fit-content !important;
 }
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .workspace-leaf-content:not([data-type="backlink"]) .view-content .markdown-reading-view > div
+{
+	padding-bottom:var(--file-margins) !important;
+}
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .empty-state
 {
 	position:relative !important;

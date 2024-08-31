@@ -317,7 +317,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			workspace.activeTabGroup.containerEl.dataset.sort_order = sort_order;										// set data-sort_order
 			toggleContinuousMode(this.app.appId +'_'+ workspace.activeTabGroup.id,true)									// enable continuous mode
 			setTimeout(() => { workspace.setActiveLeaf(active_split?.parent.children[0],{focus:true}); },0);			// focus new group
-			workspace.updateLayout();
 		 }
 		 // end openItemsInContinuousMode	
 		 // Sort Items
@@ -639,8 +638,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			})
 		);
 		this.registerEvent(
-			this.app.workspace.on('leaf-menu', (menu,tab_group) => {																					// on leaf-menu (e.g. sidebar tab headers)
-				menu.addItem((item) => { addContinuousModeMenuItem(item,tab_group?.containerEl?.closest('.workspace-tabs').dataset?.tab_group_id) });
+			this.app.workspace.on('leaf-menu', (menu,leaf) => {																					// on leaf-menu (e.g. sidebar tab headers)
+				if ( leaf.containerEl.closest('.mod-left-split,.mod-right-split') ) {
+					menu.addItem((item) => { addContinuousModeMenuItem(item,leaf?.containerEl?.closest('.workspace-tabs').dataset?.tab_group_id) });
+				}
 			})
 		);
 		this.registerEvent(
@@ -839,12 +840,12 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 		new obsidian.Setting(containerEl).setName('Set default single-click action:').setClass("cm-setting-indent")
 			.addDropdown((dropDown) => {
 				dropDown.addOption("disabled", "—");
-				dropDown.addOption("open_left", "Open folder in new split left");
-				dropDown.addOption("open_right", "Open folder in new split right");
-				dropDown.addOption("open_up", "Open folder in new split up");
-				dropDown.addOption("open_down", "Open folder in new split down");
-				dropDown.addOption("append", "Append folder in active tab group");
-				dropDown.addOption("replace", "Replace active tab group with folder");
+				dropDown.addOption("open_left", "Open folder contents in new split left");
+				dropDown.addOption("open_right", "Open folder contents in new split right");
+				dropDown.addOption("open_up", "Open folder contents in new split up");
+				dropDown.addOption("open_down", "Open folder contents in new split down");
+				dropDown.addOption("append", "Append folder contents in active tab group");
+				dropDown.addOption("replace", "Replace active tab group with folder contents");
 				dropDown.setValue( ( this.plugin.settings.allowSingleClickOpenFolderAction === undefined || this.plugin.settings.allowSingleClickOpenFolder === false ? 'disabled' : this.plugin.settings.allowSingleClickOpenFolderAction ) )
 				dropDown.onChange(async (value) => {
 					this.plugin.settings.allowSingleClickOpenFolderAction = value;
