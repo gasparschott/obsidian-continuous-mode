@@ -1,12 +1,12 @@
 .workspace-tabs.is_continuous_mode:not(.mod-stacked)
 {
-	
 }
 
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-tab-container
 {
 	display:block !important;
 	overflow-y:scroll;
+	scroll-behavior:smooth;
 }
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf
 {
@@ -226,7 +226,11 @@
 }
 
 /* SETTINGS PANE */
-.cm-setting-indent 
+.cm-setting-bold
+{
+	font-weight:bold;
+}
+.cm-setting-indent, .cm-setting-indent-no-bullet
 {
 	padding-left:2em;
 	position:relative;
@@ -268,3 +272,15 @@
 	min-height:fit-content !important;
 }
 
+/* EXPERIMENTAL: unset position:relative in editor leaves to allow active line scrollTo in full height of tab group */
+/* allows getting y-scroll position of active editor line */
+/* 
+.workspace-leaf, 
+.workspace-leaf-content, 
+.view-content, 
+.markdown-source-view, 
+.markdown-source-view .cm-editor
+{
+	position:static !important;
+}
+ */

@@ -55,13 +55,15 @@ This menu will show “file,” “document links,” “query block links,” �
 - Replace files in the active tab group with files from the selected folder (i.e., close all open notes in active tab group and replace with folder items).  
 
 See the Settings for options to:
-- filter (include or exclude) the folder items that are opened by type (e.g., markdown, images, canvas, etc.), extension, or file name;  
-- set the number of items to open at one time;  
-- open File Explorer folder contents with one click.  
+- Filter (include or exclude) the folder items that are opened by type (e.g., markdown, images, canvas, etc.), extension, or file name;  
+- Set the number of items to open at one time;  
+– Set the sorting order when opening multiple items.
+- Open File Explorer folder contents with one click.  
 
 **Notes:**   
 - Opening folders is not recursive—only the top level notes in the folder will be opened.  
-- Sort order of the source (e.g., File Explorer, Search Results) is respected when opening multiple items. Once opened, sort order does not dynamically update when it is changed in the file explorer; reopen the folder in Continuous Mode to accomplish this.  
+– You can select multiple non-consecutive files (but not [yet?] folders) in the File Explorer (Alt/Opt + Click) and open them via the context menu.
+- Sort order of the source (e.g., File Explorer, Search Results) is respected when opening multiple items. Once opened, sort order does not dynamically update when it is changed in the file explorer; reopen the folder in Continuous Mode to accomplish this or change the sort order via the tab group menu. In the Settings you can choose the default sort order when opening multiple items.  
 - Similarly, after opening multiple files, the tab group will not dynamically reflect any changes you make to the folder structure in the file explorer. If you do make any changes (e.g., move, create, or delete a note), you'll have to reopen the folder to see the updated structure.
 
 ## Commands
