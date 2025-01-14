@@ -76,11 +76,11 @@ Compact Mode
 Semi-Compact Mode  
 <img src="assets/semi-compact-mode.png" style="width:621px;" alt="Semi-Compact Mode" />  
 
-	• When Compact Mode is active, the left split will preview the first few lines of each open note (or a thumbnail for images). Clicking a preview or otherwise making it active will open the note in the right sidebar.  
-	• When Semi-Compact Mode is active, the active note will be displayed normally.  
-	• Compact Mode notes can be navigated with the arrow keys.  
-	• Added user settings to open clicked file explorer folders or files in compact mode.  
-	• Note: You may wish to disable the Obsidian editor setting ```Always focus new tabs``` to allow continuous arrow navigation of Compact View items.  
+	- When Compact Mode is active, the left split will preview the first few lines of each open note (or a thumbnail for images). Clicking a preview or otherwise making it active will open the note in the right sidebar.  
+	- When Semi-Compact Mode is active, the active note will be displayed normally.  
+	- Compact Mode notes can be navigated with the arrow keys.  
+	- Added user settings to open clicked file explorer folders or files in compact mode.  
+	- Note: You may wish to disable the Obsidian editor setting ```Always focus new tabs``` to allow continuous arrow navigation of Compact View items.  
 
 ## Commands
 Many of the above functions can be invoked via the Command Palette.
