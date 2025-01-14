@@ -67,7 +67,7 @@ See the Settings for options to:
 	- Sort order of the source (e.g., File Explorer, Search Results) is respected when opening multiple items. Once opened, sort order does not dynamically update when it is changed in the file explorer; reopen the folder in Continuous Mode to accomplish this or change the sort order via the tab group menu. In the Settings you can choose the default sort order when opening multiple items.  
 	- Similarly, after opening multiple files, the tab group will not dynamically reflect any changes you make to the folder structure in the file explorer. If you do make any changes (e.g., move, create, or delete a note), you'll have to reopen the folder to see the updated structure.
 
-#### Compact Mode  
+### Compact Mode  
 Compact Mode emulates the note preview sidebar found in apps like Bear or Evernote.
 <img src="assets/compact-mode.png" style="width:621px;" alt="Compact Mode" />  
 <img src="assets/semi-compact-mode.png" style="width:621px;" alt="Semi-Compact Mode" />  
