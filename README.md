@@ -68,10 +68,14 @@ See the Settings for options to:
 	- Similarly, after opening multiple files, the tab group will not dynamically reflect any changes you make to the folder structure in the file explorer. If you do make any changes (e.g., move, create, or delete a note), you'll have to reopen the folder to see the updated structure.
 
 #### Compact Mode  
-Compact Mode emulates the note preview sidebar found in apps like Bear or Evernote. When Compact Mode is active, the left split will display the first few lines of each open note (or a thumbnail for images). 
-	- By default, clicking a preview or navigating with the arrow keys will open the note in the right sidebar. 
-		- You may wish to disable the Obsidian editor setting ```Always focus new tabs``` to allow continuous arrow navigation of the Compact View items. 
-	- Alternately, disable the plugin setting ```Open selected note in new right split``` and the active previewed note will expand in place to its full height instead.   
+Compact Mode emulates the note preview sidebar found in apps like Bear or Evernote.
+<img src="assets/compact-mode.png" style="width:621px;" alt="Compact Mode" />  
+<img src="assets/semi-compact-mode.png" style="width:621px;" alt="Semi-Compact Mode" />  
+	• When Compact Mode is active, the left split will preview the first few lines of each open note (or a thumbnail for images). Clicking a preview or otherwise making it active will open the note in the right sidebar.  
+	• When Semi-Compact Mode is active, the active note will be displayed normally.  
+	• Compact Mode notes can be navigated with the arrow keys.  
+	• Added user settings to open clicked file explorer folders or files in compact mode.  
+	• Note: You may wish to disable the Obsidian editor setting ```Always focus new tabs``` to allow continuous arrow navigation of Compact View items.  
 
 ## Commands
 Many of the above functions can be invoked via the Command Palette.
