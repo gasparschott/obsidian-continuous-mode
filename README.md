@@ -75,8 +75,7 @@ Compact Mode
 
 Semi-Compact Mode  
 <img src="assets/semi-compact-mode.png" style="width:621px;" alt="Semi-Compact Mode" />  
-
-	- When Compact Mode is active, the left split will preview the first few lines of each open note (or a thumbnail for images). Clicking a preview or otherwise making it active will open the note in the right sidebar.  
+ 	- When Compact Mode is active, the left split will preview the first few lines of each open note (or a thumbnail for images). Clicking a preview or otherwise making it active will open the note in the right sidebar.  
 	- When Semi-Compact Mode is active, the active note will be displayed normally.  
 	- Compact Mode notes can be navigated with the arrow keys.  
 	- Added user settings to open clicked file explorer folders or files in compact mode.  
