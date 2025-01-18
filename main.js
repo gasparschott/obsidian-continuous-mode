@@ -346,7 +346,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				case is_semi_compact_mode && !active_editor && !/ArrowLeft|ArrowRight/.test(e.key):
 				case is_semi_compact_mode && is_last_line && e.key === 'ArrowDown':
 				case is_semi_compact_mode && cursor_anchor?.ch === 0 && cursor_anchor?.line === 0 && e.key === 'ArrowUp':
-				case is_compact_mode: 			compactModeNavigation(e,active_leaf,activeTabGroupChildren);									return;	// use compact mode navigation
+				case is_compact_mode && !is_semi_compact_mode: 			compactModeNavigation(e,active_leaf,activeTabGroupChildren);			return;	// use compact mode navigation
 				case workspace.leftSplit.containerEl.querySelector('.tree-item-self.nav-file-title.is-selected.has-focus') !== null:
 					scrollSideBarItems(workspace.leftSplit.containerEl.querySelector('.tree-item-self.nav-file-title.is-selected.has-focus'));			// scroll focused file explorer item into view
 				case !getActiveLeaf()?.containerEl?.closest('.workspace-tabs')?.classList.contains('is_continuous_mode'):								// continuous mode inactive in .workspace-tabs

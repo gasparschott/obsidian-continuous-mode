@@ -388,11 +388,6 @@
 {
 	opacity:1;
 }
-.mod-root .workspace-tabs.is_continuous_mode.is_compact_mode:not(.hide_note_titles) .workspace-leaf :is(.cm-scroller,.markdown-preview-view),
-.mod-root .workspace-tabs.is_continuous_mode.is_semi_compact_mode:not(.hide_note_titles) .workspace-leaf.mod-active :is(.cm-scroller,.markdown-preview-view)
-{
-	padding-top:0;
-}
 .mod-root .workspace-tabs.is_continuous_mode.only_show_file_name .view-header-title-parent,
 .mod-root .workspace-tabs.is_continuous_mode.is_compact_mode .workspace-leaf :is(.cm-gutters,.view-header-left,.view-actions,.metadata-properties-heading,.metadata-add-button,.cm-line span:not(.cm-header):not(.cm-hmd-internal-link):not(.cm-link-alias)),
 .mod-root .workspace-tabs.is_continuous_mode.is_semi_compact_mode .workspace-leaf:not(.mod-active) :is(.cm-gutters,.view-header-left,.view-actions,.metadata-properties-heading,.metadata-content,.metadata-add-button,.cm-line span:not(.cm-header):not(.cm-hmd-internal-link):not(.cm-link-alias)),
