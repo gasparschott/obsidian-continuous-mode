@@ -32,11 +32,6 @@
 {
 	position:relative !important;
 }
-.workspace-tab-header.temp_pinned .workspace-tab-header-status-icon,
-.menu-separator + .menu-item.tappable:has(.menu-item-title:empty):has(.menu-item-icon:empty) + .menu-item.tappable:has(.menu-item-title:empty):has(.menu-item-icon:empty) + .menu-separator 
-{
-	display:none !important;
-}
 /* SPECIFIC VIEW TYPES */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="canvas"]),
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="graph"]),
@@ -121,11 +116,6 @@
 	display:table;
 	padding:var(--size-4-2);
 	background-color:var(--background-primary);
-}
-/* completely hide empty context menu items */
-.menu-item:has(.menu-item-icon:empty,.menu-item-title:empty)
-{
-	padding:0;
 }
 /* sidebar pane titles */
 .workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="all-properties"]) .nav-header::before,
