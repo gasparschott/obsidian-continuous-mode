@@ -652,8 +652,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						active_leaf = workspace.activeTabGroup.children.find(child => child.tabHeaderEl.className.includes('is-active'));
 						workspace.setActiveLeaf(active_leaf,{focus:true}); 
 					});																																			// nobreak
-				case ( e.target.closest('.workspace-leaf')?.classList.contains('mod-active') && e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode') && !e.target.classList.contains('view-header-title')):
-				case ( /workspace-tab-header|nav-header|view-header-title-container/.test(e.target.className) && workspace.activeTabGroup.containerEl.classList.contains('is_continuous_mode')  && !e.target.classList.contains('view-header-title') ):
+				case ( e.target.closest('.workspace-leaf')?.classList.contains('mod-active') && e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode') && !e.target.classList.contains('view-header-title') && !e.target.classList.contains('inline-title')):
+				case ( /workspace-tab-header|nav-header|view-header-title-container/.test(e.target.className) && workspace.activeTabGroup.containerEl.classList.contains('is_continuous_mode') && !e.target.classList.contains('view-header-title') && !e.target.classList.contains('inline-title')):
 					workspace.setActiveLeaf(getActiveLeaf(),{focus:true});	
 					scrollItemsIntoView(e);																												break;	// click tab, scroll into view
 			}
