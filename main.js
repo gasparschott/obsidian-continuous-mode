@@ -551,7 +551,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 							workspace.activeTabGroup.children.forEach( child => { if ( child !== appended_leaf ) { activateLeafThenDetach(child,child,0); } });		
 							workspace.activeTabGroup.containerEl.classList.remove('hide_pins');
 							resetPinnedLeaves(); 																					// reset pinned status
-							return;
+							break;
 						default:																									// open folder/multiple files ==> close all open leaves
 							workspace.activeTabGroup.children.forEach( child => { activateLeafThenDetach(child,child,0); });				break;
 					}																										break;
@@ -620,6 +620,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				workspace.activeTabGroup.children.forEach( child => { if ( child.getViewState().type === 'empty' ) { activateLeafThenDetach(child,child,0); }  });	// remove empty leaf
 				workspace.activeTabGroup.containerEl.classList.remove('hide_pins');										// remove class
 				resetPinnedLeaves(); 																					// reset pinned status
+				activateLeaf(first_leaf,0,true);																		// activate the first leaf
 				activateLeaf(first_leaf,1000,true);																		// activate the first leaf
 			}
 			openItems(items);
