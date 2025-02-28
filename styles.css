@@ -7,7 +7,10 @@
 {
 	display:block !important;
 	overflow-y:scroll;
-	scroll-behavior:smooth;
+}
+.workspace-tabs.is_continuous_mode:not(.mod-stacked):not(.is_disable_scroll) .workspace-tab-container
+{
+	!scroll-behavior:smooth;
 }
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf
 {
@@ -69,7 +72,8 @@
 	display:table;
 }
 .workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .view-header :is(.view-header-left,.view-actions),
-.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="all-properties"],[data-type="bookmarks"]) .view-header
+.workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="all-properties"],[data-type="bookmarks"]) .view-header,
+.hide_pins .workspace-tab-header-status-icon.mod-pinned
 {
 	display:none !important;
 }
@@ -241,6 +245,14 @@
 	content:'• ';
 	color:var(--text-normal);
 }
+.setting-item.hidden
+{
+	display:none;
+}
+.setting-item:has(.checkbox-container.is-enabled) + .setting-item.hidden
+{ 
+	display:flex;
+}
 /* OPEN LINKS IN CONTINUOUS MODE BUTTON */
 .continuous_mode_open_links_button {
 	padding: var(--size-2-2) var(--size-2-3);
@@ -282,7 +294,9 @@
 .mod-root .workspace-tabs.is_continuous_mode.is_compact_mode:not(.hide_note_titles) .workspace-leaf .view-header,
 .mod-root .workspace-tabs.is_continuous_mode.is_semi_compact_mode:not(.hide_note_titles) .workspace-leaf:not(.mod-active) .view-header
 {
-    min-height: var(--header-height);
+    height:auto;
+    min-height: 0;
+    padding-top:var(--size-4-3);
  	pointer-events:none;
 }
 .mod-root .workspace-tabs.is_continuous_mode.is_compact_mode .workspace-leaf .view-header-title-container,
@@ -306,7 +320,8 @@
 .mod-root .workspace-tabs.is_continuous_mode.is_compact_mode .workspace-leaf .view-content:not(:has(.audio-container,.video-container,.image-container,.pdf-viewer)),
 .mod-root .workspace-tabs.is_continuous_mode.is_semi_compact_mode .workspace-leaf:not(.mod-active) .view-content:not(:has(.audio-container,.video-container,.image-container,.pdf-viewer))
 {
- 	padding-bottom:var(--size-4-4);
+ 	padding-top:var(--size-4-2);
+ 	padding-bottom:var(--size-4-3);
 }
 .mod-root .workspace-tabs.is_continuous_mode.is_compact_mode .workspace-leaf .view-content:has(.audio-container,.video-container,.image-container),
 .mod-root .workspace-tabs.is_continuous_mode.is_semi_compact_mode .workspace-leaf .view-content:has(.audio-container,.video-container,.image-container)
@@ -345,6 +360,15 @@
 	margin-top:0;
 	margin-bottom:0;
 	vertical-align:bottom;
+	white-space:pre-line;
+}
+.mod-root .workspace-tabs.is_continuous_mode.is_compact_mode .workspace-leaf :is(.cm-editor,.markdown-preview-view) .inline-title
+{
+	margin-block-end:var(--size-2-2) !important;
+}
+.mod-root .workspace-tabs.is_continuous_mode.is_compact_mode.hide_note_titles .workspace-leaf :is(.cm-editor,.markdown-preview-view) .inline-title
+{
+	padding-top:var(--size-4-0);
 }
 .mod-root .workspace-tabs.is_continuous_mode.is_compact_mode .workspace-leaf .cm-line
 {
@@ -357,7 +381,7 @@
 .mod-root .workspace-tabs.is_continuous_mode.is_compact_mode .workspace-leaf :is(.cm-scroller,.markdown-preview-view),
 .mod-root .workspace-tabs.is_continuous_mode.is_semi_compact_mode .workspace-leaf:not(.mod-active) :is(.cm-scroller,.markdown-preview-view)
 {
-	padding:var(--size-4-4);
+	padding:0 var(--size-4-4) 0;
 	display: -webkit-box !important;
 	-webkit-line-clamp: 2;
  	-webkit-box-orient: vertical;
