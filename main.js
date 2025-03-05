@@ -1,3 +1,7 @@
+/* eslint-disable no-fallthrough */
+/* jshint esversion: 6 */
+
+
 'use strict';
 
 let obsidian = require('obsidian');
@@ -121,7 +125,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		const activateLeaf = (leaf, timeout, bool) => {
 			return delayedPromise( timeout, () => {
 				workspace.setActiveLeaf(leaf, { focus: true });
-				if ( bool ) { leaf.containerEl.click(); leaf.tabHeaderEl.click(); }
+				if ( bool ) { leaf?.containerEl?.click(); leaf?.tabHeaderEl?.click(); }
 			});
 		}
 		const delayedPromise = (timeout, callback) => {
@@ -548,7 +552,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					workspace.setActiveLeaf(recent_leaf,{focus:true});
 					switch(true) {
 						case appended_leaf !== null:																				// open single file ==> close all open leaves except appended leaf
-							workspace.activeTabGroup.children.forEach( child => { if ( child !== appended_leaf ) { activateLeafThenDetach(child,child,0); } });		
+							workspace.activeTabGroup.children.forEach( child => { if ( child !== appended_leaf ) { activateLeafThenDetach(child,child,10); } });		
 							workspace.activeTabGroup.containerEl.classList.remove('hide_pins');
 							resetPinnedLeaves(); 																					// reset pinned status
 							break;
@@ -557,7 +561,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					}																										break;
 				case ( /append/.test(action) ):																						// append folder items to active tab group
 					if ( type === 'file' ) {
-						findDuplicateLeaves(open_leaves).forEach( leaf => { activateLeafThenDetach(workspace.getLeafById(leaf.id),workspace.getLeafById(leaf.id),0) } );	// close dupe notes
+						findDuplicateLeaves(open_leaves).forEach( leaf => { activateLeafThenDetach(workspace.getLeafById(leaf.id),workspace.getLeafById(leaf.id),100) } );	// close dupe notes
 					}
 					items = items.filter( item => !open_files.includes(item) );														// no dupe notes
 					workspace.iterateAllLeaves( child => { sleep(0).then( () => { child.setPinned(false); }); });
@@ -569,6 +573,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 								workspace.activeTabGroup.containerEl.classList.remove('is_compact_mode','is_semi_compact_mode'); 
 							}																								break;
 						default:
+//case  items.length === 1 && open_files.includes(items[0]): 	 
+// 	active_leaf === recent_leaf.parent.children.filter( child => items[0] === child.view.file )
+// 	resetPinnedLeaves(); workspace.setActiveLeaf(active_leaf,{focus:true}); 
+// 	console.log(recent_leaf);
+// 				return;
 							workspace.setActiveLeaf(appended_leaf,{focus:true}); 													// set single appended leaf to active
 							scrollRootItems(appended_leaf.containerEl);														break;	// scroll single appended leaf into view
 					}																										break;
@@ -620,7 +629,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				workspace.activeTabGroup.children.forEach( child => { if ( child.getViewState().type === 'empty' ) { activateLeafThenDetach(child,child,0); }  });	// remove empty leaf
 				workspace.activeTabGroup.containerEl.classList.remove('hide_pins');										// remove class
 				resetPinnedLeaves(); 																					// reset pinned status
-				activateLeaf(first_leaf,0,true);																		// activate the first leaf
+				activateLeaf(first_leaf,0,true);																		// hacky workaround: call activateLeaf twice
 				activateLeaf(first_leaf,1000,true);																		// activate the first leaf
 			}
 			openItems(items);
@@ -670,7 +679,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		 };
 		/*-----------------------------------------------*/
 		// REGISTER DOM EVENTS
-		this.registerDomEvent(window,'click', (e) => {
+		this.registerDomEvent(document,'click', (e) => {
 			let action = this.settings.allowSingleClickOpenFolderAction, path = '', items = null, active_leaf, active_compact_leaf;
 			switch(true) {
 				case typeof e.target.className === 'string' && e.target?.className?.includes('metadata-'):												break;
@@ -690,7 +699,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						path = e.target.closest('.nav-file-title').dataset.path, items = this.app.vault.getFileByPath(path);
 						openItemsInContinuousMode([items],action,'file'); 
 					});																																	break;
-				case ( e.target.closest('.nav-folder.tree-item') !== null && this.settings.allowSingleClickOpenFolder === true )  		// open file explorer folders on single click
+				case ( /nav-folder/.test(e.target.classList) && this.settings.allowSingleClickOpenFolder === true )  		// open file explorer folders on single click
 						&& e.target.closest('.nav-folder-collapse-indicator') === null && e.target.closest('.collapse-icon') === null
 						&& !e.altKey && !e.ctrlKey && !e.shiftKey && e.button !== 2
 						&& action !== 'disabled':
@@ -715,7 +724,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					scrollItemsIntoView(e,getActiveLeaf());																								break;	// click tab, scroll into view
 			}
 		});
-		this.registerDomEvent(window,'mousedown', (e) => {
+		this.registerDomEvent(document,'mousedown', (e) => {
 			switch(true) {
 				case ( e.target.closest('.nav-file.tree-item') !== null 
 					&& this.settings.allowSingleClickOpenFolder === true ) 
@@ -732,9 +741,9 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				case this.settings.allowSingleClickOpenFolder === false:
 				case e.altKey || e.ctrlKey || e.shiftKey || e.button === 2:																				break;	// do nothing
 				case ( e.target.classList.contains('menu-item-title') && testStr.test(e.target.innerText) ):													// nobreak; CM menu items
-				case ( e.target.closest('.nav-file.tree-item') !== null ):																						// nobreak; file explorer files
- 				case ( e.target.closest('.nav-folder.tree-item') !== null																						// file explorer folders
+ 				case ( /nav-folder/.test(e.target.classList)																						// file explorer folders
  					&& e.target.closest('.nav-folder-collapse-indicator') === null && e.target.closest('.collapse-icon') === null ): 
+				case ( e.target.closest('.nav-file.tree-item') !== null ):																						// nobreak; file explorer files
 						workspace.iterateAllLeaves( leaf => {
 							if ( leaf.pinned !== true ) { 
 								leaf.setPinned(true); leaf.containerEl.classList.add('temp_pinned'); leaf.tabHeaderEl.classList.add('temp_pinned');				// pin all unpinned leaves, add class
