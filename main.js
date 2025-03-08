@@ -354,19 +354,20 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		/*-----------------------------------------------*/
 		// ARROW NAVIGATION between open leaves
 		const leafArrowNavigation = (e) => {
-			e.preventDefault();
 			let active_leaf = getActiveLeaf(), activeTabGroupChildren = workspace.activeTabGroup.children, el = null, anchorNode = getSelection()?.anchorNode;
 			const is_last_line = () => {
 				return getActiveCursor()?.ch === getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length && getActiveCursor()?.line === ( getActiveEditor()?.lastLine() ); 
 			}
 			switch(true) {																														// Ignore arrow navigation function in these cases:
 				case isCompactMode():			compactModeNavigation(e,active_leaf,activeTabGroupChildren);											// use compact mode navigation
+				case e.target.closest('.view-header') !== null:																							// allow arrow in note headers
 				case getActiveLeaf()?.containerEl?.closest('.mod-root') === null && !getActiveEditor()?.hasFocus():										// not in editor
 				case e.target.querySelector('.canvas-node.is-focused') && /Arrow/.test(e.key): 															// editing canvas
 				case e.target.querySelector('.workspace-leaf-content[data-set="graph"]') && /Arrow/.test(e.key) && e.shiftKey:					return;	// graph active; use shift key to move graph
 				case workspace.leftSplit.containerEl.querySelector('.tree-item-self.nav-file-title.is-selected.has-focus') !== null:
 					scrollSideBarItems(workspace.leftSplit.containerEl.querySelector('.tree-item-self.nav-file-title.is-selected.has-focus'));	return;	// scroll focused file explorer item into view
 			}
+			e.preventDefault();
 			switch(e.key) {
 				case 'ArrowUp': case 'ArrowLeft': case 'PageUp':
 					switch(true) {
