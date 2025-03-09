@@ -427,30 +427,21 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					}																															break;
 				case 'ArrowDown':	case 'ArrowRight': case 'PageDown':
 					switch(true) {
-// 						case getAnchorOffset() !== getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length 
-// 							 && getActiveCursor()?.line === getActiveEditor()?.lastLine() 
-// 							 && e.key === 'ArrowDown': 
-// console.log("A");
-// //								getActiveEditor()?.setCursor({line:getActiveEditor()?.lastLine(),ch:0});										
-// 								return;	// last line
 						case getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length === getAnchorOffset() 
 							 && getActiveCursor()?.line === getActiveEditor()?.lastLine() 
 							 && e.key === 'ArrowDown' 
 							 && !getActiveEditor().containerEl.classList.contains('last-line-active'): 
 								getActiveEditor().containerEl.classList.add('last-line-active');														// add last line active class
 								getActiveEditor()?.setCursor({line:getActiveEditor()?.lastLine(),ch:getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length});	
-console.log("B");
 								return;	// last line active
 						case e.target === active_leaf.view.inlineTitleEl && inlineTitleIsVisible() 
 							 && e.key === 'ArrowDown':
-console.log("C");
 							 	e.preventDefault();																								break;	// inline-title ArrowDown
 						case e.target === active_leaf.view.inlineTitleEl && inlineTitleIsVisible() 
 							 && e.key === 'ArrowRight':																							break;	// inline-title ArrowRight
 						case getAnchorOffset() !== 0 && e.key === 'ArrowDown' 
 							 && /inline-title/.test(anchorNode?.parentElement?.className) 
 							 && inlineTitleIsVisible(): 
-console.log("D");
 							selectAll(active_leaf.view.inlineTitleEl);																			break;	// inline title select text
 						case ( /outliner-editor-view/.test(active_leaf.getViewState().type) ):
 						case ( /metadata-/.test(e.target.className) ): 																			break;
@@ -467,7 +458,6 @@ console.log("D");
 						case is_last_line() && e.key !== 'ArrowRight':
 						case getActiveLeaf().getViewState().state.mode === 'preview' && e.key !== 'ArrowRight':											// leaf is in preview mode
 						case ( !/markdown/.test(active_leaf.getViewState().type) ):
-console.log("E");
 							workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(active_leaf) + 1] || active_leaf),{focus:true});	// make next leaf active
 							getSelection()?.removeAllRanges();
 							if ( getActiveLeaf().getViewState().state.mode !== 'preview' ) {
