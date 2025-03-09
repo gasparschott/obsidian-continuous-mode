@@ -342,8 +342,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					break;
 			}
 		}
-		const scrollItemsIntoView = obsidian.debounce( (e) => {
-			let target = ( /body/i.test(e?.target?.tagName) ? workspace.getActiveViewOfType(obsidian.View).containerEl : e?.target || e?.containerEl );
+		const scrollItemsIntoView = obsidian.debounce( (e,el) => {
+			let target = ( el ? el : /body/i.test(e?.target?.tagName) ? workspace.getActiveViewOfType(obsidian.View).containerEl : e?.target || e?.containerEl );
 			if ( target === undefined || target.closest('.is_continuous_mode') === null ) { return }										// ignore e.target ancestor is not in continuous mode
 			switch(true) {
 				case ( target.closest('.mod-sidedock.mod-left-split,.mod-sidedock.mod-right-split') !== null ):	scrollSideBarItems(target);	break;	// scroll sidebar items
@@ -359,8 +359,9 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				return getActiveCursor()?.ch === getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length && getActiveCursor()?.line === ( getActiveEditor()?.lastLine() ); 
 			}
 			switch(true) {																														// Ignore arrow navigation function in these cases:
-				case isCompactMode():			compactModeNavigation(e,active_leaf,activeTabGroupChildren);											// use compact mode navigation
-				case e.target.closest('.view-header') !== null:																							// allow arrow in note headers
+				case !active_leaf.parent.containerEl.classList.contains('is_continuous_mode'): 													return; // not in continuous mode
+				case isCompactMode():			compactModeNavigation(e,active_leaf,activeTabGroupChildren);									return;	// use compact mode navigation
+				case e.target.closest('.view-header') !== null:																							// allow arrows in note headers
 				case getActiveLeaf()?.containerEl?.closest('.mod-root') === null && !getActiveEditor()?.hasFocus():										// not in editor
 				case e.target.querySelector('.canvas-node.is-focused') && /Arrow/.test(e.key): 															// editing canvas
 				case e.target.querySelector('.workspace-leaf-content[data-set="graph"]') && /Arrow/.test(e.key) && e.shiftKey:					return;	// graph active; use shift key to move graph
@@ -426,24 +427,30 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					}																															break;
 				case 'ArrowDown':	case 'ArrowRight': case 'PageDown':
 					switch(true) {
-						case getAnchorOffset() !== getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length 
-							 && getActiveCursor()?.line === getActiveEditor()?.lastLine() 
-							 && e.key === 'ArrowDown': 
-								getActiveEditor()?.setCursor({line:getActiveEditor()?.lastLine(),ch:0});										return;	// last line
+// 						case getAnchorOffset() !== getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length 
+// 							 && getActiveCursor()?.line === getActiveEditor()?.lastLine() 
+// 							 && e.key === 'ArrowDown': 
+// console.log("A");
+// //								getActiveEditor()?.setCursor({line:getActiveEditor()?.lastLine(),ch:0});										
+// 								return;	// last line
 						case getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length === getAnchorOffset() 
 							 && getActiveCursor()?.line === getActiveEditor()?.lastLine() 
 							 && e.key === 'ArrowDown' 
 							 && !getActiveEditor().containerEl.classList.contains('last-line-active'): 
 								getActiveEditor().containerEl.classList.add('last-line-active');														// add last line active class
-								getActiveEditor()?.setCursor({line:getActiveEditor()?.lastLine(),ch:getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length});	return;	// last line active
+								getActiveEditor()?.setCursor({line:getActiveEditor()?.lastLine(),ch:getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length});	
+console.log("B");
+								return;	// last line active
 						case e.target === active_leaf.view.inlineTitleEl && inlineTitleIsVisible() 
 							 && e.key === 'ArrowDown':
+console.log("C");
 							 	e.preventDefault();																								break;	// inline-title ArrowDown
 						case e.target === active_leaf.view.inlineTitleEl && inlineTitleIsVisible() 
 							 && e.key === 'ArrowRight':																							break;	// inline-title ArrowRight
 						case getAnchorOffset() !== 0 && e.key === 'ArrowDown' 
 							 && /inline-title/.test(anchorNode?.parentElement?.className) 
 							 && inlineTitleIsVisible(): 
+console.log("D");
 							selectAll(active_leaf.view.inlineTitleEl);																			break;	// inline title select text
 						case ( /outliner-editor-view/.test(active_leaf.getViewState().type) ):
 						case ( /metadata-/.test(e.target.className) ): 																			break;
@@ -460,6 +467,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						case is_last_line() && e.key !== 'ArrowRight':
 						case getActiveLeaf().getViewState().state.mode === 'preview' && e.key !== 'ArrowRight':											// leaf is in preview mode
 						case ( !/markdown/.test(active_leaf.getViewState().type) ):
+console.log("E");
 							workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(active_leaf) + 1] || active_leaf),{focus:true});	// make next leaf active
 							getSelection()?.removeAllRanges();
 							if ( getActiveLeaf().getViewState().state.mode !== 'preview' ) {
@@ -690,7 +698,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					&& e.target.closest('.workspace-tab-header-new-tab') === null && e.target.closest('.workspace-tab-header-tab-list') === null:
 						active_compact_leaf = workspace.getActiveViewOfType(obsidian.View)?.leaf;
 						if ( active_compact_leaf.parent.containerEl.classList.contains('is_compact_mode') ) { openInRightSplit(e,active_compact_leaf); }
-						scrollItemsIntoView(e,active_compact_leaf);
+						scrollItemsIntoView(e,active_compact_leaf.containerEl);
 						workspace.setActiveLeaf(active_compact_leaf,{focus:true})
 					break;
 				case ( e.target.closest('.nav-file.tree-item') !== null && this.settings.allowSingleClickOpenFolder === true ) 			// open file explorer files on single click
@@ -713,16 +721,14 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						active_leaf = workspace.activeTabGroup.children.find(child => child.tabHeaderEl.className.includes('is-active'));
 						workspace.setActiveLeaf(active_leaf,{focus:true}); 
 					});																																			// nobreak
-				case ( e.target.closest('.workspace-leaf')?.classList.contains('mod-active') 
-						&& e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode') 
-						&& !e.target.classList.contains('view-header-title') 
-						&& !e.target.classList.contains('inline-title')):
+// 				case ( e.target.closest('.workspace-leaf')?.classList.contains('mod-active') 
+// 						&& e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode') 
+// 						&& !/view-header-title|inline-title|cm-line|cm-header|cm-preview|cm-embed/.test(e.target.className)):
 				case ( /workspace-tab-header|nav-header|view-header-title-container/.test(e.target.className) 
 						&& workspace.activeTabGroup.containerEl.classList.contains('is_continuous_mode') 
-						&& !e.target.classList.contains('view-header-title') 
-						&& !e.target.classList.contains('inline-title')):
+						&& !/view-header-title|inline-title/.test(e.target.className)):
 					workspace.setActiveLeaf(getActiveLeaf(),{focus:true});	
-					scrollItemsIntoView(e,getActiveLeaf());																								break;	// click tab, scroll into view
+					scrollItemsIntoView(e,getActiveLeaf().containerEl);																					break;	// click tab, scroll into view
 			}
 		});
 		this.registerDomEvent(document,'mousedown', (e) => {
