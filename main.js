@@ -1041,28 +1041,30 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		);
 		/*-----------------------------------------------*/
 		// ADD COMMAND PALETTE ITEMS		
-		['active','left','right'].forEach( side => {													// add commands: toggle continuous mode in active tab group, left/right sidebars
+		['active','left','right','root'].forEach( side => {													// add commands: toggle continuous mode in active tab group, left/right sidebars
 			const toggleCM = (tab_group) => { 
 				toggleContinuousMode([this.app.appId +'_'+ tab_group.id],( tab_group.containerEl.classList?.contains('is_continuous_mode') ? false : true ),'@0') 
 			}
 			this.addCommand({
-				id: 	( side === 'active' ? 'toggle-continuous-mode-active' : 'toggle-continuous-mode-in-'+side+'-sidebar' ),
-				name:	( side === 'active' ? 'Toggle Continuous Mode in active tab group' : 'Toggle Continuous Mode in '+side+' sidebar' ),
+				id: 	( side === 'active' ? 'toggle-continuous-mode-active' : side === 'root' ? 'toggle-continuous-mode-in-root-tab-groups' : 'toggle-continuous-mode-in-'+side+'-sidebar' ),
+				name:	( side === 'active' ? 'Toggle Continuous Mode in active tab group' : side === 'root' ? 'Toggle Continuous Mode in root tab groups' : 'Toggle Continuous Mode in '+side+' sidebar'),
 				callback: () => {
 					switch(side) {
 						case 'left':	getTabGroupsRecursively(workspace.leftSplit).forEach( tab_group => toggleCM(tab_group) );		break;
 						case 'right':	getTabGroupsRecursively(workspace.rightSplit).forEach( tab_group => toggleCM(tab_group) );		break;
+						case 'root':	getTabGroupsRecursively(workspace.rootSplit).forEach( tab_group => toggleCM(tab_group) );		break;
 						default: 		toggleCM(workspace.activeTabGroup); 
 					}
 				}
 			});
 			this.addCommand({																			// add command: toggle display of leaf headers
-				id: 	( side === 'active' ? 'toggle-headers-active-tab-group' : 'toggle-headers-in-'+side+'-sidebar' ),
-				name:	( side === 'active' ? 'Toggle visibility of note titles in active tab group' : 'Toggle visibility of note titles '+side+' sidebar' ),
+				id: 	( side === 'active' ? 'toggle-headers-active-tab-group' : side === 'root' ? 'toggle-headers-in-root-tab-groups' : 'toggle-headers-in-'+side+'-sidebar' ),
+				name:	( side === 'active' ? 'Toggle visibility of note titles in active tab group' : side === 'root' ? 'Toggle visibility of note titles in root tab groups' : 'Toggle visibility of note titles '+side+' sidebar' ),
 				callback: () => {
 					switch(side) {
 						case 'left':	workspace.leftSplit.containerEl.querySelectorAll('.workspace-tabs').forEach( tab_group => tab_group.classList.toggle('hide_note_titles') );		break;
 						case 'right':	workspace.rightSplit.containerEl.querySelectorAll('.workspace-tabs').forEach( tab_group => tab_group.classList.toggle('hide_note_titles') );	break;
+						case 'root':	workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs').forEach( tab_group => tab_group.classList.toggle('hide_note_titles') );		break;
 						default: 		workspace.activeTabGroup.containerEl.classList.toggle('hide_note_titles');
 					}
 				},
@@ -1323,18 +1325,6 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 				this.plugin.settings.enableSmoothScroll = value;
 				await this.plugin.saveSettings();
 		}));
-// 		new obsidian.Setting(containerEl).setName('Disable scroll active note into view').setDesc('If you find the plugin’s default scroll behavior on arrow navigation (which keeps the insertion point more or less centered by line/paragraph, similar to “typewriter mode”) distracting, enable this setting. Clicking tab headers will still scroll notes into view.')
-// 			.addToggle( A => A.setValue(this.plugin.settings.enableScrollIntoView === false ? false : this.plugin.settings.disableScrollRootItemsIntoView)
-// 			.onChange(async (value) => {
-// 				this.plugin.settings.disableScrollRootItemsIntoView = value;
-// 				await this.plugin.saveSettings();
-// 		}));
-// 		new obsidian.Setting(containerEl).setName('Disable scroll sidebar items into view').setDesc('Don’t scroll sidebar tree items into view when an item is selected or becomes active.')
-// 			.addToggle( A => A.setValue(this.plugin.settings.disableScrollSidebarsIntoView)
-// 			.onChange(async (value) => {
-// 				this.plugin.settings.disableScrollSidebarsIntoView = value;
-// 				await this.plugin.saveSettings();
-// 		}));
 		new obsidian.Setting(containerEl).setName('Disable warnings').setDesc('Don’t warn when replacing active tab group with folder contents or opening in compact view.')
 			.addToggle( A => A.setValue(this.plugin.settings.disableWarnings)
 			.onChange(async (value) => {
