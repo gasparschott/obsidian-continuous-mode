@@ -500,7 +500,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		/*-----------------------------------------------*/
 		// OPEN ITEMS IN CONTINUOUS MODE getAllTabGroups
 		const openItemsInContinuousMode = async (items,action,type) => {
-			if ( !items ) { return }
+			if ( !items ) { resetPinnedLeaves(); return }
 			let active_leaf, new_leaf, recent_leaf = workspace.getMostRecentLeaf(), direction, bool, dupe = null, last_opened_leaf = null, found = null; 
 			let open_files = [], open_leaves = [], included_extensions = [];
 			recent_leaf?.parent?.children?.forEach( child => { open_files.push(child?.view?.file); open_leaves.push(child) });			// get open files in active tab group
@@ -523,12 +523,15 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			);
 			switch(true) {																															// warnings:
 				case (/replace/.test(action)) && this.settings.disableWarnings !== true 
-					&& !window.confirm('You are about to replace all items in the active split. Are you sure you want to do this? (This warning can be disabled in the settings.)'): return; // confirm
+					&& !window.confirm('You are about to replace all items in the active split. Are you sure you want to do this? (This warning can be disabled in the settings.)'): 
+																														resetPinnedLeaves(); return; // confirm
 				case items.length > 99 && this.settings.disableWarnings !== true 
-					&& !window.confirm('You are about to open '+ items.length +'. Are you sure you want to do this? (This warning can be disabled in the settings.)'): return;// warn on opening > 99 notes
+					&& !window.confirm('You are about to open '+ items.length +'. Are you sure you want to do this? (This warning can be disabled in the settings.)'):
+																														resetPinnedLeaves(); return;// warn on opening > 99 notes
 				case items.length === 0:
 					alert(type === 'document links' ? 'No document links found.' : 
-						'No readable files found.\nCheck the Settings to see if you have included any specific file types to be opened in Continuous Mode.'); return; // alert no items found
+						'No readable files found.\nCheck the Settings to see if you have included any specific file types to be opened in Continuous Mode.'); 
+																														resetPinnedLeaves(); return; // alert no items found
 			}
 			switch(true) {
 				case ( /replace/i.test(action) ):
