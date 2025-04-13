@@ -1,4 +1,4 @@
-# obsidian-continuous-mode
+# continuous-mode
 
 ![GitHub manifest version](https://img.shields.io/github/manifest-json/v/gasparschott/obsidian-continuous-mode) ![GitHub all releases](https://img.shields.io/github/downloads/gasparschott/obsidian-continuous-mode/total)
 
@@ -44,16 +44,14 @@ These menu items are available in the Tab Group Menu, File Menu, Selected Tab Me
 <img src="assets/menu-sort.png" style="width:197px;" alt="Change sort order" />  
 
 
-#### Opening Multiple Items  
+#### Opening Items in Continuous Mode  
 
-In other contexts, the menu will include options to allow you to open multiple items in Continuous Mode. 
+When the context menu is opened on File Explorer items (folders or individual files), Search results, and other locations, the Continuous Mode menu will show options to:
+- Open the items in a new split (left, right, up, down).  
+- Open (or append) the items in the active tab group. Files will not be duplicated if they are already open.  
+- Replace the open files in the active tab group with the items (i.e., close all open notes in active tab group and replace with folder items). This action will show a warning before executing; you can disable this and similar warnings in the settings.  
 
-<img src="assets/menu-open-folder.png" style="width:307px;" alt="Folder Menu" />  
-
-This menu will show “file,” “document links,” “query block links,” “search results” instead of “folder contents” depending on the context. You can:
-- Open items in a new split (left, right, up, down).  
-- Open or append items in the active tab group; files will not be duplicated if they are already open.  
-- Replace files in the active tab group with files from the selected folder (i.e., close all open notes in active tab group and replace with folder items).  
+<img src="assets/menu-open-folder.png" style="width:307px;" alt="Folder Menu" />  This menu will show “file,” “document links,” “query block links,” “search results” instead of “folder contents” depending on the context. 
 
 See the Settings for options to:
 	- Filter (include or exclude) the folder items that are opened by type (e.g., markdown, images, canvas, etc.), extension, or file name;  

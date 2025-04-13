@@ -19,6 +19,12 @@
 	height:auto !important;
 	min-height:fit-content !important;
 }
+/* Fixes for Unitade plugin/Monaco Editor */
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(.workspace-leaf-content[data-type="codeview"])
+{
+	contain:strict !important;
+	height:100% !important;
+}
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-content .cm-sizer,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .view-content .cm-content,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .workspace-leaf-content:not([data-type="backlink"]) .view-content > div > div,
@@ -73,7 +79,7 @@
 }
 .workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .view-header :is(.view-header-left,.view-actions),
 .workspace-split:is(.mod-left-split,.mod-right-split) .workspace-tabs.is_continuous_mode:not(.hide_note_titles) .workspace-leaf-content:is([data-type="all-properties"],[data-type="bookmarks"]) .view-header,
-.hide_pins .workspace-tab-header-status-icon.mod-pinned
+.temp_pinned .workspace-tab-header-status-icon.mod-pinned
 {
 	display:none !important;
 }
