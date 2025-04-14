@@ -9,7 +9,6 @@ let DEFAULT_SETTINGS = {
 	'allowSingleClickOpenFolder': 		false,
 	'allowSingleClickOpenFolderAction':	'disabled',
 	'alwaysHideNoteHeaders':			false,
-	'alwaysOpenInContinuousMode':		false,
 	'defaultSortOrder':					'alphabetical',
 //	'disableScrollRootItemsIntoView':	false,
 //	'disableScrollSidebarsIntoView':	false,
@@ -204,9 +203,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		/*-----------------------------------------------*/
 		// TOGGLE CONTINUOUS MODE
 		const toggleContinuousMode = (tab_group_ids,restore,mode) => {
-			if ( this.settings.alwaysOpenInContinuousMode === true && restore === true ) {											// add all root tab groups if alwaysOpenInContinuousMode === true
-				getTabGroupsRecursively(workspace.rootSplit).forEach( tab_group => tab_group_ids.push(this.app.appId +'_'+ tab_group.id +'_@0') ); tab_group_ids = [...new Set(tab_group_ids)]; 
-			}
 			if ( tab_group_ids.length === 0 ) { return }
 			tab_group_ids.forEach( tab_group_id => {
 				let current_app_id = tab_group_id.split('_')[0], current_tab_group_id = tab_group_id.split('_')[1], current_mode = tab_group_id.split('_')[2] || mode || '@0';
@@ -1173,12 +1169,6 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
         containerEl.createEl("h1", {}, (el) => {el.innerHTML = 'Continuous Mode'; });
-		new obsidian.Setting(containerEl).setName('Always open new splits in Continuous Mode').setDesc('')
-			.addToggle( A => A.setValue(this.plugin.settings.alwaysOpenInContinuousMode)
-			.onChange(async (value) => {
-				this.plugin.settings.alwaysOpenInContinuousMode = value;
-				await this.plugin.saveSettings();
-		}));
         this.containerEl.createEl("h2", { text: 'Opening Multiple Items in Continuous Mode' })
         this.containerEl.createEl("div", { text: 'You can open multiple items in Continuous Mode via commands in the command palette or the contextual menus available in various parts of the Obsidian UI. Contextual menus are available in File Explorer items, Search Results, File Menu, Tab Menu, and the Editor Menu. The settings below allow you to control which items are opened, how many are opened at a time, and their sort order, among other things.', cls: 'setting-item-description' })
 		new obsidian.Setting(containerEl).setName('Filter included file types and items').setDesc('Select file types and items to include when using the “Open in Continuous Mode” commands and contextual menu items. (Note: toggling off these settings does not prevent any of these file types from being opened manually.)').setClass("cm-setting-indent-no-bullet");
