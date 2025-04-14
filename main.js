@@ -204,6 +204,9 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		/*-----------------------------------------------*/
 		// TOGGLE CONTINUOUS MODE
 		const toggleContinuousMode = (tab_group_ids,restore,mode) => {
+			if ( this.settings.alwaysOpenInContinuousMode === true && restore === true ) {											// add all root tab groups if alwaysOpenInContinuousMode === true
+				getTabGroupsRecursively(workspace.rootSplit).forEach( tab_group => tab_group_ids.push(this.app.appId +'_'+ tab_group.id +'_@0') ); tab_group_ids = [...new Set(tab_group_ids)]; 
+			}
 			if ( tab_group_ids.length === 0 ) { return }
 			tab_group_ids.forEach( tab_group_id => {
 				let current_app_id = tab_group_id.split('_')[0], current_tab_group_id = tab_group_id.split('_')[1], current_mode = tab_group_id.split('_')[2] || mode || '@0';
