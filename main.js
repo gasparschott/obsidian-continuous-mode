@@ -339,6 +339,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				return getActiveCursor()?.ch === getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length && getActiveCursor()?.line === ( getActiveEditor()?.lastLine() ); 
 			}
 			switch(true) {																														// Ignore arrow navigation function in these cases:
+				case ( /textarea|input/.test(e.target.type) ):																					return;
 				case workspace.leftSplit.containerEl.querySelector('.workspace-leaf.mod-active .tree-item:has(.is-selected,.has-focus,.is-active)') !== null:
 				case workspace.rightSplit.containerEl.querySelector('.workspace-leaf.mod-active .tree-item:has(.is-selected,.has-focus,.is-active)') !== null:
 					el = ( workspace.leftSplit.containerEl.querySelector('.workspace-leaf.mod-active .tree-item:has(.is-selected,.has-focus,.is-active)') !== null 
