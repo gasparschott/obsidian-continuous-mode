@@ -489,7 +489,6 @@
 	transform:scale(0.33);
 	transform-origin:top;
 }
-
 /* EXPERIMENTAL: unset position:relative in editor leaves to allow active line scrollTo in full height of tab group */
 /* allows getting y-scroll position of active editor line */
 /* 

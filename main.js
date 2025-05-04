@@ -303,19 +303,19 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 		}
 		const scrollSideBarItems = (target) => {
-			if ( this.settings.enableScrollIntoView === false ) { return }
 			let type = ( /workspace-leaf|workspace-tab-header|nav-header|view-header-title-container|nav-buttons-container/.test(target?.className) ? 'leaf' : 'item' );
-			let workspaceTabs = target?.closest('.workspace-tabs.mod-active.is_continuous_mode');
-			let workspaceTabsContainer = workspaceTabs?.querySelector('.workspace-tab-container');
-			let scrollEl = ( type === 'leaf' ? workspaceTabs.querySelector('.workspace-leaf.mod-active') : target );
-			let active_leaf = workspaceTabs.querySelector('.workspace-leaf.mod-active');
+			let workspace_tabs = target?.closest('.workspace-tabs.mod-active.is_continuous_mode');
+			if ( this.settings.enableScrollIntoView === false || workspace_tabs === null ) { return }
+			let workspace_tabsContainer = workspace_tabs?.querySelector('.workspace-tab-container');
+			let scrollEl = ( type === 'leaf' ? workspace_tabs.querySelector('.workspace-leaf.mod-active') : target );
+			let active_leaf = workspace_tabs.querySelector('.workspace-leaf.mod-active');
 			let adjust_height = (active_leaf.parentElement.offsetHeight/2) - active_leaf.querySelector('.nav-header')?.offsetHeight || 0;	// center focused item
 			switch(true) {
 				case ( /workspace-leaf-content/.test(target?.className) && target?.dataset.type === 'search' ):
-					workspaceTabsContainer.scrollTo({top:workspace.activeLeaf.containerEl.offsetTop - workspaceTabs.querySelector('.workspace-tab-header-container').offsetHeight,behavior:'smooth'});
+					workspace_tabsContainer.scrollTo({top:workspace.activeLeaf.containerEl.offsetTop - workspace_tabs.querySelector('.workspace-tab-header-container').offsetHeight,behavior:'smooth'});
 					break;
 				case type === 'leaf':	
-					workspaceTabsContainer.scrollTo({top:scrollEl.offsetTop - workspaceTabs.querySelector('.workspace-tab-header-container').offsetHeight,behavior:'smooth'});
+					workspace_tabsContainer.scrollTo({top:scrollEl.offsetTop - workspace_tabs.querySelector('.workspace-tab-header-container').offsetHeight,behavior:'smooth'});
 					break;
 				case type === 'item' && target !== null && !isVisible(target):				// only scroll if item is not visible
 					target.scrollIntoView({behavior:'smooth',block:'center'});
@@ -339,7 +339,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				return getActiveCursor()?.ch === getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length && getActiveCursor()?.line === ( getActiveEditor()?.lastLine() ); 
 			}
 			switch(true) {																														// Ignore arrow navigation function in these cases:
-				case ( /textarea|input/.test(e.target.type) ):																					return;
 				case workspace.leftSplit.containerEl.querySelector('.workspace-leaf.mod-active .tree-item:has(.is-selected,.has-focus,.is-active)') !== null:
 				case workspace.rightSplit.containerEl.querySelector('.workspace-leaf.mod-active .tree-item:has(.is-selected,.has-focus,.is-active)') !== null:
 					el = ( workspace.leftSplit.containerEl.querySelector('.workspace-leaf.mod-active .tree-item:has(.is-selected,.has-focus,.is-active)') !== null 
@@ -738,7 +737,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 		});
 		this.registerDomEvent(window,'keydown', (e) => {
-			if ( /pageup|pagedown|arrow/i.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey ) {
+			if ( /pageup|pagedown|arrow/i.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && !/input|textarea/.test(e.target.tagName.toLowerCase() ) ) {
 				leafArrowNavigation(e);
 			}
 		});	
