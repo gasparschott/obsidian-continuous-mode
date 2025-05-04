@@ -215,7 +215,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						switch(true) {
 							case ( /\@0/.test(mode) ):																									// remove continuous mode
 								tab_group.containerEl?.classList?.remove('is_continuous_mode','is_compact_mode','is_semi_compact_mode');				// remove classes
-								tab_group.containerEl?.classList?.remove('hide_note_titles','show_note_titles','only_show_file_name', 'is_disable_scroll');
+								tab_group.containerEl?.classList?.remove('hide_note_titles','show_note_titles','only_show_file_name', 'is_enable_scroll', 'is_smooth_scroll','is_typewriter_scroll');
 								tab_group.containerEl.querySelectorAll('.continuous_mode_open_links_button').forEach( btn => btn?.remove() );	break;	// remove document links buttons
 							case ( /\@1|\@2/.test(mode) ):																								// remove compact mode, preserve continuous mode
 								tab_group.containerEl?.classList?.remove('is_compact_mode','is_semi_compact_mode');								break;
@@ -230,7 +230,9 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						} else {
 							tab_group.containerEl?.classList?.add('show_note_titles');
 						}
-						if ( this.settings.enableScrollIntoView === false ) { tab_group.containerEl?.classList?.add('is_disable_scroll') }
+						if ( this.settings.enableScrollIntoView === false ) { tab_group.containerEl?.classList?.add('is_enable_scroll') }
+						if ( this.settings.enableSmoothScroll === true ) { tab_group.containerEl?.classList?.add('is_smooth_scroll') }
+						if ( this.settings.enableTypewriterScroll === true ) { tab_group.containerEl?.classList?.add('is_typewriter_scroll') }
 						if ( this.settings.onlyShowFileName === true ) { tab_group.containerEl?.classList?.add('only_show_file_name'); }	break;
 				}
 				updateSavedIds(restore);
@@ -338,7 +340,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			const is_last_line = () => {
 				return getActiveCursor()?.ch === getActiveEditor()?.getLine(getActiveEditor()?.lastLine()).length && getActiveCursor()?.line === ( getActiveEditor()?.lastLine() ); 
 			}
-			switch(true) {																														// Ignore arrow navigation function in these cases:
+			switch(true) {																																// Ignore arrow navigation function in these cases:
 				case workspace.leftSplit.containerEl.querySelector('.workspace-leaf.mod-active .tree-item:has(.is-selected,.has-focus,.is-active)') !== null:
 				case workspace.rightSplit.containerEl.querySelector('.workspace-leaf.mod-active .tree-item:has(.is-selected,.has-focus,.is-active)') !== null:
 					el = ( workspace.leftSplit.containerEl.querySelector('.workspace-leaf.mod-active .tree-item:has(.is-selected,.has-focus,.is-active)') !== null 
@@ -390,7 +392,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 							active_leaf.containerEl.querySelector('iframe').contentWindow.scrollBy({top:-250,left:0,behavior:'smooth'});		break;
 						case ( /pdf/.test(active_leaf.view.getViewType() ) ):
 							switch(true) {
-								case e.key === 'ArrowLeft':												pdfPageNavigation(e);					return;	// pdf page navigation
+								case e.key === 'ArrowLeft':																						return;	// pdf page navigation
 								case e.key === 'ArrowUp':																								// pdf navigation up arrow to previous leaf
 									active_leaf.view.viewer?.containerEl?.querySelector('.pdf-toolbar')?.blur();
 									active_leaf.view.viewer.containerEl.querySelector('.focused_pdf_page')?.classList.remove('focused_pdf_page');		// nobreak
@@ -434,7 +436,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 							active_leaf.containerEl.querySelector('iframe').contentWindow.scrollBy({top:250,left:0,behavior:'smooth'});			break;
 						case ( /pdf/.test(active_leaf.view.getViewType() ) ):
 							switch(true) {
-								case e.key === 'ArrowRight':											pdfPageNavigation(e);					return;	// pdf page navigation
+								case e.key === 'ArrowRight':																return;	// pdf page navigation
 								case e.key === 'ArrowDown':																								// pdf navigation down arrow to next leaf
 									active_leaf.view.viewer?.containerEl?.querySelector('.pdf-toolbar')?.blur();
 									active_leaf.view.viewer.containerEl.querySelector('.focused_pdf_page')?.classList.remove('focused_pdf_page');		// nobreak
@@ -467,36 +469,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			delete active_leaf.containerEl.querySelector('iframe')?.scrolling;
 			openInRightSplit(e,next_leaf);																							// open file in right split
 			scrollItemsIntoView(e,next_leaf.containerEl);
-		}
-		// PDF PAGE NAVIGATION
-		const pdfPageNavigation = (e) => {
-			let focused_pdf_page = getActiveLeaf().view.viewer.containerEl.querySelector('.focused_pdf_page');
-			let pdf_pages = getActiveLeaf().view.viewer.child.pdfViewer.pdfViewer._pages;
-			let activeTabGroupChildren = workspace.activeTabGroup.children;
-			let scroll_top = 0;
-			switch(true) {
-				case ( e.key === 'ArrowRight' ):
-					switch(true) {
-						case focused_pdf_page === null:					 pdf_pages[0].div.classList.add('focused_pdf_page'); 					break;	// add class to first page
-						case focused_pdf_page.nextSibling !== null: 	 focused_pdf_page.nextSibling.classList.add('focused_pdf_page');				// add class to next page
-																		 focused_pdf_page.classList.remove('focused_pdf_page');					break;	// remove class from previous page
-						case focused_pdf_page.nextSibling === null:		 focused_pdf_page.classList.remove('focused_pdf_page');							// remove class from last page
-							 workspace.setActiveLeaf((activeTabGroupChildren?.[activeTabGroupChildren?.indexOf(getActiveLeaf()) + 1] || getActiveLeaf()),{focus:true});	// focus next leaf
-																																				break;
-					}																															break;
-				case ( e.key === 'ArrowLeft' ):
-					switch(true) {
-						case focused_pdf_page === null:					 pdf_pages[pdf_pages.length - 1].div.classList.add('focused_pdf_page');	break;	// add class to last page
-						case focused_pdf_page.previousSibling !== null:	 focused_pdf_page.previousSibling.classList.add('focused_pdf_page');			// add class to previous page
-																		 focused_pdf_page.classList.remove('focused_pdf_page');					break;	// remove class from last page
-						case focused_pdf_page.previousSibling === null:	 focused_pdf_page.classList.remove('focused_pdf_page');							// remove class from first page
-							 workspace.setActiveLeaf((activeTabGroupChildren?.[activeTabGroupChildren?.indexOf(getActiveLeaf()) - 1] || getActiveLeaf()),{focus:true});	// focus previous leaf
-																																				break;
-					}																															break;
-			}
-			scroll_top = (getActiveLeaf().view.viewer?.containerEl?.querySelector('.focused_pdf_page')?.offsetTop || 0) + getActiveLeaf().containerEl?.querySelector('.pdf-toolbar')?.offsetHeight;
-			getActiveLeaf().containerEl?.querySelector('.pdf-container')?.scrollTo({left:0,top:scroll_top,behavior:'smooth'});
-			getActiveLeaf().view.viewer?.containerEl?.querySelector('.pdf-toobar')?.click();	// needed to focus pdf viewer and enable proper page navigation by arrow keys
 		}
 		/*-----------------------------------------------*/
 		// OPEN ITEMS IN CONTINUOUS MODE getAllTabGroups
@@ -1149,7 +1121,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		let tab_groups = this.app.workspace.containerEl.querySelectorAll('.workspace-tabs');
 		tab_groups.forEach( 
 			el => {
-				el?.classList?.remove('is_continuous_mode','hide_note_titles','is_compact_mode','is_semi_compact_mode','only_show_file_name');
+				el?.classList?.remove('is_continuous_mode','hide_note_titles','is_compact_mode','is_semi_compact_mode','only_show_file_name','is_enable_scroll','is_smooth_scroll','is_typewriter_scroll');
 				delete el?.dataset?.sort_order; 
 				el?.querySelectorAll('.continuous_mode_open_links_button').forEach(btn => btn?.remove() );
 			}
@@ -1315,18 +1287,40 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 			.addToggle( A => A.setValue(this.plugin.settings.enableScrollIntoView)
 			.onChange(async (value) => {
 				this.plugin.settings.enableScrollIntoView = value;
+				let tab_groups = this.app.workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs.is_continuous_mode');
+				if ( value === true ) {
+					tab_groups?.forEach( tab_group => {
+						tab_group.classList?.add('is_enable_scroll');
+						if ( this.plugin.settings.enableSmoothScroll === true ) { tab_group => tab_group.classList?.add('is_smooth_scroll') }
+						if ( this.plugin.settings.enableTypewriterScroll === true ) { tab_group => tab_group.classList?.add('is_typewriter_scroll') }
+					})
+				} else {
+					tab_groups?.forEach( tab_group => tab_group.classList?.remove('is_enable_scroll','is_smooth_scroll','is_typewriter_scroll') )
+				}
 				await this.plugin.saveSettings();
 		}));
 		new obsidian.Setting(containerEl).setName('Use smooth scrolling').setClass("cm-setting-indent").setClass('hidden').setDesc('Only available when scroll-into-view is enabled.')
 			.addToggle( A => A.setValue(this.plugin.settings.enableSmoothScroll)
 			.onChange(async (value) => {
 				this.plugin.settings.enableSmoothScroll = value;
+				let tab_groups = this.app.workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs.is_continuous_mode');
+				if ( value === true ) {
+					tab_groups?.forEach( tab_group => tab_group.classList?.add('is_smooth_scroll') )
+				} else {
+					tab_groups?.forEach( tab_group => tab_group.classList?.remove('is_smooth_scroll') )
+				}
 				await this.plugin.saveSettings();
 		}));
 		new obsidian.Setting(containerEl).setName('Enable typewriter scrolling').setClass("cm-setting-indent").setClass('next-hidden').setDesc('Only available when scroll-into-view is enabled.')
 			.addToggle( A => A.setValue(this.plugin.settings.enableTypewriterScroll)
 			.onChange(async (value) => {
 				this.plugin.settings.enableTypewriterScroll = value;
+				let tab_groups = this.app.workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs.is_continuous_mode');
+				if ( value === true ) {
+					tab_groups?.forEach( tab_group => tab_group.classList?.add('is_typewriter_scroll') )
+				} else {
+					tab_groups?.forEach( tab_group => tab_group.classList?.remove('is_typewriter_scroll') )
+				}
 				await this.plugin.saveSettings();
 		}));
 		new obsidian.Setting(containerEl).setName('Disable warnings').setDesc('Don’t warn when replacing active tab group with folder contents or opening in compact view.')

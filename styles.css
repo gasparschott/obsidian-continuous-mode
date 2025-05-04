@@ -8,9 +8,10 @@
 	display:block !important;
 	overflow-y:scroll;
 }
-.workspace-tabs.is_continuous_mode:not(.mod-stacked):not(.is_disable_scroll) .workspace-tab-container
+.workspace-tabs.is_continuous_mode.is_smooth_scroll:not(.mod-stacked) .workspace-tab-container,
+.workspace-tabs.is_continuous_mode.is_smooth_scroll:not(.mod-stacked) .pdf-viewer-container
 {
-	!scroll-behavior:smooth;
+	scroll-behavior:smooth;
 }
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf
 {
