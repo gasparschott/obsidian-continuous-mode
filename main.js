@@ -21,6 +21,7 @@ let DEFAULT_SETTINGS = {
 	'includeEmbeddedFiles':				false,
 	'includedFileTypes':				['markdown'],
 	"maximumItemsToOpen":				'0',
+	'navigateInPlace':					false,
 	'onlyShowFileName':					false,
 	'tabGroupIds':						[],
 };
@@ -405,10 +406,12 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						case getAnchorOffset() === 0 && e.target === active_leaf.view.inlineTitleEl &&	e.key === 'ArrowUp':
 						case getActiveLeaf().getViewState().state.mode === 'preview' && e.key !== 'ArrowLeft':											// leaf is in preview mode
 						case ( !/markdown/.test(active_leaf.getViewState().type) ):																		// nobreak; leaf is empty (new tab)
-							if ( active_leaf.containerEl.previousSibling !== null ) {																	// if not first leaf
-								e.preventDefault();																										// prevent up arrow when leaf becomes active
-								workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(active_leaf) - 1],{focus:true});			// make previous leaf active 
-								getActiveEditor()?.setCursor({line:getActiveEditor()?.lastLine(),ch:getActiveEditor()?.lastLine()?.length - 1});return;	// select last char if editor
+							switch(true) {
+								case this.settings.navigateInPlace === true:														navigateInPlace(e);	return; // navigate in place
+								case active_leaf.containerEl.previousSibling !== null:																			// if not first leaf
+									e.preventDefault();																											// prevent up arrow when leaf activates
+									workspace.setActiveLeaf(activeTabGroupChildren[activeTabGroupChildren.indexOf(active_leaf) - 1],{focus:true});				// make previous leaf active 
+									getActiveEditor()?.setCursor({line:getActiveEditor()?.lastLine(),ch:getActiveEditor()?.lastLine()?.length - 1});	return;	// select last char if editor
 							}
 					}																															break;
 				case 'ArrowDown':	case 'ArrowRight': case 'PageDown':
@@ -444,6 +447,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						case is_last_line() && e.key !== 'ArrowRight':
 						case getActiveLeaf().getViewState().state.mode === 'preview' && e.key !== 'ArrowRight':											// leaf is in preview mode
 						case ( !/markdown/.test(active_leaf.getViewState().type) ):
+							if ( this.settings.navigateInPlace === true ) { navigateInPlace(e); return; } 
 							workspace.setActiveLeaf((activeTabGroupChildren[activeTabGroupChildren.indexOf(active_leaf) + 1] || active_leaf),{focus:true});	// make next leaf active
 							getSelection()?.removeAllRanges();
 							if ( getActiveLeaf().getViewState().state.mode !== 'preview' ) {
@@ -469,6 +473,15 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			delete active_leaf.containerEl.querySelector('iframe')?.scrolling;
 			openInRightSplit(e,next_leaf);																							// open file in right split
 			scrollItemsIntoView(e,next_leaf.containerEl);
+		}
+		const navigateInPlace = (e) => {
+			let tree = workspace.getLeavesOfType('file-explorer')[0].view.tree;
+			let direction = ( e.key === 'ArrowUp' ? 'backwards' : 'forwards' );
+			tree.setFocusedItem(tree.view.activeDom);
+			sleep(100).then(() => { 
+				tree.changeFocusedItem(direction);
+				if ( tree.focusedItem.file instanceof obsidian.TFile ) { getActiveLeaf().openFile(tree.focusedItem.file); }
+			})
 		}
 		/*-----------------------------------------------*/
 		// OPEN ITEMS IN CONTINUOUS MODE getAllTabGroups
@@ -1203,32 +1216,6 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 				this.plugin.settings.includeBlockLinks = value;
 				await this.plugin.saveSettings();
 		}));
-		new obsidian.Setting(containerEl).setName('Maximum number of items to open at one time').setDesc('Leave empty (or set to 0) to open all items at once. Otherwise, setting a value here allows you to incrementally open the items in a folder (or search results or document links) by repeatedly selecting “Open or append items in Continuous Mode.” Useful for dealing with folders containing a large number of items.')
-			.addText((A) => A.setPlaceholder("").setValue(this.plugin.settings.maximumItemsToOpen?.toString() || '')
-			.onChange(async (value) => {
-				if ( isNaN(Number(value)) || !Number.isInteger(Number(value)) ) { 
-					alert('Please enter a positive integer, 0, or leave blank.');
-					A.setValue('');
-				} else {
-					this.plugin.settings.maximumItemsToOpen = Number(value.trim()) || 0;									// add unique excluded names, remove empty items
-					await this.plugin.saveSettings();
-				}
-		}));
-		new obsidian.Setting(containerEl).setName('Default sort order:').setDesc('If no value is set, items will be sorted according to the current sort order of the source (e.g., the file explorer, search results, etc.)')
-			.addDropdown((dropDown) => {
-				dropDown.addOption("disabled", "—");
-				dropDown.addOption("alphabetical", "File name (A to Z)");
-				dropDown.addOption("alphabeticalReverse", "File name (Z to A)");
-				dropDown.addOption("byModifiedTime", "Modified Time (new to old)");
-				dropDown.addOption("byModifiedTimeReverse", "Modified Time (old to new)");
-				dropDown.addOption("byCreatedTime", "Created Time (new to old)");
-				dropDown.addOption("byCreatedTimeReverse", "Created Time (old to new)");
-				dropDown.setValue( ( this.plugin.settings.defaultSortOrder === undefined || this.plugin.settings.defaultSortOrder === false ? 'disabled' : this.plugin.settings.defaultSortOrder ) )
-				dropDown.onChange(async (value) => {
-					this.plugin.settings.defaultSortOrder = value;
-					await this.plugin.saveSettings();
-		  });
-		});
         new obsidian.Setting(containerEl).setName('Allow single click to open File Explorer items in Continuous Mode').setDesc('Enable this setting to make it possible to open the items in the File Explorer with a single click. Set the default single click action below.')
         	.addToggle( (A) => A.setValue(this.plugin.settings.allowSingleClickOpenFolder)
         	.onChange(async (value) => {
@@ -1255,10 +1242,42 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 					await this.plugin.saveSettings();
 		  });
 		});
+		new obsidian.Setting(containerEl).setName('Maximum number of items to open at one time').setDesc('Leave empty (or set to 0) to open all items at once. Otherwise, setting a value here allows you to incrementally open the items in a folder (or search results or document links) by repeatedly selecting “Open or append items in Continuous Mode.” Useful for dealing with folders containing a large number of items. (Note: The “single click” action above must be set to one of the “Append” options.)')
+			.addText((A) => A.setPlaceholder("").setValue(this.plugin.settings.maximumItemsToOpen?.toString() || '')
+			.onChange(async (value) => {
+				if ( isNaN(Number(value)) || !Number.isInteger(Number(value)) ) { 
+					alert('Please enter a positive integer, 0, or leave blank.');
+					A.setValue('');
+				} else {
+					this.plugin.settings.maximumItemsToOpen = Number(value.trim()) || 0;									// add unique excluded names, remove empty items
+					await this.plugin.saveSettings();
+				}
+		}));
+		new obsidian.Setting(containerEl).setName('Default sort order:').setDesc('If no value is set, items will be sorted according to the current sort order of the source (e.g., the file explorer, search results, etc.)')
+			.addDropdown((dropDown) => {
+				dropDown.addOption("disabled", "—");
+				dropDown.addOption("alphabetical", "File name (A to Z)");
+				dropDown.addOption("alphabeticalReverse", "File name (Z to A)");
+				dropDown.addOption("byModifiedTime", "Modified Time (new to old)");
+				dropDown.addOption("byModifiedTimeReverse", "Modified Time (old to new)");
+				dropDown.addOption("byCreatedTime", "Created Time (new to old)");
+				dropDown.addOption("byCreatedTimeReverse", "Created Time (old to new)");
+				dropDown.setValue( ( this.plugin.settings.defaultSortOrder === undefined || this.plugin.settings.defaultSortOrder === false ? 'disabled' : this.plugin.settings.defaultSortOrder ) )
+				dropDown.onChange(async (value) => {
+					this.plugin.settings.defaultSortOrder = value;
+					await this.plugin.saveSettings();
+		  });
+		});
         this.containerEl.createEl("h2", { text: 'About Compact Mode and Semi-Compact Mode' });
         this.containerEl.createEl("div", {text: 'Compact and Semi-Compact Mode show previews of your notes in the left split, similar to the second side-pane previews in apps like Evernote, Bear Notes, Simplenote, Apple Notes, etc. Notes can be navigated up and down with the arrow keys as in Continuous Mode, but in Compact Mode, the selected note will be opened in the right split; in Semi-Compact Mode, the selected note will be expanded in place for editing, leaving the other notes in compact view.', cls: 'setting-item-description' });
-        this.containerEl.createEl("div", {text: 'Note: You may wish to disable the Obsidian editor setting “Always focus new tabs” to allow continuous arrow navigation of Compact Mode items.', cls: 'setting-item-description' });
+        this.containerEl.createEl("div", {text: '(Note: You may wish to disable the Obsidian editor setting “Always focus new tabs” to allow continuous arrow navigation of Compact Mode items.)', cls: 'setting-item-description' });
         this.containerEl.createEl("h2", { text: "Other Settings" });
+		new obsidian.Setting(containerEl).setName('Allow Continuous Mode navigation in place:').setDesc('If this setting is enabled, using the arrow up/down keys when the cursor is in the first or last line respectively of the active editor will open the previous or next file (as listed in the File Explorer) in the same tab.')
+			.addToggle( A => A.setValue(this.plugin.settings.navigateInPlace)
+			.onChange(async (value) => {
+				this.plugin.settings.navigateInPlace = value;
+				await this.plugin.saveSettings();
+		}));
 		new obsidian.Setting(containerEl).setName('Always hide note headers').setDesc('Never show the note header when opening items in Continuous Mode.')
 			.addToggle( A => A.setValue(this.plugin.settings.alwaysHideNoteHeaders)
 			.onChange(async (value) => {
