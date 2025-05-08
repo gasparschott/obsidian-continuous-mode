@@ -106,9 +106,6 @@ If the `Allow Continuous Mode navigate in place` setting is enabled, using the A
 
 <img src="assets/settings.png" style="width:621px;" alt="Settings window" />  
 
-- Maximum number of items to open at one time: Leave empty (or set to 0) to open all items at once. Otherwise, setting a value here allows you to incrementally open the items in a folder (or search results or document links) by repeatedly selecting “Open or append items in Continuous Mode.” This is useful for dealing with folders containing a large number of items.  
-- Allow single click to open File Explorer folders in Continuous Mode: Enable this setting to make it possible to open the items in a File Explorer folders with a single click. Set the default single click action below.  
-
 ## Continuous Mode and other Plugins  
 The Continuous Mode menus are available or compatible with the following third-party plugins, which add to or modify the File Explorer or provide new file views:
 
