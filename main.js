@@ -20,6 +20,7 @@ let DEFAULT_SETTINGS = {
 	'includeBlockLinks':				false,
 	'includeEmbeddedFiles':				false,
 	'includedFileTypes':				['markdown'],
+	'indexFilesAtTop':					true,
 	"maximumItemsToOpen":				'0',
 	'navigateInPlace':					false,
 	'onlyShowFileName':					false,
@@ -501,7 +502,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		// OPEN ITEMS IN CONTINUOUS MODE getAllTabGroups
 		const openItemsInContinuousMode = async (items,action,type) => {
 			if ( !items ) { resetPinnedLeaves(); return }
-			let active_leaf, new_leaf, recent_leaf = workspace.getMostRecentLeaf(), direction, bool, dupe = null, last_opened_leaf = null, found = null; 
+			let active_leaf, new_leaf, recent_leaf = workspace.getMostRecentLeaf(), direction, bool, dupe = null, last_opened_leaf = null, found = null, index = null; 
 			let open_files = [], open_leaves = [], included_extensions = [];
 			recent_leaf?.parent?.children?.forEach( child => { open_files.push(child?.view?.file); open_leaves.push(child) });			// get open files in active tab group
 			let duplicateLeaves = findDuplicateLeaves(open_leaves);
@@ -586,7 +587,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 							case 'none':																																		break;	// no sort
 						}
 						// open sorted items:
-						workspace.activeTabGroup.containerEl.dataset.sort_order = sort_order;										// set data-sort_order
+						workspace.activeTabGroup.containerEl.dataset.sort_order = sort_order;							// set data-sort_order
+						if ( this.settings.indexFilesAtTop === true ) {
+							index = items.find( item => ( /index/.test(item.basename) && /md/.test(item.extension)) || item.basename === item.parent.name ); 
+							if ( index ) { items.splice(items.indexOf(index),1); items.unshift(index); }					// move index file to beginning
+						}
 						for ( let i = 0; i < maximumItemsToOpen && i < items.length; i++ ) {							// limit number of items to open
 							active_leaf = workspace.getLeaf();															// open new tab/leaf
 							active_leaf.openFile(items[i]);																// open file
@@ -1289,6 +1294,13 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 					await this.plugin.saveSettings();
 		  });
 		});
+		new obsidian.Setting(containerEl).setName('Index files at top').setDesc('If the directory contains an “index.md” file or a file with the same name as the directory itself, place it at the top of the opened files, regardless of the sort order.').setClass("cm-setting-indent")
+			.addToggle( A => A.setValue(this.plugin.settings.indexFilesAtTop)
+			.onChange(async (value) => {
+				this.plugin.settings.indexFilesAtTop = value;
+				await this.plugin.saveSettings();
+		}));
+
         this.containerEl.createEl("h2", { text: 'About Compact Mode and Semi-Compact Mode' });
         this.containerEl.createEl("div", {text: 'Compact and Semi-Compact Mode show previews of your notes in the left split, similar to the second side-pane previews in apps like Evernote, Bear Notes, Simplenote, Apple Notes, etc. Notes can be navigated up and down with the arrow keys as in Continuous Mode, but in Compact Mode, the selected note will be opened in the right split; in Semi-Compact Mode, the selected note will be expanded in place for editing, leaving the other notes in compact view.', cls: 'setting-item-description' });
         this.containerEl.createEl("div", {text: '(Note: You may wish to disable the Obsidian editor setting “Always focus new tabs” to allow continuous arrow navigation of Compact Mode items.)', cls: 'setting-item-description' });
