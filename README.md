@@ -9,9 +9,9 @@
 	3. [Contextual Menus](#contextual-menus)  
 	4. [Opening Multiple Items](#opening-multiple-items)  
 	5. [Compact Mode](#compact-mode)  
-- [Commands](#commands)  
 - [Keyboard navigation in and between notes](#keyboard-navigation-in-and-between-notes)
 - [Other Functions](#other-functions)  
+- [Commands](#commands)  
 - [The Settings Window](#the-settings-window)  
 	5. [Maximum number of items to open at one time](#maximum-number-of-items-to-open-at-one-time)  
 	6. [Allow single click to open File Explorer folders in Continuous Mode](#allow-single-click-to-open-file-explorer-folders-in-continuous-mode)  
@@ -54,17 +54,17 @@ When the context menu is opened on File Explorer items (folders or individual fi
 
 <img src="assets/menu-open-folder.png" style="width:307px;" alt="Folder Menu" />  
 
-This menu will show “file,” “document links,” “query block links,” “search results” instead of “folder contents” depending on the context. 
+This menu will show “file,” “document links,” “query block links,” “search results” instead of “folder contents” depending on the context.  
 
-See the Settings for options to:
+See the Settings for options to:  
  - Filter (include or exclude) the folder items that are opened by type (e.g., markdown, images, canvas, etc.), extension, or file name;  
  - Set the number of items to open at one time.  
- - Set the sorting order when opening multiple items.
+ - Set the sorting order when opening multiple items.  
  - Open File Explorer folder contents with one click.  
 
 **Notes:**   
  - Opening folders is not recursive—only the top level notes in the folder will be opened.  
- - You can select multiple non-consecutive files (but not [yet?] folders) in the File Explorer (Alt/Opt + Click) and open them via the context menu.
+ - You can select multiple non-consecutive files (but not [yet?] folders) in the File Explorer (Alt/Opt + Click) and open them via the context menu.  
  - Sort order of the source (e.g., File Explorer, Search Results) is respected when opening multiple items. Once opened, sort order does not dynamically update when it is changed in the file explorer; reopen the folder in Continuous Mode to accomplish this or change the sort order via the tab group menu. In the Settings you can choose the default sort order when opening multiple items.  
  - Similarly, after opening multiple files, the tab group will not dynamically reflect any changes you make to the folder structure in the file explorer. If you do make any changes (e.g., move, create, or delete a note), you'll have to reopen the folder to see the updated structure.
 
@@ -82,9 +82,6 @@ Semi-Compact Mode
  - Added user settings to open clicked file explorer folders or files in compact mode.  
  - Note: You may wish to disable the Obsidian editor setting ```Always focus new tabs``` to allow continuous arrow navigation of Compact View items.  
 
-## Commands
-Many of the above functions can be invoked via the Command Palette.
-
 ## Keyboard navigation in and between notes  
 In Continuous Mode you can navigate between open notes with the up and down arrow keys, and with the left and right arrow keys if the cursor is at the beginning or end of the note.  
  - In pdfs, the left and right arrow keys will jump from page to page.
@@ -94,7 +91,13 @@ In Continuous Mode you can navigate between open notes with the up and down arro
  - While editing notes, the insertion point will scroll so as to remain more or less in the center of the screen, similar to “typewriter mode”; this behavior can be disabled in the settings.  
 
 #### Navigate in place  
-If the `Allow Continuous Mode navigate in place` setting is enabled, using the Arrow Up/Down keys when the cursor is in the first or last line respectively of the active editor will open the previous/next file (as listed in the File Explorer) in the same tab. This means that you can easily scan through files without opening new tabs or switching to the File Explorer.
+If the `Allow Continuous Mode navigate in place` setting is enabled, using the Arrow Up/Down keys when the cursor is in the first or last line respectively of the active editor will open the previous/next file (as listed in the File Explorer) in the same tab. This means that you can easily scan through files without opening new tabs or switching to the File Explorer.  
+
+Two open-in-place commands are available as well, so you don't have to arrow up/down the whole note to get to the next one:  ```Open next File Explorer item in place``` and ```Open previous File Explorer item in place```.  
+ - Because of certain limitations in the Obsidian API, getting the previous/next files is limited to the current directory level and any nested directories. This means that if your vault is structured around directories, you won’t be able to use this method alone to access all your files.  
+ - As an optional workaround, you may find it helpful to install my “Smooth Explorer” and “Smooth Navigator” plugins.  
+   - <a href="https://github.com/gasparschott/smooth-explorer" target="_blank">Smooth Explorer</a> allows keyboard navigation of the File Explorer, with options to open selected items in the most recent active leaf (similar to navigate in place) or new tabs. If this plugin is enabled, the File Explorer will be automatically focused for navigation when the previous/next item is a directory, allowing Arrow Up/Down navigation to continue uninterrupted.
+   - <a href="https://github.com/gasparschott/smooth-navigator" target="_blank">Smooth Navigator</a> provides a suite of commands that makes it easier to switch between splits and tabs (e.g., to and from the File Explorer and the most recent active note).
 
 ## Other functions   
  - Notes will scroll into view when you click the tab header. Note: this may fail when clicking tab headers for the first time after start-up, and before the note has been scrolled into view at least once; this appears to be an issue with Obsidian.  
@@ -102,12 +105,50 @@ If the `Allow Continuous Mode navigate in place` setting is enabled, using the A
  - You can reorder notes in a tab group by dragging and dropping the tab headers.  
  - Automatically save and restore continuous mode tab group settings when shutting down/starting up Obsidian.  
 
+## Commands
+Many of the above functions can be invoked via the Command Palette.  
+Here is a complete list of available commands:  
+
+ - Append document links in active tab group  
+ - Append search results in active tab group  
+ - Open active document links in new split down  
+ - Open active document links in new split left  
+ - Open active document links in new split right  
+ - Open active document links in new split up  
+ - Open current search results in new split down  
+ - Open current search results in new split left  
+ - Open current search results in new split right  
+ - Open current search results in new split up  
+ - Open next File Explorer item in place  
+ - Open previous File Explorer item in place  
+ - Open selected file explorer item in new split append  
+ - Open selected file explorer item in new split down  
+ - Open selected file explorer item in new split left  
+ - Open selected file explorer item in new split replace  
+ - Open selected file explorer item in new split right  
+ - Open selected file explorer item in new split up  
+ - Replace active tab group with document links  
+ - Replace active tab group with search results  
+ - Sort active tab group by created time (new to old)  
+ - Sort active tab group by created time (old to new)  
+ - Sort active tab group by file name (A to Z)  
+ - Sort active tab group by file name (Z to A)  
+ - Sort active tab group by modified time (new to old)  
+ - Sort active tab group by modified time (old to new)  
+ - Toggle compact mode  
+ - Toggle Continuous Mode in active tab group  
+ - Toggle Continuous Mode in left sidebar  
+ - Toggle Continuous Mode in right sidebar  
+ - Toggle Continuous Mode in root tab groups  
+ - Toggle semi-compact mode  
+ - Toggle visibility of note titles in active tab group  
+ - Toggle visibility of note titles in root tab groups  
+ - Toggle visibility of note titles left sidebar  
+ - Toggle visibility of note titles right sidebar  
+
 ## The Settings Window
 
 <img src="assets/settings.png" style="width:621px;" alt="Settings window" />  
-
-- Maximum number of items to open at one time: Leave empty (or set to 0) to open all items at once. Otherwise, setting a value here allows you to incrementally open the items in a folder (or search results or document links) by repeatedly selecting “Open or append items in Continuous Mode.” This is useful for dealing with folders containing a large number of items.  
-- Allow single click to open File Explorer folders in Continuous Mode: Enable this setting to make it possible to open the items in a File Explorer folders with a single click. Set the default single click action below.  
 
 ## Continuous Mode and other Plugins  
 The Continuous Mode menus are available or compatible with the following third-party plugins, which add to or modify the File Explorer or provide new file views:
