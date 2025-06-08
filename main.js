@@ -219,8 +219,12 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					case restore === true:																												// restore modes on startup
 						tab_group.containerEl?.classList?.add('is_continuous_mode');
 						switch(true) {
-							case mode === "@1": tab_group.containerEl?.classList?.remove('is_semi_compact_mode');	tab_group.containerEl?.classList?.add('is_compact_mode'); compact_mode = true;	break;
-							case mode === "@2": tab_group.containerEl?.classList?.remove('is_compact_mode');		tab_group.containerEl?.classList?.add('is_semi_compact_mode');	break;
+							case mode === "@1" && tab_group === workspace.rootSplit?.children[0]:
+								tab_group.containerEl?.classList?.remove('is_semi_compact_mode');
+								tab_group.containerEl?.classList?.add('is_compact_mode'); compact_mode = true;									break;
+							case mode === "@2" && tab_group === workspace.rootSplit?.children[0]: 
+								tab_group.containerEl?.classList?.remove('is_compact_mode');
+								tab_group.containerEl?.classList?.add('is_semi_compact_mode');													break;
 						}																														break;
 					default:																															// add continuous mode on toggle, etc.
 						class_names = tab_group?.containerEl.className;
