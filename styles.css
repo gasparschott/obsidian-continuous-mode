@@ -44,6 +44,7 @@
 }
 /* SPECIFIC VIEW TYPES */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="canvas"]),
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="excalidraw"]),
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="graph"]),
 .workspace-tabs.is_continuous_mode:not(.mod-stacked):not(.is_compact_mode) .workspace-leaf:has(div[data-type="html-view"]),
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="surfing-view"]),
@@ -230,7 +231,8 @@
 .workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="html-view"] .view-content,
 .workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="html-view"] iframe,
 .workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="pdf"] .view-content,
-.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="graph"] .view-content 
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="graph"] .view-content,
+.workspace-tabs.is_continuous_mode .workspace-leaf:not(.mod-active) .workspace-leaf-content[data-type="excalidraw"] .view-content
 {
 	pointer-events:none !important;
 }
