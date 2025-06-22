@@ -531,6 +531,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			let appended_leaf = ( items.length === 1 ? open_leaves.find( open_leaf => items[0] === open_leaf.view.file ) : null );
 			let extensions = { 
 				markdown:	['md'],
+				base:		['base'],
 				images:		['avif','bmp','jpg','jpeg','gif','png','svg','webp'],
 				canvas:		['canvas'],
 				media:		['aac','aif','aiff','ape','flac','m4a','mka','mp3','ogg','opus','wav','m4v','mkv','mov','mp4','mpeg','webm'],
@@ -1224,6 +1225,12 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 			.addToggle( A => A.setValue(this.plugin.settings.includedFileTypes.includes('images'))
 			.onChange(async (value) => {
 				(value === true ? this.plugin.settings.includedFileTypes.push('images') : this.plugin.settings.includedFileTypes.splice(this.plugin.settings.includedFileTypes.indexOf('images'),1));
+				await this.plugin.saveSettings();
+		}));
+		new obsidian.Setting(containerEl).setName('Include base files').setClass("cm-setting-indent")
+			.addToggle( A => A.setValue(this.plugin.settings.includedFileTypes.includes('base'))
+			.onChange(async (value) => {
+				(value === true ? this.plugin.settings.includedFileTypes.push('base') : this.plugin.settings.includedFileTypes.splice(this.plugin.settings.includedFileTypes.indexOf('base'),1));
 				await this.plugin.saveSettings();
 		}));
 		new obsidian.Setting(containerEl).setName('Include canvas files').setClass("cm-setting-indent")
