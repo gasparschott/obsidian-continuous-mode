@@ -255,16 +255,16 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						}
  						updateSavedIds(false);
 				}
-				if ( compact_mode === true ) { openInRightSplit(tab_group.children.find( leaf => leaf.containerEl.classList.contains('mod-active') ) || tab_group.children[0] ); }
-				if ( this.settings.alwaysHideNoteHeaders === true && !tab_group.containerEl?.classList?.contains('show_note_titles') ) {
-					tab_group.containerEl?.classList?.add('hide_note_titles');
+				if ( compact_mode === true ) { openInRightSplit(tab_group?.children?.find( leaf => leaf.containerEl.classList.contains('mod-active') ) || tab_group?.children[0] ); }
+				if ( this.settings.alwaysHideNoteHeaders === true && !tab_group?.containerEl?.classList?.contains('show_note_titles') ) {
+					tab_group?.containerEl?.classList?.add('hide_note_titles');	tab_group?.containerEl?.classList?.remove('show_note_titles');
 				} else {
-					tab_group.containerEl?.classList?.add('show_note_titles');
+					tab_group?.containerEl?.classList?.add('show_note_titles');	tab_group?.containerEl?.classList?.remove('hide_note_titles');
 				}
-				if ( this.settings.enableScrollIntoView === false )		{ tab_group.containerEl?.classList?.add('is_enable_scroll') }
-				if ( this.settings.enableSmoothScroll === true )		{ tab_group.containerEl?.classList?.add('is_smooth_scroll') }
-				if ( this.settings.enableTypewriterScroll === true )	{ tab_group.containerEl?.classList?.add('is_typewriter_scroll') }
-				if ( this.settings.onlyShowFileName === true )			{ tab_group.containerEl?.classList?.add('only_show_file_name'); }
+				if ( this.settings.enableScrollIntoView === false )		{ tab_group?.containerEl?.classList?.add('is_enable_scroll') }
+				if ( this.settings.enableSmoothScroll === true )		{ tab_group?.containerEl?.classList?.add('is_smooth_scroll') }
+				if ( this.settings.enableTypewriterScroll === true )	{ tab_group?.containerEl?.classList?.add('is_typewriter_scroll') }
+				if ( this.settings.onlyShowFileName === true )			{ tab_group?.containerEl?.classList?.add('only_show_file_name'); }
 			})
 		}
 		/*-----------------------------------------------*/
