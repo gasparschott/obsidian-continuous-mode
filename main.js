@@ -350,11 +350,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		}
 		const scrollItemsIntoView = obsidian.debounce( async (e,el) => {
 			let target = ( el ? el : /body/i.test(e?.target?.tagName) ? workspace.getActiveViewOfType(obsidian.View).containerEl : e?.target || e?.containerEl );
-			if ( target === undefined || target.closest('.is_continuous_mode') === null ) { return }										// ignore e.target ancestor is not in continuous mode
+			if ( target === undefined || target.closest('.is_continuous_mode') === null || /menu-item/.test(e.target.className) ) { return }		// ignore e.target ancestor is not in continuous mode
 			switch(true) {
 				case ( target.closest('.mod-sidedock.mod-left-split,.mod-sidedock.mod-right-split') !== null ):	scrollSideBarItems(target);	break;	// scroll sidebar items
 				case ( /workspace-tab-header|workspace-leaf/.test(target.className) ):		scrollRootItems(e,target);						break;	// scroll leaf into view
-				default:							 										scrollTabHeader();	scrollToActiveLine(e);		break;	// scroll active line into view
+				default: 							 										scrollTabHeader();	scrollToActiveLine(e);		break;	// scroll active line into view
 			}
 		},0);
 		/*-----------------------------------------------*/

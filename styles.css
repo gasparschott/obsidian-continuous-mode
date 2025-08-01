@@ -53,6 +53,7 @@
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .pdf-container,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="pdf"] .pdf-content-container,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="html-view"]) .view-content,
+.workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="mindmap-view"]) .view-content,
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf-content[data-type="canvas"] .view-content .canvas-wrapper
 {
 	height:calc(100% - 2px) !important;
