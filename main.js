@@ -350,7 +350,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		}
 		const scrollItemsIntoView = obsidian.debounce( async (e,el) => {
 			let target = ( el ? el : /body/i.test(e?.target?.tagName) ? workspace.getActiveViewOfType(obsidian.View).containerEl : e?.target || e?.containerEl );
-			if ( target === undefined || target.closest('.is_continuous_mode') === null || /menu-item/.test(e.target.className) ) { return }		// ignore e.target ancestor is not in continuous mode
+			if ( target === undefined || target.closest('.is_continuous_mode') === null || /menu-item-title/.test(e?.target?.className) ) { return } // ignore e.target ancestor is not in continuous mode
 			switch(true) {
 				case ( target.closest('.mod-sidedock.mod-left-split,.mod-sidedock.mod-right-split') !== null ):	scrollSideBarItems(target);	break;	// scroll sidebar items
 				case ( /workspace-tab-header|workspace-leaf/.test(target.className) ):		scrollRootItems(e,target);						break;	// scroll leaf into view
@@ -546,15 +546,13 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				&& !this.settings.excludedNames.includes( item.basename +'.'+ item.extension )														// remove items excluded by name
 			);
 			switch(true) {																															// warnings:
+				case items.length > this.settings.maximumItemsToOpen && !window.confirm('Continuous Mode:\nOpening '+ this.settings.maximumItemsToOpen +' of '+ items.length +' items.\n(Change the “Maximum number of items to open at one time” setting to adjust this value.)'):									resetPinnedLeaves(); return; // opening multiple items
 				case (/replace/.test(action)) && this.settings.disableWarnings !== true 
-					&& !window.confirm('You are about to replace all items in the active split. Are you sure you want to do this? (This warning can be disabled in the settings.)'): 
-																														resetPinnedLeaves(); return; // confirm
-				case items.length > 99 && this.settings.disableWarnings !== true 
-					&& !window.confirm('Are you sure you want to open '+ items.length +' items? (This warning can be disabled in the settings.)'):
-																														resetPinnedLeaves(); return;// warn on opening > 99 notes
+					&& !window.confirm('Continuous Mode:\nYou are about to replace all items currently open in the active split.\nAre you sure you want to do this?\n(This warning can be disabled in the settings.)'): 
+																														resetPinnedLeaves(); return; // confirm replacing open items
 				case items.length === 0:
-					alert(type === 'document links' ? 'No document links found.' : 
-						'No readable files found.\nCheck the Settings to see if you have included any specific file types to be opened in Continuous Mode.'); 
+					alert(type === 'document links' ? 'Continuous Mode: No document links found.' : 
+						'Continuous Mode:\nNo readable files found.\nCheck the Settings to see if you have included any specific file types to be opened in Continuous Mode.'); 
 																														resetPinnedLeaves(); return; // alert no items found
 			}
 			switch(true) {
@@ -677,6 +675,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		this.registerDomEvent(document,'click', (e) => {
 			let action = this.settings.allowSingleClickOpenFolderAction, path = '', items = null, active_leaf, active_compact_leaf;
 			switch(true) {
+				case ( /tree-item-icon/.test(e.target.className) ):												e.stopPropagation();					break;
 				case typeof e.target.className === 'string' && e.target?.className?.includes('metadata-'):												break;
 				case e.target.classList.contains('continuous_mode_open_links_button'):																			// nobreak
 				case e.target.closest('.continuous_mode_open_links_button') !== null:												showLinksMenu(e);	break;	// open links in continuous mode
@@ -689,12 +688,14 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					break;
 				case ( /nav-folder-title/.test(e.target.className) && this.settings.allowSingleClickOpenFolder === true )  								// open file explorer folders on single click
 						&& e.target.closest('.nav-folder-collapse-indicator') === null && e.target.closest('.collapse-icon') === null
-						&& !e.altKey && !e.ctrlKey && !e.shiftKey && e.button !== 2
-						&& action !== 'disabled':
-					sleep(0).then( () => {
-						path = e.target.closest('.nav-folder-title')?.dataset?.path, items = this.app.vault.getFolderByPath(path)?.children;
-						openItemsInContinuousMode(items,action,'folder');
-					});																																	break;
+						&& !e.altKey && !e.ctrlKey && !e.shiftKey && e.button !== 2:
+						switch(true) {
+							case action === 'disabled':						return alert("Continuous Mode:\nPlease select a single click action in the settings.");
+							default:	sleep(0).then( () => {
+											path = e.target.closest('.nav-folder-title')?.dataset?.path, items = this.app.vault.getFolderByPath(path)?.children;
+											openItemsInContinuousMode(items,action,'folder');
+										});
+						}																																	break;
 				case e.target.classList.contains('menu-item-title'):																							// focus tab and scroll into view
 					sleep(0).then( () => {
 						active_leaf = workspace.activeTabGroup.children.find(child => child.tabHeaderEl.className.includes('is-active'));
@@ -711,6 +712,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			let action = this.settings.allowSingleClickOpenFolderAction, path = '', items = null, active_leaf, active_compact_leaf;
 			const testStr = /append .+ in active tab group|replace active tab group|open .+ in new split|compact mode:/i;
 			switch(true) {
+				case ( /tree-item-icon/.test(e.target.className) ):												e.stopPropagation();					break;
 				case ( e.target.classList.contains('menu-item-title') && testStr.test(e.target.innerText) ):	setPinnedLeaves();						break; // CM menu items
 				case ( /nav-folder-title/.test(e.target.className) && this.settings.allowSingleClickOpenFolder === true && !e.altKey && !e.ctrlKey && !e.shiftKey && e.button !== 2 ):
 					setPinnedLeaves();
@@ -731,6 +733,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		});
 		this.registerDomEvent(document,'mouseup', (e) => {
 			switch(true) {
+				case ( /tree-item-icon/.test(e.target.className) ):												e.stopPropagation();
 				case this.settings.allowSingleClickOpenFolder === false:
 				case this.settings.allowSingleClickOpenFolderAction === 'disabled':
 				case ( /Toggle Compact Mode/.test(e.target.innerText) ):																						// from Tab Group Menu
@@ -768,7 +771,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 		});	
 		this.registerDomEvent(window,'dragstart', (e) => {
-			if ( !e.target.closest('.workspace-tabs')?.classList.contains('is_continuous_mode')) { return; }
+			if ( e.target.nodeType !== 1 || !e.target?.closest('.workspace-tabs')?.classList?.contains('is_continuous_mode') ) { return; }
 			if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }					// get initial tab header index for onTabHeaderDragEnd()
 		});
 		/*-----------------------------------------------*/
@@ -1128,7 +1131,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				callback: () => {
 					let items = workspace.getLeavesOfType('file-explorer')[0].view.tree.focusedItem?.file?.children || workspace.getLeavesOfType('file-explorer')[0].view.tree?.focusedItem?.file || workspace.getLeavesOfType('file-explorer')[0].view.tree?.activeDom?.file;
 					if ( !items ) { 
-						alert('No file explorer item selected') 
+						alert('Continuous Mode:\nNo file explorer item selected') 
 					} else {
 						setPinnedLeaves();
 						openItemsInContinuousMode(items,'open_'+action,'folder'); 
@@ -1165,7 +1168,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					if ( workspace.activeTabGroup.containerEl.classList.contains('is_continuous_mode') ) {
 						sortItems(this.app.appId +'_'+ workspace.activeTabGroup.id,key);
 					} else {
-						alert('Active tab group is not in continuous mode.');
+						alert('Continuous Mode:\nActive tab group is not in continuous mode.');
 					}
 				}
 			});
@@ -1302,7 +1305,7 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 		  });
 		});
 		new obsidian.Setting(containerEl).setName('Maximum number of items to open at one time').setDesc('Leave empty (or set to 0) to open all items at once. Otherwise, setting a value here allows you to incrementally open the items in a folder (or search results or document links) by repeatedly selecting “Append items in Continuous Mode.” Useful for dealing with folders containing a large number of items. (Note: The “single click” action above must be set to one of the “Append” options.)')
-			.addText((A) => A.setPlaceholder("").setValue(this.plugin.settings.maximumItemsToOpen?.toString() || '')
+			.addText((A) => A.setPlaceholder("").setValue(this.plugin.settings.maximumItemsToOpen?.toString() || '0')
 			.onChange(async (value) => {
 				if ( isNaN(Number(value)) || !Number.isInteger(Number(value)) ) { 
 					alert('Please enter a positive integer, 0, or leave blank.');
