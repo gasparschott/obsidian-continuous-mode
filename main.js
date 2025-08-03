@@ -373,6 +373,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 																														scrollSideBarItems(el);	return;	// scroll focused left/right split item into view
 				case !active_leaf.parent.containerEl.classList.contains('is_continuous_mode'): 													return; // not in continuous mode
 				case isCompactMode():			compactModeNavigation(e,active_leaf,activeTabGroupChildren);									return;	// use compact mode navigation
+				case /metadata-input|multi-select/.test(e.target.classList):
 				case e.target.closest('.view-header') !== null:																							// allow arrows in note headers
 				case getActiveLeaf()?.containerEl?.closest('.mod-root') === null && !getActiveEditor()?.hasFocus():										// not in editor
 				case e.target.querySelector('.canvas-node.is-focused') && /Arrow/.test(e.key): 															// editing canvas
