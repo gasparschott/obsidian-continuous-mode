@@ -111,7 +111,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		const findDuplicateLeaves = (leaves) => {
 		  const seen = [], duplicateLeaves = [];
 			leaves.forEach(leaf => {
-				if ( !seen.includes(leaf.view.file) ) { seen.push(leaf); } else { duplicateLeaves.push(leaf); }
+				if ( !seen.includes(leaf?.view?.file) ) { seen.push(leaf); } else { duplicateLeaves.push(leaf); }
 			});
 			return [seen,duplicateLeaves];
 		}
@@ -547,13 +547,13 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				&& !this.settings.excludedNames.includes( item.basename +'.'+ item.extension )														// remove items excluded by name
 			);
 			switch(true) {																															// warnings:
-				case items.length > this.settings.maximumItemsToOpen && !window.confirm('Continuous Mode:\nOpening '+ this.settings.maximumItemsToOpen +' of '+ items.length +' items.\n(Change the “Maximum number of items to open at one time” setting to adjust this value.)'):									resetPinnedLeaves(); return; // opening multiple items
+				case items.length > this.settings.maximumItemsToOpen && !window.confirm('Continuous Mode:\nOpening '+ this.settings.maximumItemsToOpen +' of '+ items.length +' items.\n\n(Change the “Maximum number of items to open at one time” setting to adjust this value.)'):									resetPinnedLeaves(); return; // opening multiple items
 				case (/replace/.test(action)) && this.settings.disableWarnings !== true 
-					&& !window.confirm('Continuous Mode:\nYou are about to replace all items currently open in the active split.\nAre you sure you want to do this?\n(This warning can be disabled in the settings.)'): 
+					&& !window.confirm('Continuous Mode:\nYou are about to replace all items currently open in the active split.\nAre you sure you want to do this?\n\n(This warning can be disabled in the settings.)'): 
 																														resetPinnedLeaves(); return; // confirm replacing open items
 				case items.length === 0:
 					alert(type === 'document links' ? 'Continuous Mode: No document links found.' : 
-						'Continuous Mode:\nNo readable files found.\nCheck the Settings to see if you have included any specific file types to be opened in Continuous Mode.'); 
+						'Continuous Mode:\n\nNo readable files found.\n\nCheck the Settings to see if you have included any specific file types to be opened in Continuous Mode.'); 
 																														resetPinnedLeaves(); return; // alert no items found
 			}
 			switch(true) {
