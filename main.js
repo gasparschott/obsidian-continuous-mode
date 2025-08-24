@@ -35,28 +35,23 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		/*-----------------------------------------------*/
 		// HELPERS
 		const workspace = this.app.workspace; 
-		const getAllTabGroups = () => {
-			let root_children = workspace.rootSplit?.children || [], 
-				left_children = workspace.leftSplit?.children || [], 
-				right_children = workspace.rightSplit?.children || [], 
-				floating_children = workspace.floatingSplit?.children || [],
-				all_tab_groups = [];
-			let nodes = (floating_children).concat(root_children,right_children,left_children);
-			if ( nodes[0] === undefined ) { return []; }
-			nodes?.forEach( node => { if ( node && node.type === 'tabs' ) { all_tab_groups.push(node) } else { all_tab_groups = getTabGroupsRecursively(node,all_tab_groups) } });
-			return all_tab_groups;
-		}
-		const getTabGroupsRecursively = (begin_node,all_tab_groups) => {
-			let all_children = begin_node?.children;
-			if ( all_children === undefined ) { return }
-			all_tab_groups = all_tab_groups || [];
-			if ( begin_node.children ) {
-				begin_node.children.forEach(function(child) {
-					if (child.type === 'tabs') { all_tab_groups.push(child); }
-					all_children = all_children.concat(getTabGroupsRecursively(child,all_tab_groups));
-				});
-			}
-			return all_tab_groups;
+		const getAllTabGroups = (split) => {
+			let tab_groups = [];
+			this.app.workspace.iterateAllLeaves(
+				leaf => {
+					switch(true) {
+						case leaf.parent.type !== 'tabs':																			break;
+						case (/root/i.test(split)) && leaf.getRoot() !== workspace.rootSplit:												// get root tab groups only
+						case (/left/i.test(split)) && leaf.getRoot() !== workspace.leftSplit:												// get root tab groups only
+						case (/right/i.test(split)) && leaf.getRoot() !== workspace.rightSplit:										break;	// get root tab groups only
+						case (/root/i.test(split)) && leaf.getRoot() === workspace.rootSplit:												// get root tab groups only
+						case (/left/i.test(split)) && leaf.getRoot() === workspace.leftSplit:												// get root tab groups only
+						case (/right/i.test(split)) && leaf.getRoot() === workspace.rightSplit:		tab_groups.push(leaf.parent);	break;	// get root tab groups only
+						default:																	tab_groups.push(leaf.parent);	break;	// get all tab groups
+					} 
+				}
+			)
+			return [...new Set(tab_groups)];
 		}
 		const getTabGroupById = (id) =>		{ return getAllTabGroups()?.find( tab_group => tab_group.id === id ); }			// get tab group by id, not dataset-tab-group-id
 		const getTabHeaderIndex = (e) =>	{ return Array.from(e.target.parentElement.children).indexOf(e.target); }
@@ -779,6 +774,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		// ADD CONTEXTUAL MENU ITEMS
 		const addContinuousModeMenuItem = (item, tab_group_id, leaf) => {																// add continuous mode menu items (toggle, headers, sort)
 			let tab_group = getTabGroupById(tab_group_id?.split('_')[1]), tab_group_el = tab_group?.containerEl, tab_group_classList = tab_group_el?.classList;
+			let isLeftLeaf = workspace.leftSplit === leaf?.parent?.parent;
 			item.setTitle('Continuous Mode')
 				.setIcon('scroll-text')
 				.setSection( leaf ? 'pane' : 'action' )
@@ -791,7 +787,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					})
 				})
 				.addSeparator()
-				.addItem((item12) => {
+				.addItem( (item12) => {
 					if ( tab_group === workspace.rootSplit.children[0] ) {
 						item12.setTitle('Toggle Compact Mode')
 						.setIcon('compactMode')
@@ -995,7 +991,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				if ( !!editor.containerEl.querySelectorAll('.cm-active .cm-link, .cm-active .cm-hmd-internal-link, .cm-active .cm-link-alias') ) {	// prevent adding CM menus twice
 					menu.addItem((item) => { 
 						let links = getDocumentLinks(editor.editorComponent.view.file,editor.editorComponent.view.leaf), files = getFilesFromLinks(links);
-						addContinuousModeMenuItem(item,this.app.appId +'_'+ editor?.editorComponent.owner.leaf.parent.id)								// add continuous mode items
+						addContinuousModeMenuItem(item,this.app.appId +'_'+ editor?.editorComponent.owner.leaf.parent.id,)								// add continuous mode items
 						if ( links.length > 0 ) { openItemsInContinuousModeMenuItems(item,files,'document links'); }										// add open document links items
 					});
 				}
@@ -1047,7 +1043,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			this.app.workspace.on('leaf-menu', (menu,leaf) => {																					// on leaf-menu (e.g. sidebar tab headers)
 				if ( leaf !== workspace.getActiveViewOfType(obsidian.View).leaf ) { workspace.setActiveLeaf(leaf,{focus:true}); }
 				if ( leaf.containerEl.closest('.mod-left-split,.mod-right-split') ) {
-					menu.addItem((item) => { addContinuousModeMenuItem(item,this.app.appId +'_'+ leaf.parent.id ) });
+					menu.addItem((item) => { addContinuousModeMenuItem(item,this.app.appId +'_'+ leaf.parent.id,leaf ) });
 				}
 			})
 		);
@@ -1095,9 +1091,9 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				name:	( side === 'active' ? 'Toggle Continuous Mode in active tab group' : side === 'root' ? 'Toggle Continuous Mode in root tab groups' : 'Toggle Continuous Mode in '+side+' sidebar'),
 				callback: () => {
 					switch(side) {
-						case 'left':	getTabGroupsRecursively(workspace.leftSplit).forEach( tab_group => toggleCM(tab_group) );		break;
-						case 'right':	getTabGroupsRecursively(workspace.rightSplit).forEach( tab_group => toggleCM(tab_group) );		break;
-						case 'root':	getTabGroupsRecursively(workspace.rootSplit).forEach( tab_group => toggleCM(tab_group) );		break;
+						case 'left':	getAllTabGroups('left').forEach( tab_group => toggleCM(tab_group) );		break;
+						case 'right':	getAllTabGroups('right').forEach( tab_group => toggleCM(tab_group) );		break;
+						case 'root':	getAllTabGroups('root').forEach( tab_group => toggleCM(tab_group) );		break;
 						default: 		toggleCM(workspace.activeTabGroup); 
 					}
 				}
