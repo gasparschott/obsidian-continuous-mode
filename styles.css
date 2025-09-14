@@ -427,9 +427,9 @@
 .mod-root .workspace-tabs.is_continuous_mode.is_compact_mode .workspace-leaf :is(.cm-gutters,.view-header-left,.view-actions,.metadata-properties-heading,.metadata-add-button,.cm-line span:not(.cm-header):not(.cm-hmd-internal-link):not(.cm-link-alias)),
 .mod-root .workspace-tabs.is_continuous_mode.is_semi_compact_mode .workspace-leaf:not(.mod-active) :is(.cm-gutters,.view-header-left,.view-actions,.metadata-properties-heading,.metadata-content,.metadata-add-button,.cm-line span:not(.cm-header):not(.cm-hmd-internal-link):not(.cm-link-alias)),
 .mod-root .workspace-tabs.is_continuous_mode.is_compact_mode :is(.!workspace-tab-header,.list-bullet),
-.mod-root .workspace-tabs.is_continuous_mode.is_semi_compact_mode .workspace-leaf:not(.mod-active) :is(.workspace-tab-header,.list-bullet),
-.menu-group:has( .menu-item-title:empty, .menu-item-icon:empty ):not( :has( .setting-item ) ) + .menu-separator,
-.menu-item:has( > .menu-item-title:empty, > .menu-item-icon:empty ):not( :has( .setting-item ) )
+.mod-root .workspace-tabs.is_continuous_mode.is_semi_compact_mode .workspace-leaf:not(.mod-active) :is(.workspace-tab-header,.list-bullet)
+/*.menu-group:has( .menu-item-title:empty, .menu-item-icon:empty ):not( :has( .setting-item ) ) + .menu-separator,
+.menu-item:has( > .menu-item-title:empty, > .menu-item-icon:empty ):not( :has( .setting-item ) )*/
 {
 	display:none !important;
 }
