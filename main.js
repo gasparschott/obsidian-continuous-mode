@@ -375,6 +375,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				case /metadata-input|multi-select/.test(e.target.classList):
 				case e.target.closest('.view-header') !== null:																							// allow arrows in note headers
 				case getActiveLeaf()?.containerEl?.closest('.mod-root') === null && !getActiveEditor()?.hasFocus():										// not in editor
+				case e.target.contentEditable === 'true' && /Arrow/.test(e.key): 																		// editing canvas
 				case e.target.querySelector('.canvas-node.is-focused') && /Arrow/.test(e.key): 															// editing canvas
 				case e.target.querySelector('.workspace-leaf-content[data-set="graph"]') && /Arrow/.test(e.key) && e.shiftKey:					return;	// graph active; use shift key to move graph
 			}
