@@ -49,7 +49,8 @@ These menu items are available in the Tab Group Menu, File Menu, Selected Tab Me
 
 When the context menu is opened on File Explorer items (folders or individual files), Search results, and other locations, the Continuous Mode menu will show options to:
 - Open the items in a new split (left, right, up, down).  
-- Open (or append) the items in the active tab group. Files will not be duplicated if they are already open.  
+- Open (or append) the items in the active tab group. Files will not be duplicated if they are already open.\*
+   - \*Files will not be duplicated only when opening folders; opening a single file will result in a duplicated leaf if the file was already open. To prevent this, I recommend installing the “Open Tab Settings” plugin by jesse-r-s-hines.  
 - Replace the open files in the active tab group with the items (i.e., close all open notes in active tab group and replace with folder items). This action will show a warning before executing; you can disable this and similar warnings in the settings.  
 
 <img src="assets/menu-open-folder.png" style="width:307px;" alt="Folder Menu" />  
@@ -63,7 +64,7 @@ See the Settings for options to:
  - Open File Explorer folder contents with one click.  
 
 **Notes:**   
- - Opening folders is not recursive—only the top level notes in the folder will be opened.  
+ - Opening folders is not recursive—only the top level notes in the folder will be opened. This may change in a future release.  
  - You can select multiple non-consecutive files (but not [yet?] folders) in the File Explorer (Alt/Opt + Click) and open them via the context menu.  
  - Sort order of the source (e.g., File Explorer, Search Results) is respected when opening multiple items. Once opened, sort order does not dynamically update when it is changed in the file explorer; reopen the folder in Continuous Mode to accomplish this or change the sort order via the tab group menu. In the Settings you can choose the default sort order when opening multiple items.  
  - Similarly, after opening multiple files, the tab group will not dynamically reflect any changes you make to the folder structure in the file explorer. If you do make any changes (e.g., move, create, or delete a note), you'll have to reopen the folder to see the updated structure.

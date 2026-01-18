@@ -1,7 +1,7 @@
 {
 	"id": "continuous-mode",
 	"name": "Continuous Mode",
-	"version": "3.5.1",
+	"version": "3.5.2",
 	"minAppVersion": "0.15.0",
 	"description": "Displays all open notes in a tab group as if they were a continuous scrollable document (sometimes called \"Scrivenings mode\"). Open all notes in Continuous Mode from a folder, search results, or links in a file or Dataview/query block; use arrow keys to navigate between notes; display notes in “Compact Mode” similar to Evernote or Bear; reorder notes via tab header drag-and-drop, sorting, more.",
 	"author": "Michael Schrauzer",
