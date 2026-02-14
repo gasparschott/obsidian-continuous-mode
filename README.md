@@ -6,7 +6,8 @@
 - [Introduction](#introduction)  
 - [Usage](#usage)  
 	1. [Basic Example](#basic-example)  
-	3. [Contextual Menus](#contextual-menus)  
+	2. [Continuous Mode modes](#continuous-mode-modes)  
+	3. [Opening Items in Continuous Mode](#opening-items-in-continuous-mode)  
 	4. [Opening Multiple Items](#opening-multiple-items)  
 	5. [Compact Mode](#compact-mode)  
 - [Keyboard navigation in and between notes](#keyboard-navigation-in-and-between-notes)
@@ -19,7 +20,7 @@
 - [Troubleshooting](#troubleshooting)  
 
 ## Introduction
-A plugin for Obsidian that displays all open notes in a tab group as if they were a continuous scrollable document (sometimes called “Scrivenings mode”). Continuous Mode is available for notes in the Main Split and panes in the Sidebars. The plugin also allows keyboard navigation between notes, and provides several ways to open multiple notes at a time from the File Explorer, search results, document links, or dataview/query blocks.
+Continuous Mode is a plugin for Obsidian that allows you to toggle display of all open notes in a tab group as if they were a continuous scrollable document (similar to “Scrivenings” in the novel-writing app, Scrivener). Continuous Mode is available for individual splits in in the main workspace, and in the sidebars and floating windows. The plugin also enables keyboard navigation between notes, and provides several ways to open notes (including entire folders) from the File Explorer, search results, document links, and dataview/query blocks within notes.
 
 ### <a href="https://www.buymeacoffee.com/fiLtliTFxQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;" ></a>
 
@@ -30,9 +31,25 @@ With multiple notes already open, you can use the contextual menu to toggle Cont
 
 <img src="assets/01-basic.gif" style="width:672px;" alt="Basic usage example" />
 
-### Contextual Menus
+### Continuous Mode modes  
+Continuous Mode itself comes in three modes or flavors: the default Continuous Mode, Semi-Compact Mode, and Compact Mode.  
 
-This plugin adds a “Continuous Mode” menu item to the contextual menus available in various parts of the Obsidian UI. The position of the menu item and the available options differ according to the...er...context.
+1. In the default mode, open files are displayed with all their content visible. This mode can be enabled in any tab group in the workspace, including sidebars and floating windows.  
+2. Compact Mode and Semi-Compact Mode emulate the note preview sidebar found in apps like Bear or Evernote. See below for more details.
+
+### Opening Items in Continuous Mode   
+Files and folders can be opened in Continuous Mode by clicking File Explorer items, and via contextual menus and commands. There are options to:  
+- Append items in the active tab group  
+- Replace the active tab group with the items  
+- Open the items in a new split (up, down, left, or right)  
+- Append or replace the items in Semi-Compact or Compact Mode  
+
+#### Opening items from the File Explorer
+
+If the "Allow single click to open File Explorer items in Continuous Mode" setting is enabled, clicking a file or folder in the File Explorer will open the items in Continuous Mode according to the “default single-click action” setting. 
+
+#### Opening items with Contextual Menus  
+The “Continuous Mode” menu is available in the contextual menus in various parts of the Obsidian UI: File Explorer items, Search results, the tab group menu, the "More options" menu, query blocks, and elsewhere. The available options differ according to the...er...context.
 
 #### Basic Functions
 
@@ -44,9 +61,6 @@ These menu items are available in the Tab Group Menu, File Menu, Selected Tab Me
 
 <img src="assets/menu-sort.png" style="width:197px;" alt="Change sort order" />  
 
-
-#### Opening Items in Continuous Mode  
-
 When the context menu is opened on File Explorer items (folders or individual files), Search results, and other locations, the Continuous Mode menu will show options to:
 - Open the items in a new split (left, right, up, down).  
 - Open (or append) the items in the active tab group. Files will not be duplicated if they are already open.\*
@@ -57,20 +71,20 @@ When the context menu is opened on File Explorer items (folders or individual fi
 
 This menu will show “file,” “document links,” “query block links,” “search results” instead of “folder contents” depending on the context.  
 
-See the Settings for options to:  
- - Filter (include or exclude) the folder items that are opened by type (e.g., markdown, images, canvas, etc.), extension, or file name;  
- - Set the number of items to open at one time.  
- - Set the sorting order when opening multiple items.  
- - Open File Explorer folder contents with one click.  
+The plugin settings have options for:  
+ - Filtering (including or excluding) the files that are opened: by type (e.g., markdown, images, canvas, etc.), extension, or file name;  
+ - Setting the number of items to open at one time.  
+ - Setting the Sorting Order when opening multiple items.  
+ - Opening the contents of File Explorer folders recursively  
+   - By default, opening folders is not recursive, that is, only the top level files in the folder will be opened.  
+   - Clicking a closed (collapsed) folder in the File Explorer will perform the default “open with single click action” without uncollapsing the folder in File Explorer (the default Obsidian behavior). Folders can be uncollapsed by clicking the toggle-collapse icon instead.
 
 **Notes:**   
- - Opening folders is not recursive—only the top level notes in the folder will be opened. This may change in a future release.  
  - You can select multiple non-consecutive files (but not [yet?] folders) in the File Explorer (Alt/Opt + Click) and open them via the context menu.  
  - Sort order of the source (e.g., File Explorer, Search Results) is respected when opening multiple items. Once opened, sort order does not dynamically update when it is changed in the file explorer; reopen the folder in Continuous Mode to accomplish this or change the sort order via the tab group menu. In the Settings you can choose the default sort order when opening multiple items.  
  - Similarly, after opening multiple files, the tab group will not dynamically reflect any changes you make to the folder structure in the file explorer. If you do make any changes (e.g., move, create, or delete a note), you'll have to reopen the folder to see the updated structure.
 
 ### Compact Mode and Semi-Compact Mode 
-Compact Mode and Semi-Compact Mode emulate the note preview sidebar found in apps like Bear or Evernote.
 
 Compact Mode  
 <img src="assets/compact-mode.png" style="width:621px;" alt="Compact Mode" /> 
@@ -83,7 +97,7 @@ Semi-Compact Mode
  - Added user settings to open clicked file explorer folders or files in compact mode.  
  - Note: You may wish to disable the Obsidian editor setting ```Always focus new tabs``` to allow continuous arrow navigation of Compact View items.  
 
-## Keyboard navigation in and between notes  
+### Keyboard navigation  
 In Continuous Mode you can navigate between open notes with the up and down arrow keys, and with the left and right arrow keys if the cursor is at the beginning or end of the note.  
  - In pdfs, the left and right arrow keys will jump from page to page.
  - In HTML files, the left and right arrow keys will scroll the page.
@@ -132,6 +146,7 @@ Here is a complete list of available commands:
  - Replace active tab group with search results  
  - Sort active tab group by created time (new to old)  
  - Sort active tab group by created time (old to new)  
+ - Sort active tab group by file explorer order  
  - Sort active tab group by file name (A to Z)  
  - Sort active tab group by file name (Z to A)  
  - Sort active tab group by modified time (new to old)  
@@ -159,7 +174,7 @@ The Continuous Mode menus are available or compatible with the following third-p
  - “<a href="https://obsidian.md/plugins?id=longform" target="_blank">Longform</a>” plugin. Basic support: Files are opened in their project or scene order (i.e. not alphabetically); however, tab order is not automatically refreshed when the project order is changed, nor are new files automatically opened when new scenes are created. While technically feasible, there are too many variables to make this work predictably. Instead, open the project again in Continuous Mode using the "replace" option.
 
 **Conflicts:**
- - “<a href="https://obsidian.md/plugins?id=folder-notes" target="_blank">Folder Notes</a>”: There is a conflict with the Folder Notes plugin and the "Single click to open file explorer items" action in Continuous Mode whereby Folder Notes captures mouse clicks on file explorer folders, preventing the action from succeeding. A possible solution is to change the “Key for creating folder note” and “Key for opening folder note” settings to ```Cmd+Click``` or ```Alt+Cmd```.
+ - “<a href="https://obsidian.md/plugins?id=folder-notes" target="_blank">Folder Notes</a>”: There is a conflict with the Folder Notes plugin and the "Allow single click to open file explorer items" action in Continuous Mode whereby Folder Notes captures mouse clicks on file explorer folders, preventing the action from succeeding. A possible solution is to change the “Key for creating folder note” and “Key for opening folder note” settings to ```Cmd+Click``` or ```Alt+Cmd```.
  - “<a href="https://github.com/oxdc/obsidian-vertical-tabs" target="_blank">Vertical Tabs</a>”: This plugin can prevent opening "Compact Mode" previews in the right split. The solution is to change the Vertical Tabs “Navigation strategy” setting from “Obsidian+” to “Obsidian”.
 
 If you find that Continuous Mode interferes with or doesn’t work properly with a particular plugin, please let me know.
