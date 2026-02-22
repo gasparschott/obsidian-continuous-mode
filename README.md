@@ -103,7 +103,7 @@ In Continuous Mode you can navigate between open notes with the up and down arro
  - In HTML files, the left and right arrow keys will scroll the page.
  - In an active canvas leaf, click the background to deselect any active node and use the up and down arrow keys to navigate to the adjacent note.  
  - In an active graph view, similarly use the arrow keys to navigate to the adjacent note. Use ```shift + arrow``` keys to move the graph around.   
- - While editing notes, the insertion point will scroll so as to remain more or less in the center of the screen, similar to “typewriter mode”; this behavior can be disabled in the settings.  
+ - Typewriter scrolling: While editing notes, the active line remain more or less in the center of the screen; this behavior can be disabled in the settings.  
 
 #### Navigate in place  
 If the `Allow Continuous Mode navigate in place` setting is enabled, using the Arrow Up/Down keys when the cursor is in the first or last line respectively of the active editor will open the previous/next file (as listed in the File Explorer) in the same tab. This means that you can easily scan through files without opening new tabs or switching to the File Explorer.  
@@ -116,8 +116,9 @@ Two open-in-place commands are available as well, so you don't have to arrow up/
 
 ## Other functions   
  - Notes will scroll into view when you click the tab header. Note: this may fail when clicking tab headers for the first time after start-up, and before the note has been scrolled into view at least once; this appears to be an issue with Obsidian.  
- - Clicking a line in a note will scroll that line into view.
- - You can reorder notes in a tab group by dragging and dropping the tab headers.  
+ - Clicking a line in a note will scroll that line into view.  
+ - You can reorder notes in a tab group by dragging and dropping the tabs.  
+ - Inline titles (if visible; see the Obsidian Appearance settings) will be sized according to the note’s position or level within the File Explorer’s folder hierarchy, starting with the H1 size for top-level notes and progressing to the H2, H3, H4, H5, and H6 sizes for more deeply-nested notes. This provides some visual indication of your  (If you don’t use folders, this will not apply to you.)  
  - Automatically save and restore continuous mode tab group settings when shutting down/starting up Obsidian.  
 
 ## Commands

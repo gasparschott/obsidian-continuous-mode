@@ -493,6 +493,15 @@
 	transform:scale(0.33);
 	transform-origin:top;
 }
+/* SET INLINE TITLE HIERARCHY */
+.is_continuous_mode .workspace-leaf[data-cmlevel] .inline-title:not([data-level]) { text-align:center; font-size: var(--font-smaller); font-weight:var(--font-light); }
+.is_continuous_mode .workspace-leaf[data-cmlevel="1"] .inline-title:not([data-level]) { font-size: var(--h1-size); font-weight:var(--font-black); line-height:var(--h1-line-height); }
+.is_continuous_mode .workspace-leaf[data-cmlevel="2"] .inline-title:not([data-level]) { font-size: var(--h2-size); font-weight:var(--font-extrabold); line-height:var(--h2-line-height); }
+.is_continuous_mode .workspace-leaf[data-cmlevel="3"] .inline-title:not([data-level]) { font-size: var(--h3-size); font-weight:var(--font-bold); line-height:var(--h3-line-height); }
+.is_continuous_mode .workspace-leaf[data-cmlevel="4"] .inline-title:not([data-level]) { font-size: var(--h4-size); font-weight:var(--font-semibold); line-height:var(--h4-line-height); }
+.is_continuous_mode .workspace-leaf[data-cmlevel="5"] .inline-title:not([data-level]) { font-size: var(--h5-size); font-weight:var(--font-medium); line-height:var(--h5-line-height); }
+.is_continuous_mode .workspace-leaf[data-cmlevel="6"] .inline-title:not([data-level]) { font-size: var(--h6-size); font-weight:var(--font-normal); line-height:var(--h6-line-height); }
+
 /* EXPERIMENTAL: unset position:relative in editor leaves to allow active line scrollTo in full height of tab group */
 /* allows getting y-scroll position of active editor line */
 /* 
