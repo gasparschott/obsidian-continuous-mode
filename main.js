@@ -17,6 +17,7 @@ let DEFAULT_SETTINGS = {
 	'enableTypewriterScroll':			true,
 	'excludedNames':					[],
 	'extraFileTypes':					[],
+	'hideTabBar':						false,
 	'includeBlockLinks':				false,
 	'includeEmbeddedFiles':				false,
 	'includedFileTypes':				['markdown'],
@@ -179,8 +180,9 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			openItemsInContinuousMode(sorted,'replace',sort_order);
 		};
 		const prepItems = (items,action,type,recent_leaf) => {															// filter, dedupe, sort, move items before opening
+			if ( this.settings.openFoldersRecursively === true ) { items = getFileExplorerItemsRecursively(items,[]) }
 			let sort_order = getSortOrder(type);
-			workspace.activeTabGroup.containerEl.dataset.sort_order = sort_order;								// set data-sort_order
+			workspace.activeTabGroup.containerEl.dataset.sort_order = sort_order;										// set data-sort_order
 			let extensions = { 
 				markdown:	['md'],
 				base:		['base'],
@@ -193,17 +195,27 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			for (const [key, value] of Object.entries(extensions)) { if ( this.settings.includedFileTypes.includes(key) ) { included_extensions.push(value); } }	// get included extensions
 			included_extensions = included_extensions.concat(this.settings.extraFileTypes).flat(Infinity).map( ext => ext.trim() );									// get extra extensions, trim, flatten
 			items = items.filter( 
-				item => item instanceof obsidian.TFile 																								// item must be TFile
-				&& included_extensions.includes( item.extension ) 																					// remove items included by extension
-				&& !this.settings.excludedNames.includes( item.basename +'.'+ item.extension )														// remove items excluded by name
+				item => item instanceof obsidian.TFile 																												// item must be TFile
+				&& included_extensions.includes( item.extension ) 																									// remove items included by extension
+				&& !this.settings.excludedNames.includes( item.basename +'.'+ item.extension )																		// remove items excluded by name
 			);
-			if ( /append/.test(action) && items.length === 1 ) {
-				let found = recent_leaf.parent?.children.find( (leaf) => leaf.view.file === items[0] );
-				if ( found ) { workspace.setActiveLeaf(found,{focus:true}); items = found }
-			} else
-			if ( !/replace|up|down|left|right/.test(action) ) {
-				recent_leaf.parent?.children.forEach( (leaf) => { items = items.filter( item => item !== leaf.view.file) } );						// filter items to prevent dupe leaves
-			}	
+			let open_files = []; 	recent_leaf.parent?.children.forEach( leaf => open_files.push( leaf.view.file ) );
+			const compareArrs = (arr1,arr2) => {																									// check if arrays contain exactly the same elements
+				if (arr1.length !== arr2.length) { return false; }
+				let sorted_arr1 = arr1.sort(), sorted_arr2 = arr2.sort();
+				for (let i = 0; i < sorted_arr1.length; i++ ) {
+					if ( sorted_arr1[i] !== arr2[i] ) { return false }
+				}
+				return true;
+			}
+			switch(true) {
+				case ( /append|replace/.test(action) && compareArrs(items,open_files) ):										items = [];	break;	// items === open files => do nothing
+				case ( /append/.test(action) && items.length === 1 ):
+					let found = recent_leaf.parent?.children.find( (leaf) => leaf.view.file === items[0] );
+					if ( found ) { workspace.setActiveLeaf(found,{focus:true}); items = found }												break;
+				case ( !/replace|up|down|left|right/.test(action) ):
+					recent_leaf.parent?.children.forEach( (leaf) => { items = items.filter( item => item !== leaf.view.file) } );			break;	// filter items to prevent dupe leaves
+			}
 			items = sortItemsByOrder(items,sort_order);																								// sort items
 			return items;
 		}
@@ -335,6 +347,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
  						updateSavedIds(false);
 				}
 				if ( compact_mode === true ) { openInRightSplit(tab_group?.children?.find( leaf => leaf.containerEl.classList.contains('mod-active') ) || tab_group?.children[0] ); }
+				if ( this.settings.hideTabBar === true ) { tab_group?.containerEl?.classList?.add('hide_tab_bar'); }							// hide tab bar
 				if ( this.settings.alwaysHideNoteHeaders === true && !tab_group?.containerEl?.classList?.contains('show_note_titles') ) {
 					tab_group?.containerEl?.classList?.add('hide_note_titles');	tab_group?.containerEl?.classList?.remove('show_note_titles');	// hide note headers
 				} else {
@@ -469,12 +482,14 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			switch(e.key) {
 				case 'ArrowUp': case 'ArrowLeft': case 'PageUp':
 					switch(true) {
+						case getActiveCursor()?.line === 0 && getAnchorOffset() === 0 && getActiveEditor().containerEl.classList.contains('first-line-active') && e.key === 'ArrowUp':
+							getActiveEditor().containerEl.classList.remove('first-line-active');												return;
 						case getActiveCursor()?.line === 1:	getActiveEditor().containerEl.classList.add('first-line-active');					return;	// add class to prevent immediate nav up
 						case e.target === active_leaf.view.inlineTitleEl && e.key === 'ArrowLeft' && inlineTitleIsVisible():							// inline title allow arrowleft
 						case getAnchorOffset() !== 0 
 							 && e.key === 'ArrowUp'
 							 && /inline-title/.test(anchorNode?.parentElement?.className) 
-							 && inlineTitleIsVisible():	 																						return; // inline-title arrowup
+							 && inlineTitleIsVisible(): 																						return; // inline-title arrowup
 						case ( getActiveCursor()?.line === 0 )
 							 && e.key !== 'ArrowLeft'
 							 && /cm-/.test(anchorNode?.parentElement?.className)
@@ -635,8 +650,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			switch(true) {
 				case ( /append/i.test(action) ):																			break;	// append items in active tab group; do nothing here
 				case ( /replace/i.test(action) ):																					// close sibling leaves
+					recent_leaf = workspace.getMostRecentLeaf().parent.children[0];
 					workspace.setActiveLeaf(recent_leaf,{focus:true});
-					recent_leaf = workspace.getMostRecentLeaf();
 					siblings = recent_leaf.parent.children.filter(leaf => leaf !== recent_leaf);
 					siblings?.forEach( sibling => sibling?.detach() );														break;
 				default:																											// open items in new splits L/R/U/D
@@ -699,7 +714,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		/*-----------------------------------------------*/
 		// REGISTER DOM EVENTS
 		this.registerDomEvent(document,'click', (e) => {
-			let active_leaf, active_compact_leaf;
+			let active_compact_leaf;
 			switch(true) {
 				case e.target.closest('.workspace-tab-header-status-icon.mod-pinned') !== null:
 				case e.target.closest('.sidebar-toggle-button') !== null:										e.stopPropagation();					break;
@@ -1130,7 +1145,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						.setIcon('panel-top-close')
 						.onClick(async () => { openItemsInContinuousMode(file,'open_up',type); })
 					})
-					.addItem((item4) => {
+					.addItem((item4) => { 
 						item4.setTitle('Open '+type+' in new split down')
 						.setIcon('panel-bottom-close')
 						.onClick(async () => { openItemsInContinuousMode(file,'open_down',type); })
@@ -1285,7 +1300,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			const toggleCM = (tab_group) => { 
 				toggleContinuousMode([this.app.appId +'_'+ tab_group.id],false,'@0') 
 			}
-			this.addCommand({
+			this.addCommand({																			// add command: toggle continuous mode in active tab group
 				id: 	( side === 'active' ? 'toggle-continuous-mode-active' : side === 'root' ? 'toggle-continuous-mode-in-root-tab-groups' : 'toggle-continuous-mode-in-'+side+'-sidebar' ),
 				name:	( side === 'active' ? 'Toggle Continuous Mode in active tab group' : side === 'root' ? 'Toggle Continuous Mode in root tab groups' : 'Toggle Continuous Mode in '+side+' sidebar'),
 				callback: () => {
@@ -1311,6 +1326,11 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					}
 				},
 			});
+		});
+		this.addCommand({																				// add command: toggle hide tab bar
+			id: 	( 'toggle-hide-tab-bar'),
+			name:	( 'Toggle hide tab bar in active tab group' ),
+			callback: () => { let active_split = workspace.getMostRecentLeaf().parent; active_split.containerEl.classList.toggle('hide_tab_bar') }
 		});
 		this.addCommand({																				// add command: toggle compact mode
 			id: 	( 'toggle-compact-mode'),
@@ -1388,7 +1408,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		let tab_groups = this.app.workspace.containerEl.querySelectorAll('.workspace-tabs');
 		tab_groups.forEach( 
 			el => {
-				el?.classList?.remove('is_continuous_mode','hide_note_titles','is_compact_mode','is_semi_compact_mode','only_show_file_name','is_enable_scroll','is_smooth_scroll','is_typewriter_scroll');
+				el?.classList?.remove('is_continuous_mode','hide_tab_bar','hide_note_titles','is_compact_mode','is_semi_compact_mode','only_show_file_name','is_enable_scroll','is_smooth_scroll','is_typewriter_scroll');
 				delete el?.dataset?.sort_order; 
 				el?.querySelectorAll('.continuous_mode_open_links_button').forEach(btn => btn?.remove() );
 				el.querySelectorAll('.workspace-leaf[data-level]')?.forEach(leaf => delete leaf?.dataset?.level);
@@ -1553,7 +1573,19 @@ let ContinuousModeSettings = class extends obsidian.PluginSettingTab {
 				this.plugin.settings.navigateInPlace = value;
 				await this.plugin.saveSettings();
 		}));
-		new obsidian.Setting(containerEl).setName('Always hide note headers').setDesc('Never show the note header when opening items in Continuous Mode.')
+		new obsidian.Setting(containerEl).setName('Hide tab bar').setDesc('Hide the row of tabs at the top of the split. Provides a bit more vertical space and reduces visual clutter, especially with many tabs open.')
+			.addToggle( A => A.setValue(this.plugin.settings.hideTabBar)
+			.onChange(async (value) => {
+				let tab_groups = this.app.workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs.is_continuous_mode');
+				if ( value === true ) {
+					tab_groups?.forEach( tab_group => tab_group.classList?.add('hide_tab_bar') )
+				} else {
+					tab_groups?.forEach( tab_group => tab_group.classList?.remove('hide_tab_bar') )
+				}
+				this.plugin.settings.hideTabBar = value;
+				await this.plugin.saveSettings();
+		}));
+		new obsidian.Setting(containerEl).setName('Hide note headers').setDesc('Hide the note headers when opening items in Continuous Mode.')
 			.addToggle( A => A.setValue(this.plugin.settings.alwaysHideNoteHeaders)
 			.onChange(async (value) => {
 				let tab_groups = this.app.workspace.rootSplit.containerEl.querySelectorAll('.workspace-tabs.is_continuous_mode');
