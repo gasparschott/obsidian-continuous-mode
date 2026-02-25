@@ -65,9 +65,9 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			switch(type) {
 				case 'folder':															// get folder items according to collapsed state and recursive & sort order settings
 					switch(true) {
-						case collapsed && recursive && sort_order === 'fileExplorer': 																	break; // do nothing or show alert?
 						case !collapsed && recursive && sort_order === 'fileExplorer':	// open visible items recursively in file explorer order
 							explorer_items = e.target.closest('.nav-folder.tree-item')?.querySelector('.tree-item-children.nav-folder-children')?.querySelectorAll('.tree-item.nav-file');	break;
+						case collapsed && recursive && sort_order === 'fileExplorer':	// open collapsed items in alphabetical order instead of File Explorer order
 						case collapsed && recursive && sort_order !== 'fileExplorer':	// open all items recursively in sort order															// nobreak
 						case !collapsed && recursive && sort_order !== 'fileExplorer':	// open all items recursively in sort order
 							items = this.app.vault.getFolderByPath(e.target.closest('.nav-folder.tree-item')?.querySelector('.tree-item-self.nav-folder-title').dataset.path).children;
@@ -209,7 +209,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				return true;
 			}
 			switch(true) {
-				case ( /append|replace/.test(action) && compareArrs(items,open_files) ):										items = [];	break;	// items === open files => do nothing
+				case ( !/alphabetical|time|file/i.test(type) && /append|replace/.test(action) && compareArrs(items,open_files) ):		items = [];	break;	// items === open files => do nothing
 				case ( /append/.test(action) && items.length === 1 ):
 					let found = recent_leaf.parent?.children.find( (leaf) => leaf.view.file === items[0] );
 					if ( found ) { workspace.setActiveLeaf(found,{focus:true}); items = found }												break;
