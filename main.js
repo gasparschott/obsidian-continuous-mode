@@ -171,7 +171,6 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				let nonindex = sorted.filter( item => ( !/^index$/im.test(item.basename) ) ); 														// find non-index files
 				sorted = [...index,...nonindex];																									// concatenate
 			}
-console.log(sorted);
 			return sorted;
 		}
 		const changeSortOrder = (tab_group_id,sort_order) => {																							// manually change sort order
