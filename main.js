@@ -709,6 +709,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		this.registerDomEvent(window,'keydown', (e) => {
 			if ( /pageup|pagedown|arrow/i.test(e.key) && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && !/form|input|textarea|select/i.test(e.target.tagName ) ) { continuousNavigation(e); }
 		});
+		this.registerDomEvent(window,'keyup', (e) => { if ( e.target.cmView ) { scrollActiveLeafContent(e,workspace.activeLeaf); } });							// typewriter scroll
 		this.registerDomEvent(window,'dragstart', (e) => {
 			if ( e.target.nodeType !== 1 || !e.target?.closest('.workspace-tabs')?.classList?.contains('is_continuous_mode') ) { return; }
 			if ( e.target.classList.contains('workspace-tab-header') ) { onTabHeaderDragEnd(e,getTabHeaderIndex(e)); }					// get initial tab header index for onTabHeaderDragEnd()
