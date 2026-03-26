@@ -140,8 +140,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			let sort_order = 																																	// get sort order
 				/fileExplorer|alphabetical|alphabeticalReverse|byModifiedTime|byModifiedTimeReverse|byCreatedTime|byCreatedTimeReverse/i.test(type) ? type
 				: workspace.getLeavesOfType('file-explorer')[0].view.sortOrder === 'custom' ? 'none'
-				: /query block links|document links|longform/i.test(type) ? 'none' 																				// open links, etc. in listed order
-				: /search/.test(type) ? workspace.getLeavesOfType('search')[0].view.dom.sortOrder																// open search results in search order
+				: /search|query block links|document links|longform/i.test(type) ? 'none' 																		// open links, etc. in listed order
 				: this.settings.defaultSortOrder !== undefined && this.settings.defaultSortOrder !== 'disabled' ? this.settings.defaultSortOrder				// use default sort order from settings
 				: this.settings.defaultSortOrder === undefined || this.settings.defaultSortOrder === 'disabled' ? workspace.getLeavesOfType('file-explorer')[0].view.sortOrder 
 				: 'alphabetical';
@@ -155,7 +154,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			switch(sort_order) {
 				case 'alphabetical':			
 					sorted = items.toSorted((a,b) => (a.parent.path+'/'+a.basename).localeCompare((b.parent.path+'/'+b.basename),navigator.language,{numeric:true}));	break;
-				case 'alphabeticalReverse':		
+				case 'alphabeticalReverse':
 					sorted = items.toSorted((a,b) => (b.parent.path+'/'+b.basename).localeCompare((a.parent.path+'/'+a.basename),navigator.language,{numeric:true}));	break;
 				case 'byModifiedTime':			
 					sorted = items.toSorted((a,b) => (b.stat?.mtime) - (a.stat?.mtime));									break;
@@ -172,6 +171,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				let nonindex = sorted.filter( item => ( !/^index$/im.test(item.basename) ) ); 														// find non-index files
 				sorted = [...index,...nonindex];																									// concatenate
 			}
+console.log(sorted);
 			return sorted;
 		}
 		const changeSortOrder = (tab_group_id,sort_order) => {																							// manually change sort order
@@ -185,7 +185,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		const prepItems = (e,items,action,type,recent_leaf) => {															// filter, dedupe, sort, move items before opening
 			if ( this.settings.openFoldersRecursively === true ) { items = getFileExplorerItemsRecursively(items,[]) }
 			let sort_order = getSortOrder(type), extensions, included_extensions = [], open_files = [], found;
-			workspace.activeTabGroup.containerEl.dataset.sort_order = sort_order;										// set data-sort_order
+			workspace.activeTabGroup.containerEl.dataset.sort_order = sort_order;											// set data-sort_order
 			extensions = { 
 				markdown:	['md'],
 				base:		['base'],
@@ -201,16 +201,16 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				&& included_extensions.includes( item.extension ) 																									// remove items included by extension
 				&& !this.settings.excludedNames.includes( item.basename +'.'+ item.extension )																		// remove items excluded by name
 			);
-			recent_leaf.parent?.children.forEach( leaf => open_files.push( leaf.view.file ) );												// get open files for comparison
+			recent_leaf.parent?.children.forEach( leaf => open_files.push( leaf.view.file ) );																		// get open files for comparison
 			switch(true) {
-				case ( !/alphabetical|time|file/i.test(type) && /append|replace/.test(action) && compareArrs(items,open_files) ):		items = [];	break;	// items === open files => do nothing
+				case ( !/alphabetical|time|file/i.test(type) && /append|replace/.test(action) && compareArrs(items,open_files) ):		items = [];			break;	// items === open files => do nothing
 				case ( /append/.test(action) && items.length === 1 ):
 					found = recent_leaf.parent?.children.find( (leaf) => leaf.view.file === items[0] );
-					if ( found ) { workspace.setActiveLeaf(found,{focus:true}); items = found }												break;
+					if ( found ) { workspace.setActiveLeaf(found,{focus:true}); items = found }																break;
 				case ( !/replace|up|down|left|right/.test(action) ):
-					recent_leaf.parent?.children.forEach( (leaf) => { items = items.filter( item => item !== leaf.view.file) } );			break;	// filter items to prevent dupe leaves
+					recent_leaf.parent?.children.forEach( (leaf) => { items = items.filter( item => item !== leaf.view.file) } );							break;	// filter items to prevent dupe leaves
 			}
-			items = sortItemsByOrder(e,items,sort_order);																								// sort items
+			items = sortItemsByOrder(e,items,sort_order);																											// sort items
 			return items;
 		}
 		/*-----------------------------------------------*/
@@ -378,7 +378,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			leaf.containerEl.scrollIntoView({behavior:scrollBehavior(),block:(block || scrollBlock())})
 			scrollTabHeader(e); 																										// scroll tab into view
 		}
-		const scrollActiveLeafContent = (e,leaf) => {
+		const scrollActiveLeafContent = obsidian.debounce( (e,leaf) => {
 			if ( this.settings.enableTypewriterScroll === false && leaf.view.getViewType() === 'markdown' ) { return }
 			let offset = 0, el = leaf.containerEl;
 			switch(true) {
@@ -397,10 +397,10 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				default:																																			// typewriter scroll md editor
 					offset = Math.abs( workspace.activeTabGroup.containerEl.querySelector('.workspace-tab-container').scrollTop ) 
 									- workspace.activeTabGroup.containerEl.offsetHeight/2 
-									+ getActiveEditor().coordsAtPos(getActiveEditor().getCursor('anchor')).bottom;
+									+ (getActiveEditor()?.coordsAtPos(getActiveEditor()?.getCursor('anchor'))?.bottom || 0);
 					workspace.activeTabGroup.containerEl.querySelector('.workspace-tab-container').scrollTo({top:offset,behavior:scrollBehavior()});
 			}
-		}
+		},10);
 		const scrollItemsIntoView = (e,leaf,type,block) => {
 			if ( !leaf || this.settings.enableScrollIntoView === false || !/is_continuous_mode/.test(leaf.parent.containerEl.className) ) 					{ return }
 			switch(true) {
@@ -518,7 +518,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			openInRightSplit(next_leaf);																								// open file in right split
 			scrollItemsIntoView(e,next_leaf,'leaf','start');
 		}
-		const continuousNavigation = (e) => {
+		const continuousNavigation = obsidian.debounce( (e) => {
 			let active_leaf = workspace.activeLeaf, active_leaf_type = active_leaf.view.getViewType(), adjacent_leaf = null;
 			let increment = ( /ArrowUp|PageUp/i.test(e.key) ? -1 : /ArrowDown|PageDown/i.test(e.key) ? 1 : 0 ), cursor_at_bof_or_eof = cursorAtBOForEOF(e,active_leaf,increment);
 			switch(true) {
@@ -535,7 +535,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					if ( adjacent_leaf.view.tree ) { focusItems(e,adjacent_leaf,increment,'content'); } else { focusItems(e,adjacent_leaf,increment,'leaf');}	break;	// set adjacent leaf active
 				default:												focusItems(e,workspace.activeLeaf,increment,'content');			// ordinary arrow nav --> or just scroll content?
 			}
-		}
+		},25);
 		/*-----------------------------------------------*/
 		// OPEN ITEMS IN CONTINUOUS MODE getAllTabGroups
 		const openItemsInContinuousMode = async (items,action,type,e) => {
@@ -778,9 +778,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		this.registerEvent(
 			this.app.workspace.on('search:results-menu', (menu) => {																					// on search-results-menu
 				menu.addItem((item) => {
-					let files = [], search_results = this.app.workspace.getLeavesOfType("search")[0].view.dom.resultDomLookup.values();
-					for ( const value of search_results ) { files.push(value.file); };
-					openItemsInContinuousModeMenuItems(item,files,'search results',menu);
+					openItemsInContinuousModeMenuItems(item,getFilesFromSearchResults(),'search results',menu);
 				})
 			})
 		);
