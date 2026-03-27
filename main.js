@@ -140,7 +140,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			let sort_order = 																																	// get sort order
 				/fileExplorer|alphabetical|alphabeticalReverse|byModifiedTime|byModifiedTimeReverse|byCreatedTime|byCreatedTimeReverse/i.test(type) ? type
 				: workspace.getLeavesOfType('file-explorer')[0].view.sortOrder === 'custom' ? 'none'
-				: /search|query block links|document links|longform/i.test(type) ? 'none' 																		// open links, etc. in listed order
+				: /search|links|longform/i.test(type) ? 'none'							 																		// open links, etc. in listed order
 				: this.settings.defaultSortOrder !== undefined && this.settings.defaultSortOrder !== 'disabled' ? this.settings.defaultSortOrder				// use default sort order from settings
 				: this.settings.defaultSortOrder === undefined || this.settings.defaultSortOrder === 'disabled' ? workspace.getLeavesOfType('file-explorer')[0].view.sortOrder 
 				: 'alphabetical';
