@@ -269,6 +269,10 @@
 	position:relative;
 	box-sizing:content-box;
 }
+.cm-setting-indent-2
+{
+	padding-left:4em;
+}
 .cm-setting-indent div.setting-item-name::before 
 {
 	content:'• ';
@@ -277,6 +281,7 @@
 .setting-item.hidden,.setting-item.next-hidden
 {
 	display:none;
+	padding-top:0;
 }
 .setting-item:has(.checkbox-container.is-enabled) + .setting-item.hidden, 
 .setting-item:has(.checkbox-container.is-enabled) + .setting-item.hidden + .setting-item.next-hidden
