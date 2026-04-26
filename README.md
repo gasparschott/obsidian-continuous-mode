@@ -20,7 +20,9 @@
 - [Troubleshooting](#troubleshooting)  
 
 ## Introduction
-Continuous Mode is a plugin for Obsidian that allows you to toggle display of all open notes in a tab group as if they were a continuous scrollable document (similar to “Scrivenings” in the novel-writing app, Scrivener). Continuous Mode is available for individual splits in in the main workspace, in the left and right sidebars, and in floating windows. It also enables keyboard navigation between notes, and provides several ways to open notes (including entire folders) from the File Explorer, search results, document links, and dataview/query blocks within notes. Continuous Mode works with your existing file structure and requires no special setup or separate project folder to use, so there is no lock-in.  
+Continuous Mode is a plugin for Obsidian that allows you to toggle display of all open notes in a tab group as if they were a continuous scrollable document (similar to “Scrivenings” in the novel-writing app, Scrivener). Continuous Mode is available for individual splits in in the main workspace, in the left and right sidebars, and in floating windows. It also enables keyboard navigation between notes, and provides several ways to open notes (including entire folders) from the File Explorer, search results, document links, and dataview/query blocks within notes. Other features include optional typewriter scrolling, the ability to hide the tab bar and tab headers, and scaling the size of inline note titles to reflect the note’s level in your folder structure.
+
+Continuous Mode aims for simplicity and ease of use. Unlike other similar plugins, it works with your existing file explorer structure and requires no special setup or separate project folder to use, so there is no lock-in. Therefore, it does not aim to replicate every function of Scrivenings mode: for example, it leaves file organization, restructuring, and custom file ordering to you (and other plugins).  
 
 ### <a href="https://www.buymeacoffee.com/fiLtliTFxQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;" ></a>
 
