@@ -370,11 +370,15 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		/*-----------------------------------------------*/
 		// SCROLL ACTIVE ITEMS INTO VIEW
 		const scrollTabHeader = () => {
-			workspace.activeLeaf.tabHeaderEl.parentElement.scrollTo({left:(workspace.activeLeaf.tabHeaderEl.offsetLeft - workspace.activeLeaf.tabHeaderEl.offsetWidth),behavior:scrollBehavior()});
+			if ( !workspace.activeLeaf.parent.containerEl.classList.contains('mod-stacked') ) {
+				workspace.activeLeaf.tabHeaderEl.parentElement.scrollTo({left:(workspace.activeLeaf.tabHeaderEl.offsetLeft - workspace.activeLeaf.tabHeaderEl.offsetWidth),behavior:scrollBehavior()});
+			}
 		}
 		const scrollActiveLeaf = (e,leaf,block) => {
-			leaf.containerEl.scrollIntoView({behavior:scrollBehavior(),block:(block || scrollBlock())})
-			scrollTabHeader(e); 																										// scroll tab into view
+			if ( !workspace.activeLeaf.parent.containerEl.classList.contains('mod-stacked') ) {
+				leaf.containerEl.scrollIntoView({behavior:scrollBehavior(),block:(block || scrollBlock())})
+				scrollTabHeader(e); 																										// scroll tab into view
+			}
 		}
 		const scrollActiveLeafContent = obsidian.debounce( (e,leaf) => {
 			if ( this.settings.enableTypewriterScroll === false && leaf.view.getViewType() === 'markdown' ) { return }
@@ -400,6 +404,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			}
 		},10);
 		const scrollItemsIntoView = (e,leaf,type,block) => {
+			if ( workspace.activeLeaf.parent.containerEl.classList.contains('mod-stacked') ) 																{ return }
 			if ( !leaf || this.settings.enableScrollIntoView === false || !/is_continuous_mode/.test(leaf.parent.containerEl.className) ) 					{ return }
 			switch(true) {
 				case type === 'leaf' && leaf.view.getViewType() !== 'markdown' && !leaf.view.tree:		scrollActiveLeaf(e,leaf,block);						break;	// scroll non-md leaves
@@ -623,6 +628,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		this.registerDomEvent(document,'click', (e) => {
 			let active_compact_leaf;
 			switch(true) {
+				case e.target.closest('.workspace-tabs.mod-stacked') !== null:																			return true;
 				case e.target.closest('.workspace-tab-header-status-icon.mod-pinned') !== null:
 				case e.target.closest('.sidebar-toggle-button') !== null:										e.stopPropagation();					break;
 				case typeof e.target.className === 'string' && e.target?.className?.includes('metadata-'):												break;
@@ -634,19 +640,19 @@ class ContinuousModePlugin extends obsidian.Plugin {
 						if ( active_compact_leaf.parent.containerEl.classList.contains('is_compact_mode') ) { openInRightSplit(active_compact_leaf); }
 						workspace.setActiveLeaf(active_compact_leaf,{focus:true});
 						scrollActiveLeaf(e,workspace.activeLeaf,'start');
-						scrollTabHeader(e,workspace.activeLeaf);																					break;	// click tab, scroll into view
+						scrollTabHeader(e,workspace.activeLeaf);																						break;	// click tab, scroll into view
 				case ( /workspace-tab-header|nav-header|view-header-title-container|menu-item-title/.test(e.target.className) 
 						&& workspace.activeTabGroup.containerEl.classList.contains('is_continuous_mode') 
 						&& !/view-header-title|inline-title/.test(e.target.className)):
 						scrollTabHeader(e,workspace.activeLeaf);		
-						scrollActiveLeaf(e,workspace.activeLeaf,'start');
-																									break;	// click tab, scroll into view
+						scrollActiveLeaf(e,workspace.activeLeaf,'start');																				break;	// click tab, scroll into view
 			}
 		});
 		this.registerDomEvent(document,'mousedown', (e) => {
 			let action = this.settings.allowSingleClickOpenFolderAction;
 			const testStr = /append .+ in active tab group|replace active tab group|open .+ in new split|compact mode:/i;
 			switch(true) {
+				case e.target.closest('.workspace-tabs.mod-stacked') !== null:																			return true;
 				case ( e.target.classList.contains('menu-item-title') && testStr.test(e.target.innerText) ): 	setPinnedLeaves();						break; // CM menu items
 				case ( /nav-folder-title/.test(e.target.className) && this.settings.allowSingleClickOpenFolder === true && !e.altKey && !e.ctrlKey && !e.shiftKey && e.button !== 2 ):
 					setPinnedLeaves(action,'folder');
@@ -662,6 +668,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		this.registerDomEvent(document,'mouseup', (e) => {
 			let action = this.settings.allowSingleClickOpenFolderAction;
 			switch(true) {
+				case e.target.closest('.workspace-tabs.mod-stacked') !== null:																			return;
 				case ( /nav-folder-title/.test(e.target.className) && this.settings.allowSingleClickOpenFolder === true )  								// open file explorer folders on single click
 					&& e.target.closest('.nav-folder-collapse-indicator') === null && e.target.closest('.collapse-icon') === null
 					&& !e.altKey && !e.ctrlKey && !e.shiftKey && e.button !== 2:
