@@ -629,6 +629,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			let active_compact_leaf;
 			switch(true) {
 				case e.target.closest('.workspace-tabs.mod-stacked') !== null:																			return true;
+				case e.target.classList.contains('menu-item-title'):
 				case e.target.closest('.workspace-tab-header-status-icon.mod-pinned') !== null:
 				case e.target.closest('.sidebar-toggle-button') !== null:										e.stopPropagation();					break;
 				case typeof e.target.className === 'string' && e.target?.className?.includes('metadata-'):												break;

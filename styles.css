@@ -389,7 +389,7 @@
 {
 	font-size:0.875rem !important;
 	color:var(--text-normal) !important;
-	display:contents;
+	display: contents;
 	border:0;
 	line-height:1.2;
 	margin-top:0;
@@ -413,7 +413,7 @@
 {
 	color:var(--text-muted) !important;
 }
-.mod-root .workspace-tabs.is_continuous_mod:not(.mod-stacked)e.is_compact_mode .workspace-leaf :is(.cm-scroller,.markdown-preview-view),
+.mod-root .workspace-tabs.is_continuous_mod:not(.mod-stacked).is_compact_mode .workspace-leaf :is(.cm-scroller,.markdown-preview-view),
 .mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked).is_semi_compact_mode .workspace-leaf:not(.mod-active) :is(.cm-scroller,.markdown-preview-view)
 {
 	padding:0 var(--size-4-4) 0;
