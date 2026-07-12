@@ -396,6 +396,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					}																																		break;
 				case leaf.view.tree && !!leaf.containerEl.querySelector('.tree-item-self.has-focus'):																// scroll tree items
 					leaf.containerEl.querySelector('.tree-item-self.has-focus').scrollIntoView({behavior:scrollBehavior(),block:'center'});					break;
+				case getActiveEditor().editorComponent.tableCell !== null: console.log("SCROLL");
+					getActiveEditor().editorComponent.tableCell.cell.el.scrollIntoView({behavior:'smooth',block:'center'});									break;	// scroll tables
 				default:																																			// typewriter scroll md editor
 					offset = Math.abs( workspace.activeTabGroup.containerEl.querySelector('.workspace-tab-container').scrollTop ) 
 									- workspace.activeTabGroup.containerEl.offsetHeight/2 
@@ -418,8 +420,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			let inline_title_visible = this.app.vault.config.showInlineTitle === true;
 			let props_visible = ( this.app.vault.config.propertiesInDocument === 'hidden' ? false : true );
 			switch(true) {
-				case new_view_state?.mode === 'preview':				block = 'start';																										break;
-				case new_view_type !== 'markdown':																												// focus other content
+				case new_view_state?.mode === 'preview':				block = 'start';																				break;
+				case new_view_type !== 'markdown':																																// focus other content
 					switch(true) {
 						case ( /tree/i.test(new_view_type) ): 			block = 'center';
 							switch(true) {
@@ -521,12 +523,12 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			openInRightSplit(next_leaf);																								// open file in right split
 			scrollItemsIntoView(e,next_leaf,'leaf','start');
 		}
-		const continuousNavigation = obsidian.debounce( (e) => {
+		const continuousNavigation = obsidian.debounce( (e) => { 
 			let active_leaf = workspace.activeLeaf, active_leaf_type = active_leaf.view.getViewType(), adjacent_leaf = null;
 			let increment = ( /ArrowUp|PageUp/i.test(e.key) ? -1 : /ArrowDown|PageDown/i.test(e.key) ? 1 : 0 ), cursor_at_bof_or_eof = cursorAtBOForEOF(e,active_leaf,increment);
 			switch(true) {
 				case this.settings.navigateInPlace === true:																				   navigateInPlace(e);	break;	// navigate in place
-				case active_leaf.parent.containerEl.classList.contains('is_compact_mode'):									compactModeNavigation(e,active_leaf);	break;	// use compact mode navigation
+				case active_leaf.parent.containerEl.classList.contains('is_compact_mode'):									 compactModeNavigation(e,active_leaf);	break;	// use compact mode navigation
 				case !/is_continuous_mode/.test(active_leaf.parent.containerEl.className): 																			break; 	// not in continuous mode
 				case active_leaf_type === 'graph' && /Arrow/.test(e.key) && e.shiftKey:																				break;	// graph active
 				case active_leaf_type === 'canvas' && ( e.target.contentEditable === 'true' || e.target.querySelector('.is-focused') ):								break;	// editing canvas
@@ -535,7 +537,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				case cursor_at_bof_or_eof:																																	// enter adjacent leaf
 					adjacent_leaf = active_leaf.parent.children[active_leaf.parent.children.indexOf(active_leaf) + increment];												// get adjacent leaf
 					if ( !adjacent_leaf ) { return } else { workspace.setActiveLeaf(adjacent_leaf,{focus:true}); }
-					if ( adjacent_leaf.view.tree ) { focusItems(e,adjacent_leaf,increment,'content'); } else { focusItems(e,adjacent_leaf,increment,'leaf');}	break;	// set adjacent leaf active
+					if ( adjacent_leaf.view.tree ) { focusItems(e,adjacent_leaf,increment,'content'); } else { focusItems(e,adjacent_leaf,increment,'leaf');}		break;	// set adjacent leaf active
 				default:												focusItems(e,workspace.activeLeaf,increment,'content');			// ordinary arrow nav --> or just scroll content?
 			}
 		},25);
@@ -653,7 +655,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 			let action = this.settings.allowSingleClickOpenFolderAction;
 			const testStr = /append .+ in active tab group|replace active tab group|open .+ in new split|compact mode:/i;
 			switch(true) {
-				case e.target.closest('.workspace-tabs.mod-stacked') !== null:																			return true;
+				case e.target.closest('.workspace-tabs.mod-stacked') !== null:																			return true;  // disable for stacked tabs
 				case ( e.target.classList.contains('menu-item-title') && testStr.test(e.target.innerText) ): 	setPinnedLeaves();						break; // CM menu items
 				case ( /nav-folder-title/.test(e.target.className) && this.settings.allowSingleClickOpenFolder === true && !e.altKey && !e.ctrlKey && !e.shiftKey && e.button !== 2 ):
 					setPinnedLeaves(action,'folder');
@@ -669,7 +671,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		this.registerDomEvent(document,'mouseup', (e) => {
 			let action = this.settings.allowSingleClickOpenFolderAction;
 			switch(true) {
-				case e.target.closest('.workspace-tabs.mod-stacked') !== null:																			return;
+				case e.target.closest('.workspace-tabs.mod-stacked') !== null:																			return;  // disable for stacked tabs
 				case ( /nav-folder-title/.test(e.target.className) && this.settings.allowSingleClickOpenFolder === true )  								// open file explorer folders on single click
 					&& e.target.closest('.nav-folder-collapse-indicator') === null && e.target.closest('.collapse-icon') === null
 					&& !e.altKey && !e.ctrlKey && !e.shiftKey && e.button !== 2:
