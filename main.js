@@ -396,8 +396,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					}																																		break;
 				case leaf.view.tree && !!leaf.containerEl.querySelector('.tree-item-self.has-focus'):																// scroll tree items
 					leaf.containerEl.querySelector('.tree-item-self.has-focus').scrollIntoView({behavior:scrollBehavior(),block:'center'});					break;
-				case getActiveEditor().editorComponent.tableCell !== null: console.log("SCROLL");
-					getActiveEditor().editorComponent.tableCell.cell.el.scrollIntoView({behavior:'smooth',block:'center'});									break;	// scroll tables
+				case getActiveEditor().editorComponent.tableCell !== null:
+					getActiveEditor().editorComponent.tableCell.cell.el.scrollIntoView({behavior:scrollBehavior(),block:'center'});							break;	// scroll tables
 				default:																																			// typewriter scroll md editor
 					offset = Math.abs( workspace.activeTabGroup.containerEl.querySelector('.workspace-tab-container').scrollTop ) 
 									- workspace.activeTabGroup.containerEl.offsetHeight/2 
