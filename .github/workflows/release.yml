@@ -18,13 +18,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Attest Plugin Artifacts
-        uses: actions/attest-build-provenance@v4
-        with:
-          files: |
-            main.js
-            manifest.json
-            styles.css
+        - name: Generate SBOM
+          run: syft . -o spdx-json > sbom.spdx.json
+        
+        - uses: actions/attest@v4
+          with:
+            subject-path: '${{ github.workspace }}/obsidian-continuous-mode'
+            sbom-path: '${{ github.workspace }}/sbom.spdx.json'
+    
           
       - name: Create release
         uses: softprops/action-gh-release@v3
