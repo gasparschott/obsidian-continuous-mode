@@ -32,15 +32,14 @@
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .markdown-preview-sizer.markdown-preview-section
 {
 	padding-bottom:0 !important;
-	!min-height:fit-content !important;
 }
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .workspace-leaf-content:not([data-type="backlink"]) .view-content .markdown-reading-view > div
 {
-	padding-bottom:var(--file-margins) !important;
+	padding-bottom:var(--file-margins);
 }
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf .empty-state
 {
-	position:relative !important;
+	position:relative;
 }
 /* SPECIFIC VIEW TYPES */
 .workspace-tabs.is_continuous_mode:not(.mod-stacked) .workspace-leaf:has(div[data-type="canvas"]),
@@ -480,7 +479,7 @@
 	box-shadow: 0 0 0 var(--input-border-width-focus) var(--background-modifier-border-focus);
 	outline: none;
 }
-/* CANVAS MODS */
+/* CANVAS MODS for compact mode */
 .mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked).is_compact_mode .workspace-leaf .canvas,
 .mod-root .workspace-tabs.is_continuous_mode:not(.mod-stacked).is_semi_compact_mode .workspace-leaf:not(.mod-active) .canvas
 {
