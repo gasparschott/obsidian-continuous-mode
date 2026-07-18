@@ -18,20 +18,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Attest main.js
-        uses: actions/attest-build-provenance@v1
+      - name: Attest Plugin Artifacts
+        uses: actions/attest-build-provenance@v4
         with:
-          subject-path: main.js
-
-      - name: Attest styles.css
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-path: styles.css
+        subject-path: |
+            main.js
+            manifest.json
+            styles.css
           
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            packages/plugin/main.js
-            packages/plugin/manifest.json
-            packages/plugin/styles.css
+            main.js
+            manifest.json
+            styles.css
