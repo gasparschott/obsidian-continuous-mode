@@ -28,7 +28,7 @@ jobs:
       - name: Generate SBOM
         run: syft . -o spdx-json > sbom.spdx.json
       - uses: actions/attest@v4
-         with:
-            subject-path: '${{ github.workspace }}/obsidian-continuous-mode'
-            sbom-path: '${{ github.workspace }}/sbom.spdx.json'
+        with:
+          subject-path: '${{ github.workspace }}/obsidian-continuous-mode'
+          sbom-path: '${{ github.workspace }}/sbom.spdx.json'
     
