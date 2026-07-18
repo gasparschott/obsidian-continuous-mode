@@ -21,7 +21,7 @@ jobs:
       - name: Attest Plugin Artifacts
         uses: actions/attest-build-provenance@v4
         with:
-        subject-path: |
+          subject-path: |
             main.js
             manifest.json
             styles.css
