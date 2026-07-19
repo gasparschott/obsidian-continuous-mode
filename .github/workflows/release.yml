@@ -16,20 +16,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Create release
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Release
         uses: softprops/action-gh-release@v3
         with:
           files: |
             main.js
             manifest.json
             styles.css
-            
-      - name: Generate SBOM
-        run: syft . -o spdx-json > sbom.spdx.json
-      - uses: actions/attest@v4
+      - name: Attest
+        uses: actions/attest@v4
         with:
           subject-path: '${{ github.workspace }}'
-          sbom-path: '${{ github.workspace }}/sbom.spdx.json'
     
