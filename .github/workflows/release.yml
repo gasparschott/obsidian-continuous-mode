@@ -31,6 +31,6 @@ jobs:
 
       - uses: actions/attest@v4
         with:
-          subject-path: '${{ github.workspace }}/obsidian-continuous-mode'
+          subject-path: '${{ github.workspace }}'
           sbom-path: '${{ github.workspace }}/sbom.spdx.json'
     
