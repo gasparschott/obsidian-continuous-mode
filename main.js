@@ -178,7 +178,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 		 	let items = active_tab_group.children, sorted = [];
 		 	if ( items === null ) { return }
 		 	items.forEach( item => sorted.push(item.view.file) );
-			openItemsInContinuousMode(sorted,'replace',sort_order);
+			openItemsInContinuousMode(sorted,'replace-change_sort',sort_order);
 		};
 		const prepItems = (e,items,action,type,recent_leaf) => {	 														// filter, dedupe, sort, move items before opening
 			if ( this.settings.openFoldersRecursively === true ) { items = getFileExplorerItemsRecursively(items,[]) }
@@ -204,7 +204,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 				case ( !/alphabetical|time|file/i.test(type) && /append|replace/.test(action) && compareArrs(items,open_files) ):		items = [];			break;	// items === open files => do nothing
 				case ( /append/.test(action) && items.length === 1 ): 
 					found = recent_leaf.parent?.children.find( (leaf) => leaf.view.file === items[0] );
-					if ( found ) { workspace.setActiveLeaf(found,{focus:true});  items = [] }								break; //scrollActiveLeaf(e,found,'start');
+					if ( found ) { workspace.setActiveLeaf(found,{focus:true});  items = [] }																break; //scrollActiveLeaf(e,found,'start');
 				case ( !/replace|up|down|left|right/.test(action) ):
 					recent_leaf.parent?.children.forEach( (leaf) => { items = items.filter( item => item !== leaf.view.file) } );							break;	// filter items to prevent dupe leaves
 			}
@@ -576,7 +576,8 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					}
 			}
 			const openItems = async (items) => {																					// open items
-				let maximumItemsToOpen = ( this.settings.maximumItemsToOpen < 1 || this.settings.maximumItemsToOpen === undefined ? Infinity : this.settings.maximumItemsToOpen );
+				let maximumItemsToOpen = 
+					( /change_sort/.test(action) || this.settings.maximumItemsToOpen < 1 || this.settings.maximumItemsToOpen === undefined ? Infinity : this.settings.maximumItemsToOpen );
 				if ( items.length > this.settings.maximumItemsToOpen ) {															// show notice if items.length > maximumItemsToOpen
 					const notice = (text) => { new Notice(text); return text; }
 					notice('Opening '+ maximumItemsToOpen +' of '+ items.length +' items.')
