@@ -580,7 +580,7 @@ class ContinuousModePlugin extends obsidian.Plugin {
 					( /change_sort/.test(action) || this.settings.maximumItemsToOpen < 1 || this.settings.maximumItemsToOpen === undefined ? Infinity : this.settings.maximumItemsToOpen );
 				if ( items.length > this.settings.maximumItemsToOpen ) {															// show notice if items.length > maximumItemsToOpen
 					const notice = (text) => { new Notice(text); return text; }
-					notice('Opening '+ maximumItemsToOpen +' of '+ items.length +' items.')
+					notice('Opening '+ (items.length > maximumItemsToOpen ? maximumItemsToOpen : items.length) +' of '+ items.length +' items.')
 				}
 				for ( let i = 0; i < maximumItemsToOpen && i < items.length; i++ ) {												// limit number of items to open
 					switch(true) {
